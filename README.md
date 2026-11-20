@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.2
+# Wireless Battery 1.4.3
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -37,7 +37,7 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - Hovering over a device shows only that device's name, battery level and last reading.
 - Click a device in the right-click menu to show or hide it; the check mark shows its visibility. Choices are saved in `settings.json`.
 - Menu order: Taskbar indicator; Start with Windows and Check for updates; device list; Refresh now; Exit.
-- If your device does not show up, choose **Copy device report** in the menu. The IDs of connected USB devices are copied to the clipboard and the "Report a device" page opens; just paste with Ctrl+V. The report contains no device paths, serial numbers or Bluetooth device names.
+- If your device does not show up, choose **Copy device report** in the menu. The IDs of connected USB devices are copied to the clipboard and the "Report a device" page opens; just paste with Ctrl+V. The report contains no device paths, serial numbers or Bluetooth device names. It also listens for 10 seconds to the vendor channels of devices that are not supported yet and includes what they send; nothing is sent to any device. For a headset, one report while charging and one while not charging helps the most.
 - The app checks GitHub for the latest version 30 seconds after starting and every 6 hours after that. When a new version is out, it shows one notification and the menu item becomes "Download new version"; clicking it opens the GitHub Releases page. Downloading and installing are left to you.
 - "Start with Windows" manages the startup entry for your user account; clicking it again removes the check mark and the entry.
 - The interface is in Turkish when the Windows display language is Turkish, and in English otherwise.
@@ -79,10 +79,11 @@ The complete corresponding source code is in this repository and in `WirelessBat
     .\WirelessBattery.exe --test
     .\WirelessBattery.exe --scan
     .\WirelessBattery.exe --render
+    .\WirelessBattery.exe --report
 
 The installer is built with Inno Setup 6 from `installer.iss`.
 
-`--test` writes the behavior checks to `test-results.txt`. `--scan` writes local device and battery reports, then exits. `--render` draws a small preview of the indicator from the current report.
+`--test` writes the behavior checks to `test-results.txt`. `--scan` writes local device and battery reports, then exits. `--render` draws a small preview of the indicator from the current report. `--report` writes the same device report as the menu item to `device-report.txt`.
 
 ## License and references
 

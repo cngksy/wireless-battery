@@ -19,6 +19,7 @@ static class Program {
  [STAThread] static void Main(string[] args) {
   if(args.Contains("--scan")) {try{var all=Native.Scan();File.WriteAllText(Path.Combine(Root,"devices.txt"),string.Join(Environment.NewLine,all.Select(x=>x.ToString())));var states=Batteries.Poll(all);File.WriteAllText(Path.Combine(Root,"battery-report.json"),new JavaScriptSerializer().Serialize(states));}catch(Exception e){File.WriteAllText(Path.Combine(Root,"scan-error.txt"),e.ToString());Environment.ExitCode=1;}return;}
   if(args.Contains("--render")){var values=new JavaScriptSerializer().Deserialize<List<BatteryState>>(File.ReadAllText(Path.Combine(Root,"battery-report.json"))).Where(x=>x.Key!="keyboard"||x.Percent>=0).OrderBy(x=>x.Kind=="Kulaklık"?0:1).ToList();using(var bmp=new Bitmap((int)Math.Ceiling(Widget.StripWidthDip(values)),44)){using(var g=Graphics.FromImage(bmp)){g.Clear(Color.FromArgb(24,24,24));Widget.DrawStrip(g,bmp.Size,values);}bmp.Save(Path.Combine(Root,"taskbar-preview.png"));}return;}
+  if(args.Contains("--report")){var hid=Native.Scan();File.WriteAllText(Path.Combine(Root,"device-report.txt"),DeviceReport.Build(hid,Batteries.Poll(hid),Updates.Current.ToString(),Environment.OSVersion.VersionString)+Environment.NewLine+Environment.NewLine+DeviceReport.Listen(hid,DeviceReport.ListenSeconds*1000));return;}
   if(args.Contains("--test")){Environment.ExitCode=RegressionChecks.Run();return;}
   PrepareData();
   using(var exitSignal=new EventWaitHandle(false,EventResetMode.AutoReset,"Local\\WirelessBatteryExit")){
@@ -69,7 +70,8 @@ class BatteryApp:ApplicationContext {
  // "report a device" page so a friend can paste it in.
  async void CopyDeviceReport(){
   string report;
-  try{var hid=await Task.Run(()=>Native.Scan());report=DeviceReport.Build(hid,states,Updates.Current.ToString(),Environment.OSVersion.VersionString);}
+  Balloon("Wireless Battery",L.DeviceReportListening(DeviceReport.ListenSeconds),ToolTipIcon.Info,null);
+  try{var snapshot=states.ToList();report=await Task.Run(()=>{var hid=Native.Scan();return DeviceReport.Build(hid,snapshot,Updates.Current.ToString(),Environment.OSVersion.VersionString)+Environment.NewLine+Environment.NewLine+DeviceReport.Listen(hid,DeviceReport.ListenSeconds*1000);});}
   catch(Exception e){report="Wireless Battery "+Updates.Current+Environment.NewLine+"Scan failed: "+e.GetType().Name;}
   if(disposed)return;
   try{Clipboard.SetText(report);}catch{Balloon("Wireless Battery",L.DeviceReportError,ToolTipIcon.Warning,null);return;}
@@ -123,7 +125,37 @@ class MenuToggle {
 }
 
 static class DeviceReport {
- public static string IssueUrl {get{return "https://github.com/"+Updates.Repo+"/issues/new?title=Cihaz%20deste%C4%9Fi%3A%20&body=Cihaz%20raporunu%20buraya%20yap%C4%B1%C5%9Ft%C4%B1r%C4%B1n%20(Ctrl%2BV).%0A%0AMarka%20%2F%20model%3A%0A%0A";}}
+ public static string IssueUrl {get{return "https://github.com/"+Updates.Repo+"/issues/new?title=Device%20support%3A%20&body=Brand%20%2F%20model%3A%0AWas%20it%20charging%20or%20at%20a%20known%20battery%20level%3F%0A%0APaste%20the%20device%20report%20below%20(Ctrl%2BV)%3A%0A%0A";}}
+ public const int ListenSeconds=10;
+ static readonly ushort[] SupportedVendors={0x046D,0x1038,0x3554,0x373B};
+ // Vendor-defined input channels of devices we cannot read yet. Many headset
+ // dongles push their status there on their own, so listening alone can
+ // reveal where the battery level sits.
+ public static bool IsListenCandidate(HidInfo x){return x!=null&&x.Page>=0xFF00&&x.Input>=8&&Array.IndexOf(SupportedVendors,x.Vid)<0;}
+ public static string Hex(byte[] data){
+  int n=data.Length;while(n>1&&data[n-1]==0)n--;
+  var parts=new string[n];for(int i=0;i<n;i++)parts[i]=data[i].ToString("X2");
+  return string.Join(" ",parts)+(n<data.Length?" (+"+(data.Length-n)+" x 00)":"");
+ }
+ // Listen only: opens each candidate channel and reads what the device sends.
+ // Nothing is ever written to the device.
+ public static string Listen(List<HidInfo> hid,int ms){
+  var targets=hid.Where(IsListenCandidate).GroupBy(x=>x.Path).Select(g=>g.First()).ToList();
+  var lines=new List<string>{"Listen-only capture ("+(ms/1000)+" s, nothing sent to devices):"};
+  if(targets.Count==0){lines.Add("  (no unsupported vendor channels)");return string.Join(Environment.NewLine,lines);}
+  var results=new string[targets.Count];
+  Parallel.For(0,targets.Count,i=>{
+   var x=targets[i];var head=string.Format("  {0:X4}:{1:X4} {2:X4}:{3:X4} in={4}",x.Vid,x.Pid,x.Page,x.Usage,x.Input);
+   try{using(var d=new HidChannel(x)){
+    if(!d.Valid){results[i]=head+": cannot open";return;}
+    var seen=new List<string>();int total=0;var watch=System.Diagnostics.Stopwatch.StartNew();
+    while(watch.ElapsedMilliseconds<ms){var r=d.Read((int)Math.Min(1000,ms-watch.ElapsedMilliseconds));if(r==null)continue;total++;string h=Hex(r);if(!seen.Contains(h)&&seen.Count<20)seen.Add(h);}
+    var block=new List<string>{head+": "+total+" reports, "+seen.Count+" distinct"};foreach(var h in seen)block.Add("    "+h);
+    results[i]=string.Join(Environment.NewLine,block);
+   }}catch(Exception e){results[i]=head+": "+e.GetType().Name;}
+  });
+  lines.AddRange(results);return string.Join(Environment.NewLine,lines);
+ }
  public static string Build(List<HidInfo> hid,List<BatteryState> states,string version,string windows) {
   var lines=new List<string>{"Wireless Battery "+version,windows,"","Detected:"};
   foreach(var s in states)lines.Add("  "+s.Kind+" | "+s.Level+" | "+Widget.DeviceSource(s)+(Widget.DeviceSource(s)=="Windows Bluetooth"?"":" | "+s.Name));

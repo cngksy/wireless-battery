@@ -22,6 +22,7 @@ public static class L {
  public static string UpdateError {get{return Pick("Güncelleme denetlenemedi. İnternet bağlantısını kontrol edin.","Could not check for updates. Check your internet connection.");}}
  public static string DeviceReport {get{return Pick("Cihaz raporunu kopyala","Copy device report");}}
  public static string DeviceReportCopied {get{return Pick("Cihaz raporu panoya kopyalandı. Açılan sayfada Ctrl+V ile yapıştırın.","Device report copied. Paste it with Ctrl+V on the page that opens.");}}
+ public static string DeviceReportListening(int s){return Pick("Cihaz raporu hazırlanıyor ("+s+" sn). Bu sırada cihazları kullanmaya devam edebilirsiniz.","Preparing the device report ("+s+" s). You can keep using your devices.");}
  public static string DeviceReportError {get{return Pick("Cihaz raporu panoya kopyalanamadı.","Could not copy the device report.");}}
  public static string StartupError {get{return Pick("Windows başlangıç ayarı değiştirilemedi.","Could not change the Windows startup setting.");}}
 }

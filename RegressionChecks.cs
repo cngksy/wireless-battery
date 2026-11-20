@@ -52,6 +52,8 @@ static class RegressionChecks {
   check(Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x1273,Name="VXE R1 PRO MAX"})=="VXE R1 / NordicMouse"&&Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x1290,Name="ATK X1 SE 2.4G"})=="ATK X1 SE"&&Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x1290,Name=""})=="ATK wireless mouse","Mouse names come from the receiver");
   var report=DeviceReport.Build(new List<HidInfo>{new HidInfo{Vid=0x373B,Pid=0x1290,Page=0xFF02,Usage=2,Input=17,Output=17,Name="ATK X1 SE",Path=@"\?\hid#vid_373b&pid_1290#7&secret"}},new List<BatteryState>{new BatteryState{Key="bt",Name="Private Phone",Kind="Kulaklık",Status="Windows Bluetooth",Percent=50}},"1.4.2","Windows");
   check(report.Contains("373B:1290 FF02:0002")&&!report.Contains("secret")&&!report.Contains("Private Phone"),"Device report lists IDs without paths or Bluetooth names");
+  check(DeviceReport.Hex(new byte[]{0x01,0xA5,0,0,0})=="01 A5 (+3 x 00)"&&DeviceReport.Hex(new byte[]{0,0})=="00 (+1 x 00)","Captured reports are printed compactly");
+  check(DeviceReport.IsListenCandidate(new HidInfo{Vid=0x3634,Pid=0x4155,Page=0xFF02,Usage=2,Input=65,Output=65})&&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x3634,Pid=0x4155,Page=0x000C,Usage=1,Input=3})&&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x373B,Pid=0x10C9,Page=0xFF02,Usage=2,Input=17,Output=17}),"Only unsupported vendor channels are listened to");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }
