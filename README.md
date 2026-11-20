@@ -64,6 +64,16 @@ Proprietary protocols of other vendors' USB receivers, the PlayStation-specific 
 
 An idle VXE receiver does not mean the mouse is off. While the receiver stays connected, a temporarily missing reading keeps the last real percentage in normal color; hovering clearly shows that it is the last reading and when it was taken. If the receiver is unplugged, the old value is kept dimmed for up to 30 minutes. Low battery alerts are raised only for current readings. Hidden devices never raise alerts.
 
+## Bug Report
+
+Is your device not showing up, or showing the wrong battery level? Let us know and we will try to add it:
+
+1. Right-click the Wireless Battery icon and choose **Copy device report** while the device is **not charging**. Note the battery level the device or its own software shows, if you can.
+2. Plug the device in to charge and choose **Copy device report** again.
+3. Open a [bug report](https://github.com/cngksy/wireless-battery/issues/new?title=Device%20support%3A%20&body=Brand%20%2F%20model%3A%0ABattery%20level%20shown%20by%20the%20device%20or%20its%20software%3A%0A%0AReport%20while%20NOT%20charging%3A%0A%0A%0AReport%20while%20charging%3A%0A%0A) and paste both reports with Ctrl+V, together with the brand and model.
+
+Each report takes about 10 seconds. It contains only device IDs and the data your devices send on their own; no device paths, serial numbers or Bluetooth device names. Nothing is sent to your devices while the report is made. Opening an issue needs a free GitHub account.
+
 ## Local data and privacy
 
 Battery readings, settings and error/layout logs are written to `%LOCALAPPDATA%\Wireless Battery`. Settings next to an older portable copy are moved there automatically on first run. The shared ZIP and the installer contain no personal settings or device reports.
