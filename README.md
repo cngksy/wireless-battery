@@ -2,6 +2,15 @@
 
 Windows 10/11 x64 için taşınabilir kablosuz cihaz pil göstergesi.
 
+[![Son sürüm](https://img.shields.io/github/v/release/cngksy/wireless-battery?label=S%C3%BCr%C3%BCm&color=2ea44f)](https://github.com/cngksy/wireless-battery/releases/latest)
+[![İndirme](https://img.shields.io/github/downloads/cngksy/wireless-battery/total?label=%C4%B0ndirme&color=0a84ff)](https://github.com/cngksy/wireless-battery/releases)
+[![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white)](https://github.com/cngksy/wireless-battery/releases/latest)
+[![GitHub Star](https://img.shields.io/github/stars/cngksy/wireless-battery?label=Star&logo=github&color=yellow)](https://github.com/cngksy/wireless-battery/stargazers)
+[![Lisans](https://img.shields.io/github/license/cngksy/wireless-battery?label=Lisans&color=lightgrey)](LICENSE)
+[![Cihaz bildir](https://img.shields.io/badge/Cihaz-bildir-2ea44f?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Cihaz%20deste%C4%9Fi%3A%20&body=Marka%20%2F%20model%3A%0ABa%C4%9Flant%C4%B1%20(USB%20al%C4%B1c%C4%B1%20%2F%20Bluetooth%20%2F%20kablolu)%3A%0AKullan%C4%B1lan%20yaz%C4%B1l%C4%B1m%20(G%20HUB%2C%20SteelSeries%20GG%20vb.)%3A%0A)
+[![Hata bildir](https://img.shields.io/badge/Hata-bildir-d73a49?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Hata%3A%20)
+[![Reddit'te paylaş](https://img.shields.io/badge/Reddit-Payla%C5%9F-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fcngksy%2Fwireless-battery&title=Wireless%20Battery%20-%20kablosuz%20cihaz%20pillerini%20Windows%20g%C3%B6rev%20%C3%A7ubu%C4%9Funda%20g%C3%B6r)
+
 **İndir:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (önerilen) veya `WirelessBattery-portable.zip`.
 
 Önerilen yöntem WirelessBattery-Setup.exe ile kullanıcı hesabına kurmaktır. Yönetici izni istemez, Başlat menüsü kısayolu ve kaldırıcı oluşturur. Portable kullanım için ZIP dosyasını çıkarıp WirelessBattery.exe dosyasını açmak da mümkündür. Windows'un .NET Framework 4.x bileşenlerini kullanır.
