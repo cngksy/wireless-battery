@@ -1,97 +1,97 @@
 # Wireless Battery 1.4.2
 
-Windows 10/11 x64 için taşınabilir kablosuz cihaz pil göstergesi.
+Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Destek%20ol-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/cangoksoy)
-[![Son sürüm](https://img.shields.io/github/v/release/cngksy/wireless-battery?label=S%C3%BCr%C3%BCm&color=2ea44f)](https://github.com/cngksy/wireless-battery/releases/latest)
-[![İndirme](https://img.shields.io/github/downloads/cngksy/wireless-battery/total?label=%C4%B0ndirme&color=0a84ff)](https://github.com/cngksy/wireless-battery/releases)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/cangoksoy)
+[![Latest release](https://img.shields.io/github/v/release/cngksy/wireless-battery?label=Release&color=2ea44f)](https://github.com/cngksy/wireless-battery/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/cngksy/wireless-battery/total?label=Downloads&color=0a84ff)](https://github.com/cngksy/wireless-battery/releases)
 [![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white)](https://github.com/cngksy/wireless-battery/releases/latest)
-[![GitHub Star](https://img.shields.io/github/stars/cngksy/wireless-battery?label=Star&logo=github&color=yellow)](https://github.com/cngksy/wireless-battery/stargazers)
-[![Lisans](https://img.shields.io/github/license/cngksy/wireless-battery?label=Lisans&color=lightgrey)](LICENSE)
-[![Cihaz bildir](https://img.shields.io/badge/Cihaz-bildir-2ea44f?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Cihaz%20deste%C4%9Fi%3A%20&body=Marka%20%2F%20model%3A%0ABa%C4%9Flant%C4%B1%20(USB%20al%C4%B1c%C4%B1%20%2F%20Bluetooth%20%2F%20kablolu)%3A%0AKullan%C4%B1lan%20yaz%C4%B1l%C4%B1m%20(G%20HUB%2C%20SteelSeries%20GG%20vb.)%3A%0A)
-[![Hata bildir](https://img.shields.io/badge/Hata-bildir-d73a49?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Hata%3A%20)
-[![Reddit'te paylaş](https://img.shields.io/badge/Reddit-Payla%C5%9F-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fcngksy%2Fwireless-battery&title=Wireless%20Battery%20-%20kablosuz%20cihaz%20pillerini%20Windows%20g%C3%B6rev%20%C3%A7ubu%C4%9Funda%20g%C3%B6r)
+[![GitHub Stars](https://img.shields.io/github/stars/cngksy/wireless-battery?label=Star&logo=github&color=yellow)](https://github.com/cngksy/wireless-battery/stargazers)
+[![License](https://img.shields.io/github/license/cngksy/wireless-battery?label=License&color=lightgrey)](LICENSE)
+[![Report a device](https://img.shields.io/badge/Report-a%20device-2ea44f?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Device%20support%3A%20&body=Brand%20%2F%20model%3A%0AConnection%20(USB%20receiver%20%2F%20Bluetooth%20%2F%20cable)%3A%0ASoftware%20used%20(G%20HUB%2C%20SteelSeries%20GG%2C%20etc.)%3A%0ADevice%20report%20(tray%20menu%20%E2%86%92%20Copy%20device%20report)%3A%0A)
+[![Report a bug](https://img.shields.io/badge/Report-a%20bug-d73a49?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Bug%3A%20)
+[![Share on Reddit](https://img.shields.io/badge/Reddit-Share-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fcngksy%2Fwireless-battery&title=Wireless%20Battery%20-%20see%20your%20wireless%20device%20batteries%20on%20the%20Windows%20taskbar)
 
-**İndir:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (önerilen) veya `WirelessBattery-portable.zip`.
+**Download:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (recommended) or `WirelessBattery-portable.zip`. No GitHub account needed.
 
-Önerilen yöntem WirelessBattery-Setup.exe ile kullanıcı hesabına kurmaktır. Yönetici izni istemez, Başlat menüsü kısayolu ve kaldırıcı oluşturur. Portable kullanım için ZIP dosyasını çıkarıp WirelessBattery.exe dosyasını açmak da mümkündür. Windows'un .NET Framework 4.x bileşenlerini kullanır.
-Kurulum ve güncelleme başlamadan önce çalışan Wireless Battery örneği otomatik ve güvenli biçimde kapatılır; kullanıcının tray menüsünden ayrıca Çıkış seçmesi gerekmez.
+The installer sets the app up for your user account only. It needs no administrator rights and adds a Start menu shortcut and an uninstaller. For portable use, extract the ZIP and run `WirelessBattery.exe`. The app uses the .NET Framework 4.x that ships with Windows.
+Before installing or updating, any running copy of Wireless Battery is closed automatically and safely; there is no need to choose Exit from the tray menu first.
 
-## Nasıl çalışır
+## How it works
 
-**Görev çubuğunda pil göstergesi.** Kulaklık, mouse ve klavye gibi kablosuz cihazların pili saatin yanında, sistem simgelerinin hemen solunda görünür. Şarj olan cihaz mavi renkte ve ⚡ işaretiyle gösterilir. %15 ve altındaki pil kırmızıya döner.
+**Battery indicator on the taskbar.** Battery levels of wireless devices such as headsets, mice and keyboards appear next to the clock, just left of the system icons. A charging device is shown in blue with a ⚡ mark. Batteries at 15% or lower turn red.
 
-![Görev çubuğunda kulaklık, mouse ve klavye pil seviyeleri](docs/taskbar.png)
+![Headset, mouse and keyboard battery levels on the taskbar](docs/taskbar.png)
 
-**Cihaz ayrıntısı.** Fareyi bir cihazın üstünde 1,2 saniye tutunca cihazın adı, pil yüzdesi, son ölçüm saati ve verinin kaynağı (G HUB, SteelSeries GG, Bluetooth vb.) açılır.
+**Device details.** Hold the pointer over a device for 1.2 seconds to see its name, battery level, time of the last reading and where the data comes from (G HUB, SteelSeries GG, Bluetooth, etc.).
 
-![Cihazın üstüne gelince açılan bilgi kutusu](docs/hover.png)
+![Details shown when hovering over a device](docs/hover.png)
 
-**Sağ tık menüsü.** Göstergeye veya bildirim alanındaki simgeye sağ tıklayınca menü açılır. Buradan cihazları tek tek gösterip gizleyebilir, göstergeyi kapatabilir, Windows ile başlatmayı ve güncelleme denetimini yönetebilirsiniz. Menü açıkken tekrar sol veya sağ tıklamak menüyü kapatır.
+**Right-click menu.** Right-click the indicator or the tray icon to open the menu. From there you can show or hide each device, turn the indicator off, and manage starting with Windows and update checks. While the menu is open, another left or right click closes it.
 
-![Sağ tık menüsü](docs/menu.png)
+![Right-click menu](docs/menu.png)
 
-## Kullanım
+## Usage
 
-- Pil bildiren destekli aygıtları otomatik tarar ve her monitörün mevcut görev çubuğuna yerleştirir.
-- Bir cihazın üstüne gelince yalnızca o cihazın adı, pili ve son ölçümü görünür.
-- Sağ tık menüsündeki cihaz adını tıklayarak göster/gizle; tik görünürlük durumudur. Seçimler settings.json dosyasında kaydedilir.
-- Sağ tık menüsü sırası: Görev çubuğu göstergesi; Windows açılırken başlat ve Güncellemeleri denetle; cihaz listesi; Şimdi yenile; Çıkış.
-- Cihazınız görünmüyorsa menüden **Cihaz raporunu kopyala**yı seçin: bağlı USB cihazlarının kimlikleri panoya kopyalanır ve "Cihaz bildir" sayfası açılır, Ctrl+V ile yapıştırmanız yeterli. Raporda cihaz yolları, seri numaraları ve Bluetooth cihaz adları bulunmaz.
-- Uygulama açıldıktan 30 saniye sonra ve sonra her 6 saatte bir GitHub'daki son sürüme bakar. Yeni sürüm varsa bir kez bildirim gösterir ve menüdeki öğe "Yeni sürümü indir" olur; tıklayınca GitHub Releases sayfası açılır. İndirme ve kurulum kullanıcıya bırakılır.
-- Windows açılırken başlat seçeneği kullanıcı hesabındaki başlangıç kaydını yönetir; yeniden tıklanınca tik ve kayıt kaldırılır.
-- Windows görüntü dili Türkçeyse arayüz Türkçe, diğer sistemlerde İngilizce çalışır.
-- Sol tık veya çift tık pencere açmaz. Bildirim alanında yalnızca uygulamanın logo simgesi bulunur.
-- Sağ tık menüsü açıksa simgeye veya cihaz göstergesine sol ya da sağ tıklamak menüyü kapatır; yeniden açmaz.
-- Cihaz bilgisi, fare göstergenin üstünde 1,2 saniye durunca açılır; menü açıkken gösterilmez.
-- Otomatik yenileme aralığı 60 saniyedir. Görev çubukları ve monitör değişiklikleri ayrıca izlenir.
-- Yeni cihaz takıldıktan sonra Şimdi yenile ile hemen taranabilir.
+- Supported devices that report a battery level are detected automatically and placed on the taskbar of every monitor.
+- Hovering over a device shows only that device's name, battery level and last reading.
+- Click a device in the right-click menu to show or hide it; the check mark shows its visibility. Choices are saved in `settings.json`.
+- Menu order: Taskbar indicator; Start with Windows and Check for updates; device list; Refresh now; Exit.
+- If your device does not show up, choose **Copy device report** in the menu. The IDs of connected USB devices are copied to the clipboard and the "Report a device" page opens; just paste with Ctrl+V. The report contains no device paths, serial numbers or Bluetooth device names.
+- The app checks GitHub for the latest version 30 seconds after starting and every 6 hours after that. When a new version is out, it shows one notification and the menu item becomes "Download new version"; clicking it opens the GitHub Releases page. Downloading and installing are left to you.
+- "Start with Windows" manages the startup entry for your user account; clicking it again removes the check mark and the entry.
+- The interface is in Turkish when the Windows display language is Turkish, and in English otherwise.
+- A left click or double click does not open a window. Only the app's logo icon sits in the notification area.
+- While the right-click menu is open, a left or right click on the icon or the indicator closes it instead of reopening it.
+- Device details appear after the pointer rests on the indicator for 1.2 seconds, and never while the menu is open.
+- Battery levels refresh automatically every 60 seconds. Taskbar and monitor changes are tracked separately.
+- After plugging in a new device, use Refresh now to scan right away.
 
-## Destek kapsamı
+## Supported devices
 
-Her marka ve modelin pili okunamaz. Pil verisini hangi yoldan yayımladığına bağlıdır. Bu sürüm şunları tarar:
+Not every brand and model can be read; it depends on how the device publishes its battery data. This version reads:
 
-- Windows'un standart pil özelliğini yayımladığı Bluetooth aygıtları; marka bağımsız.
-- Windows XInput uyumlu kablosuz gamepad'ler: sürücü yalnızca dört kademe veriyorsa Boş/Az/Orta/Dolu gösterilir; kesin yüzde uydurulmaz.
-- Logitech G HUB'ın yerel API'si üzerinden pil yüzdesi verdiği uyumlu aygıtlar; G HUB arka plan servisi gerekir.
-- VXE R1 / NordicMouse ailesi: 3554:F58A alıcı; 3554:F58C ve doğrulanmış 373B:1273 kablolu/şarj bağlantıları üzerinden HID pil okuma.
-- Diğer ATK / VXE / Compx alıcıları (VID 3554 ve 373B, örn. ATK X1 serisinin bazı alıcıları): aynı protokolü konuşuyorsa otomatik okunur. Yalnızca doğrulanmış (checksum) yanıt kabul edilir; yanıt vermeyen tanımsız alıcı listede görünmez.
-- Logitech PRO X Wireless 046D:0ABA: önce G HUB veya HID++ kesin yüzdesi kullanılır. Bunlar yoksa voltajdan hesaplanan yüzde gösterilir; görev çubuğunda ayrıca `~` işareti eklenmez.
-- SteelSeries Apex Pro TKL Wireless: GG'nin yerel durum API'si; GG/Engine arka plan servisleri gerekir.
+- Bluetooth devices that publish the standard Windows battery property, regardless of brand.
+- XInput-compatible wireless controllers. If the driver reports only four levels, Empty/Low/Medium/Full is shown; no exact percentage is made up.
+- Devices whose battery level Logitech G HUB publishes through its local API. The G HUB background service must be running.
+- VXE R1 / NordicMouse family: battery over HID through the 3554:F58A receiver, and the 3554:F58C and verified 373B:1273 cable/charging connections.
+- Other ATK / VXE / Compx receivers (VID 3554 and 373B, e.g. the ATK X1 SE on the Nearlink 373B:10C9 receiver): read automatically when they speak the same protocol. Only a reply with a valid checksum is accepted; an unknown receiver that does not answer is not listed.
+- Logitech PRO X Wireless 046D:0ABA: the exact percentage from G HUB or HID++ is used first. Without those, a percentage calculated from the voltage is shown.
+- SteelSeries Apex Pro TKL Wireless: through GG's local status API. The GG/Engine background services must be running.
 
-USB alıcılı diğer üreticilerin özel protokolleri, PlayStation'a özgü pil protokolü ve her kablosuz mikrofon bu sürümde desteklenmez. Windows/G HUB bunların pilini yayımlıyorsa genel okuyucu kullanabilir. Kablolu veya pil bilgisi yayımlamayan cihazlara yüzde atanmamalıdır.
+Proprietary protocols of other vendors' USB receivers, the PlayStation-specific battery protocol and wireless microphones in general are not supported in this version. If Windows or G HUB publishes their battery level, the generic readers may still pick it up. Wired devices and devices that do not publish battery information are never given a percentage.
 
-VXE alıcısının boşta kalması 'mouse kapalı' sayılmaz. Geçici ölçüm eksikliğinde alıcı bağlı kaldıkça son gerçek yüzde normal renkte korunur; üzerine gelince bunun son ölçüm olduğu ve saati açıkça görünür. Alıcı çıkarılırsa eski veri en fazla 30 dakika soluk olarak tutulur. Düşük pil uyarıları yalnızca güncel okumalarla verilir. Gizli aygıtlar uyarı oluşturmaz.
+An idle VXE receiver does not mean the mouse is off. While the receiver stays connected, a temporarily missing reading keeps the last real percentage in normal color; hovering clearly shows that it is the last reading and when it was taken. If the receiver is unplugged, the old value is kept dimmed for up to 30 minutes. Low battery alerts are raised only for current readings. Hidden devices never raise alerts.
 
-## Yerel veri ve paylaşım
+## Local data and privacy
 
-Pil raporu, seçimler ve hata/yerleşim raporları `%LOCALAPPDATA%\Wireless Battery` klasörüne yazılır. Eski portable sürümün yanındaki ayarlar ilk çalıştırmada otomatik taşınır. Paylaşım ZIP'i ve kurulum dosyası kişisel ayar veya cihaz raporu içermez.
-Uygulama sağ tık menüsündeki seçime göre yalnızca mevcut kullanıcı için Windows başlangıç kaydı oluşturabilir veya kaldırabilir. Veri yüklemez, kendiliğinden güncelleme indirip kurmaz ve cihaz ayarı/firmware değiştirmez.
-İnternete yalnızca güncelleme denetimi için çıkar: GitHub'ın herkese açık API'sinden (api.github.com) bu projenin son sürüm numarasını okur. Bu istekte cihaz, pil veya kişisel bilgi gönderilmez. Otomatik denetimi kapatmak için settings.json içinde "CheckUpdates" değerini false yapın.
-Yalnızca yerel cihazlar, 127.0.0.1:9010 G HUB WebSocket'i ve coreProps.json içinde tanımlanan 127.0.0.1 GG HTTPS servisleri okunur. GG adresinde uzak sunucu, proxy veya yönlendirme kabul edilmez; GG'nin yerel kendinden imzalı sertifikasına izin yalnızca o isteğe özeldir.
-EXE yerelde derlenmiştir ve dijital imzalı değildir; herhangi bir antivirüste sıfır uyarı garantisi verilmez.
+Battery readings, settings and error/layout logs are written to `%LOCALAPPDATA%\Wireless Battery`. Settings next to an older portable copy are moved there automatically on first run. The shared ZIP and the installer contain no personal settings or device reports.
+Depending on your menu choice, the app can add or remove a Windows startup entry for the current user only. It uploads no data, never downloads or installs updates by itself, and never changes device settings or firmware.
+It goes online only to check for updates: it reads this project's latest version number from GitHub's public API (api.github.com). No device, battery or personal information is sent. To turn off automatic checks, set `"CheckUpdates"` to `false` in `settings.json`.
+Only local devices, the G HUB WebSocket at 127.0.0.1:9010 and the 127.0.0.1 GG HTTPS services listed in `coreProps.json` are read. Remote servers, proxies or redirects are not accepted for the GG address; GG's local self-signed certificate is allowed for that request only.
+The EXE is built locally and is not digitally signed, so no antivirus can be guaranteed to stay silent. If Windows SmartScreen warns you, choose "More info → Run anyway".
 
-## Kaynak kod ve derleme
+## Source code and building
 
-Tam karşılık gelen kaynak kod WirelessBattery-source.zip içindedir. build.ps1 Windows'un C# derleyicisini kullanır. Gerekli logo/ikon kaynak paketin assets klasöründedir.
+The complete corresponding source code is in this repository and in `WirelessBattery-source.zip`. `build.ps1` uses the C# compiler that ships with Windows. The logo and icon sources are in the `assets` folder.
 
     .\build.ps1
     .\WirelessBattery.exe --test
     .\WirelessBattery.exe --scan
     .\WirelessBattery.exe --render
 
-Kurulum dosyası Inno Setup 6 ile `installer.iss` üzerinden oluşturulur.
+The installer is built with Inno Setup 6 from `installer.iss`.
 
---test davranış kontrollerini test-results.txt içine yazar. --scan yerel cihaz ve pil raporlarını oluşturup çıkar. --render mevcut raporun küçük gösterge önizlemesini oluşturur.
+`--test` writes the behavior checks to `test-results.txt`. `--scan` writes local device and battery reports, then exits. `--render` draws a small preview of the indicator from the current report.
 
-## Lisans ve kaynaklar
+## License and references
 
-Uygulama kodu GPL-3.0-or-later. Tam lisans LICENSE dosyasında.
-Protokol referansları:
+The application code is GPL-3.0-or-later. The full license is in the `LICENSE` file.
+Protocol references:
 - BatteryHub / Wireless Device Battery Monitor: https://github.com/krisgfx9/Wireless-Device-Battery-Monitor
 - Logitech HID++ / Solaar: https://github.com/pwr-Solaar/Solaar
 - HeadsetControl: https://github.com/Sapd/HeadsetControl
-- LogiBAT yerel G HUB mesajları: https://github.com/someweirdhuman/LogiBAT
-- Microsoft Windows XInputGetBatteryInformation ve SetupAPI belgeleri.
+- LogiBAT local G HUB messages: https://github.com/someweirdhuman/LogiBAT
+- Microsoft documentation for Windows XInputGetBatteryInformation and SetupAPI.
 
-Logo yerleşik image_gen ile oluşturuldu. Kaynak PNG, çok boyutlu ICO ve üretim istemi kaynak paketin assets klasöründedir.
+The logo was created with the built-in image_gen tool. The source PNG, the multi-size ICO and the generation prompt are in the `assets` folder.
