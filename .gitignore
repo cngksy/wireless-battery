@@ -1,0 +1,24 @@
+# Whitelist: only the app's own source, build files and assets are published.
+# Personal reports, device dumps, settings and third-party reference files stay local.
+/*
+!/.gitignore
+!/App.cs
+!/AssemblyInfo.cs
+!/Autostart.cs
+!/Battery.cs
+!/GHub.cs
+!/Localization.cs
+!/Native.cs
+!/RegressionChecks.cs
+!/SteelSeries.cs
+!/Taskbars.cs
+!/Updates.cs
+!/UserSettings.cs
+!/Widget.cs
+!/WindowsDevices.cs
+!/app.manifest
+!/build.ps1
+!/installer.iss
+!/README.md
+!/LICENSE
+!/assets/

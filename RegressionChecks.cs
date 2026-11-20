@@ -1,0 +1,50 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+static class RegressionChecks {
+ public static int Run() {
+  var failures=new List<string>();int count=0;
+  Action<bool,string> check=(ok,name)=>{count++;if(!ok)failures.Add(name);};
+  var now=new DateTime(2026,11,20,23,0,0);
+  var last=new BatteryState{Key="mouse",Name="Mouse only",Percent=95,Sample=now.AddHours(-2),Millivolts=4084};
+  var waiting=Batteries.PreserveLastReading(new BatteryState{Key="mouse",Name="Mouse only",ReceiverPresent=true},last,now);
+  check(waiting.Percent==95&&!waiting.Dimmed,"Idle receiver must retain percentage without dimming");
+  check(waiting.Stale&&waiting.Sample==last.Sample,"Cached sample must keep its original timestamp and freshness");
+  check(!waiting.Charging,"Cached charge state must not pretend charging is current");
+  var fresh=Batteries.PreserveLastReading(new BatteryState{Key="mouse",Percent=90,Sample=now,ReceiverPresent=true},last,now);
+  check(fresh.Percent==90&&!fresh.Stale&&fresh.Sample==now,"Fresh battery must replace previous sample");
+  var missing=Batteries.PreserveLastReading(new BatteryState{Key="mouse",Status="Alıcı bulunamadı"},new BatteryState{Percent=95,Sample=now.AddMinutes(-1)},now);
+  check(missing.Dimmed&&missing.Stale&&missing.Percent==95,"Unplugged receiver must be distinguished from idle radio");
+  var expired=Batteries.PreserveLastReading(new BatteryState{Key="mouse"},last,now);
+  check(expired.Percent<0,"Unplugged receiver must not retain an expired sample");
+  var hitStates=new List<BatteryState>{new BatteryState{Percent=95},new BatteryState{Percent=95},new BatteryState{Percent=95}};
+  check(Widget.HitDevice(0,1,hitStates)==0&&Widget.HitDevice(65,1,hitStates)==0&&Widget.HitDevice(66,1,hitStates)==1&&Widget.HitDevice(132,1,hitStates)==2,"Device boundaries must select separate cells");
+  check(Widget.HitDevice(-1,1,hitStates)==-1&&Widget.HitDevice(198,1,hitStates)==-1,"Outside strip must not select a device");
+  check(Widget.HitDevice(132,2,hitStates)==1,"Hover hit testing must follow display scaling");
+  var chargingHitStates=new List<BatteryState>{new BatteryState{Percent=95},new BatteryState{Percent=100,Charging=true},new BatteryState{Percent=95}};
+  check(Widget.StripWidthDip(chargingHitStates)==214&&Widget.HitDevice(147,1,chargingHitStates)==1&&Widget.HitDevice(148,1,chargingHitStates)==2,"Charging indicator must expand its cell instead of colliding with neighbors");
+  string tip=Widget.DeviceTooltip(waiting);
+  check(tip=="Mouse only\n"+L.BatteryLabel(false)+"%95\n"+L.TimeLabel+"21:00\n"+L.By("USB HID"),"Tooltip must contain localized compact device details");
+  check(Widget.DeviceTooltip(new BatteryState{Key="headset",Name="Headset",Percent=53,Charging=true,Sample=now,Status="G HUB tarafından bildirilen yüzde"})=="Headset\n"+L.BatteryLabel(true)+"%53\n"+L.TimeLabel+"23:00\n"+L.By("G HUB"),"Charging tooltip must replace the localized battery label");
+  check(Batteries.VoltagePercent(4102)==100&&Batteries.VoltagePercent(3293)==0&&Batteries.VoltagePercent(3758)==50,"Headset voltage calibration");
+  check(Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=0xFF02,Usage=2})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=1,Usage=2}),"VXE R1 Pro Max wired charging interface");
+  var settings=new UserSettings();var device=new BatteryState{Key="example",BatterySupported=true};
+  check(settings.IsShown(device),"Supported devices should be visible by default");
+  settings.Devices[device.Key]=false;check(!settings.IsShown(device),"Unchecked device must be hidden");
+  settings.Devices[device.Key]=true;check(settings.IsShown(device),"Second toggle must restore device");
+  var json=new System.Web.Script.Serialization.JavaScriptSerializer();var restored=json.Deserialize<UserSettings>(json.Serialize(settings));
+  check(restored.IsShown(device),"Device checkbox state must survive settings serialization");
+  check(WindowsDevices.KindFromClass(0x0504,"Controller")=="Gamepad"&&WindowsDevices.KindFromClass(0x0540,"Keys")=="Klavye"&&WindowsDevices.KindFromClass(0x0580,"Mouse")=="Mouse","Bluetooth device classes");
+  check(new BatteryState{Percent=60,Approximate=true}.Level=="60%","Approximate values must display without a tilde marker");
+  check(new BatteryState{Percent=60,Approximate=true,LevelText="Orta"}.Level=="Orta","Gamepad's honest coarse level remains allowed");
+  check(Autostart.CommandFor(@"C:\Apps\WirelessBattery.exe")=="\"C:\\Apps\\WirelessBattery.exe\"","Autostart command must quote the executable path");
+  check(BatteryApp.ShouldOpenMenu(false,false)&&!BatteryApp.ShouldOpenMenu(true,false)&&!BatteryApp.ShouldOpenMenu(false,true),"Second right-click must close rather than reopen the context menu");
+  check(Updates.IsNewer("v1.4.1",new Version(1,4,0))&&Updates.IsNewer("1.5",new Version(1,4,9))&&!Updates.IsNewer("v1.4.0",new Version(1,4,0))&&!Updates.IsNewer("v1.3.9",new Version(1,4,0)),"Update version comparison");
+  check(!Updates.IsNewer("latest",new Version(1,0,0))&&!Updates.IsNewer(null,new Version(1,0,0))&&!Updates.IsNewer("v2.0.0-beta",new Version(1,0,0)),"Malformed or prerelease tags must not trigger updates");
+  check(Updates.IsSafeReleaseUrl("https://github.com/"+Updates.Repo+"/releases/tag/v1.4.0")&&!Updates.IsSafeReleaseUrl("https://evil.example/releases/")&&!Updates.IsSafeReleaseUrl("https://github.com/other/repo/releases/tag/v9"),"Only this repository's release pages may be opened");
+  check(Updates.Current.Major>=1&&Updates.Current.Revision<=0,"Current version must come from the assembly");
+  File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
+  return failures.Count==0?0:1;
+ }
+}
