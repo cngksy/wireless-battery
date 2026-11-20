@@ -1,6 +1,6 @@
-using System.Reflection;
+﻿using System.Reflection;
 [assembly: AssemblyTitle("Wireless Battery")]
 [assembly: AssemblyProduct("Wireless Battery")]
 [assembly: AssemblyDescription("Wireless device battery levels on the Windows taskbar")]
-[assembly: AssemblyVersion("1.4.3.0")]
-[assembly: AssemblyFileVersion("1.4.3.0")]
+[assembly: AssemblyVersion("1.4.4.0")]
+[assembly: AssemblyFileVersion("1.4.4.0")]

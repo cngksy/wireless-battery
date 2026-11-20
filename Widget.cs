@@ -155,7 +155,22 @@ class Widget:Form {
    using(var pen=new Pen(color,2.0f)){pen.StartCap=pen.EndCap=LineCap.Round;pen.LineJoin=LineJoin.Round;
     if(s.Kind=="Kulaklık") {g.DrawArc(pen,2,2,23,24,180,180);g.DrawLine(pen,2,14,2,24);g.DrawLine(pen,25,14,25,24);g.DrawRectangle(pen,2,17,6,9);g.DrawRectangle(pen,19,17,6,9);}
     else if(s.Kind=="Mouse") {using(var path=new GraphicsPath()){path.AddArc(5,1,17,14,180,180);path.AddLine(22,8,22,19);path.AddArc(5,12,17,14,0,180);path.CloseFigure();g.DrawPath(pen,path);}g.DrawLine(pen,13.5f,3,13.5f,10);}
-    else if(s.Kind=="Gamepad") {using(var path=new GraphicsPath()){path.AddBezier(4,10,0,9,0,25,5,24);path.AddLine(5,24,10,18);path.AddLine(10,18,18,18);path.AddBezier(18,18,25,30,29,24,24,10);path.CloseFigure();g.DrawPath(pen,path);}g.DrawLine(pen,5,14,11,14);g.DrawLine(pen,8,11,8,17);g.DrawEllipse(pen,19,12,1,1);g.DrawEllipse(pen,22,15,1,1);}
+    else if(s.Kind=="Gamepad") {
+     // Symmetric controller: flat top, two rounded grips, D-pad left, two buttons right.
+     using(var path=new GraphicsPath()){
+      path.AddLine(8,7,20,7);
+      path.AddBezier(20,7,24.5f,7,26.5f,12,27,18);
+      path.AddBezier(27,18,27.5f,24,23.5f,25,21.5f,21.5f);
+      path.AddLine(21.5f,21.5f,19.5f,18.5f);
+      path.AddLine(19.5f,18.5f,8.5f,18.5f);
+      path.AddLine(8.5f,18.5f,6.5f,21.5f);
+      path.AddBezier(6.5f,21.5f,4.5f,25,0.5f,24,1,18);
+      path.AddBezier(1,18,1.5f,12,3.5f,7,8,7);
+      path.CloseFigure();g.DrawPath(pen,path);
+     }
+     g.DrawLine(pen,5.5f,12.5f,10.5f,12.5f);g.DrawLine(pen,8,10,8,15);
+     using(var dot=new SolidBrush(color)){g.FillEllipse(dot,17.6f,9.6f,2.8f,2.8f);g.FillEllipse(dot,20.6f,12.6f,2.8f,2.8f);}
+    }
     else if(s.Kind=="Mikrofon") {g.DrawRectangle(pen,9,2,10,16);g.DrawArc(pen,5,10,18,13,0,180);g.DrawLine(pen,14,23,14,27);g.DrawLine(pen,9,27,19,27);}
     else if(s.Kind=="Aygıt") {g.DrawRectangle(pen,7,4,14,22);g.DrawLine(pen,11,1,17,1);g.DrawLine(pen,11,10,17,10);g.DrawLine(pen,11,15,17,15);g.DrawLine(pen,11,20,17,20);}
     else {g.DrawRectangle(pen,1,6,26,17);for(int row=0;row<2;row++)for(int col=0;col<5;col++)g.DrawLine(pen,5+col*4,11+row*4,6+col*4,11+row*4);g.DrawLine(pen,8,20,20,20);}
