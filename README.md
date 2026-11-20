@@ -9,11 +9,14 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 [![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white)](https://github.com/cngksy/wireless-battery/releases/latest)
 [![GitHub Stars](https://img.shields.io/github/stars/cngksy/wireless-battery?label=Star&logo=github&color=yellow)](https://github.com/cngksy/wireless-battery/stargazers)
 [![License](https://img.shields.io/github/license/cngksy/wireless-battery?label=License&color=lightgrey)](LICENSE)
+[![VirusTotal](https://img.shields.io/badge/VirusTotal-scan%20results-394EFF?logo=virustotal&logoColor=white)](https://www.virustotal.com/gui/file/2aaf862d1b62fa9f39fadbc07eb8d66381b82438efdd30b4c3b9ddd71dcdefb4)
 [![Report a device](https://img.shields.io/badge/Report-a%20device-2ea44f?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Device%20support%3A%20&body=Brand%20%2F%20model%3A%0AConnection%20(USB%20receiver%20%2F%20Bluetooth%20%2F%20cable)%3A%0ASoftware%20used%20(G%20HUB%2C%20SteelSeries%20GG%2C%20etc.)%3A%0ADevice%20report%20(tray%20menu%20%E2%86%92%20Copy%20device%20report)%3A%0A)
 [![Report a bug](https://img.shields.io/badge/Report-a%20bug-d73a49?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Bug%3A%20)
 [![Share on Reddit](https://img.shields.io/badge/Reddit-Share-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fcngksy%2Fwireless-battery&title=Wireless%20Battery%20-%20see%20your%20wireless%20device%20batteries%20on%20the%20Windows%20taskbar)
 
 **Download:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (recommended) or `WirelessBattery-portable.zip`. No GitHub account needed.
+
+**VirusTotal (1.4.4):** [portable ZIP: 0/66](https://www.virustotal.com/gui/file/2aaf862d1b62fa9f39fadbc07eb8d66381b82438efdd30b4c3b9ddd71dcdefb4) · [installer: 4/71](https://www.virustotal.com/gui/file/ac9f04ff8ffe14683f367d0a3099b0ae1176941bfa9797a24cd7436c042fde62). The installer hits are generic machine-learning flags (e.g. "ObfuscatedPoly") that unsigned Inno Setup installers commonly get; no major antivirus flags either file. If you prefer, use the portable ZIP.
 
 The installer sets the app up for your user account only. It needs no administrator rights and adds a Start menu shortcut and an uninstaller. For portable use, extract the ZIP and run `WirelessBattery.exe`. The app uses the .NET Framework 4.x that ships with Windows.
 Before installing or updating, any running copy of Wireless Battery is closed automatically and safely; there is no need to choose Exit from the tray menu first.
