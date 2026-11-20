@@ -16,7 +16,7 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 
 **Download:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (recommended) or `WirelessBattery-portable.zip`. No GitHub account needed.
 
-**VirusTotal (1.4.5):** [installer: 3/71](https://www.virustotal.com/gui/file/4f586f4611add569e60ad887210f3caa0e69485604e6802589578d96b1425620) · [portable ZIP](https://www.virustotal.com/gui/file/f4a9e6c65412ce00817a93b522a90ce252166f67e28ea1131f8dc2bfd8c2886a). The installer hits are generic machine-learning guesses (e.g. "ObfuscatedPoly") that unsigned installers commonly get, and have been reported as false positives; no major antivirus flags it. The previous portable ZIP scanned [0/66](https://www.virustotal.com/gui/file/2aaf862d1b62fa9f39fadbc07eb8d66381b82438efdd30b4c3b9ddd71dcdefb4). If you prefer, use the portable ZIP.
+**VirusTotal (1.4.5):** [installer: 3/71](https://www.virustotal.com/gui/file/4f586f4611add569e60ad887210f3caa0e69485604e6802589578d96b1425620) · [portable ZIP](https://www.virustotal.com/gui/file/9bad84c3049d117841410af8f6359fd88747ae40508e97e71b9dfe20332b71fa). The installer hits are generic machine-learning guesses (e.g. "ObfuscatedPoly") that unsigned installers commonly get, and have been reported as false positives; no major antivirus flags it. The previous portable ZIP scanned [0/66](https://www.virustotal.com/gui/file/2aaf862d1b62fa9f39fadbc07eb8d66381b82438efdd30b4c3b9ddd71dcdefb4). If you prefer, use the portable ZIP.
 
 The installer sets the app up for your user account only. It needs no administrator rights and adds a Start menu shortcut and an uninstaller. For portable use, extract the ZIP and run `WirelessBattery.exe`. The app uses the .NET Framework 4.x that ships with Windows.
 Before installing or updating, any running copy of Wireless Battery is closed automatically and safely; there is no need to choose Exit from the tray menu first.
@@ -87,7 +87,7 @@ The EXE is built locally and is not digitally signed, so no antivirus can be gua
 
 ## Source code and building
 
-The complete corresponding source code is in this repository and in `WirelessBattery-source.zip`. `build.ps1` uses the C# compiler that ships with Windows. The logo and icon sources are in the `assets` folder.
+The complete corresponding source code is in this repository; every release also has a "Source code" archive. `build.ps1` uses the C# compiler that ships with Windows. The logo and icon sources are in the `assets` folder.
 
     .\build.ps1
     .\WirelessBattery.exe --test
