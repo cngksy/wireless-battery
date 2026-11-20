@@ -54,6 +54,13 @@ static class RegressionChecks {
   check(report.Contains("373B:1290 FF02:0002")&&!report.Contains("secret")&&!report.Contains("Private Phone"),"Device report lists IDs without paths or Bluetooth names");
   check(DeviceReport.Hex(new byte[]{0x01,0xA5,0,0,0})=="01 A5 (+3 x 00)"&&DeviceReport.Hex(new byte[]{0,0})=="00 (+1 x 00)","Captured reports are printed compactly");
   check(DeviceReport.IsListenCandidate(new HidInfo{Vid=0x3634,Pid=0x4155,Page=0xFF02,Usage=2,Input=65,Output=65})&&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x3634,Pid=0x4155,Page=0x000C,Usage=1,Input=3})&&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x373B,Pid=0x10C9,Page=0xFF02,Usage=2,Input=17,Output=17}),"Only unsupported vendor channels are listened to");
+  var second=new System.Drawing.Rectangle(-1920,78,1920,1080);var menuSize=new System.Drawing.Size(277,254);
+  var nearEdge=MenuToggle.MenuOrigin(new System.Drawing.Point(-60,1134),menuSize,second);
+  check(nearEdge.X==-277&&nearEdge.Y==1134-254,"Menu near the right edge of a secondary monitor stays on that monitor");
+  var leftEdge=MenuToggle.MenuOrigin(new System.Drawing.Point(-1910,1134),menuSize,second);
+  check(leftEdge.X==-1910&&leftEdge.X>=second.Left,"Menu never crosses the left edge either");
+  var top=MenuToggle.MenuOrigin(new System.Drawing.Point(100,90),menuSize,second);
+  check(top.Y==90,"Menu opens below the cursor when there is no room above");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }

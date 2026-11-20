@@ -51,9 +51,9 @@ class BatteryApp:ApplicationContext {
   devicesStart=new ToolStripSeparator();menu.Items.Add(devicesStart);menu.Items.Add(new ToolStripSeparator());
   menu.Items.Add(L.Refresh,null,(s,e)=>Refresh());
   menu.Items.Add(new ToolStripSeparator());menu.Items.Add(L.Exit,null,(s,e)=>ExitThread());
-  menu.Opening+=(s,e)=>RebuildDeviceMenu();
+  // Device entries are rebuilt right before showing, so the menu size used for placement is final.
   main=new NotifyIcon{Icon=MakeAppIcon(),Text="Wireless Battery • "+L.Scanning,Visible=true};
-  menuToggle=new MenuToggle(menu);
+  menuToggle=new MenuToggle(menu){BeforeShow=RebuildDeviceMenu};
   main.MouseDown+=(s,e)=>menuToggle.Press();
   main.MouseUp+=(s,e)=>menuToggle.Release(e.Button);
   widgets=new WidgetManager(menuToggle,settings.ShowWidget);
@@ -121,7 +121,20 @@ class MenuToggle {
  public static bool WasOpen(bool visible,double msSinceClosed){return visible||msSinceClosed<CloseGraceMs;}
  public static bool ShouldOpen(MouseButtons button,bool openAtPress,bool visible){return button==MouseButtons.Right&&!openAtPress&&!visible;}
  public void Press(){openAtPress=WasOpen(menu.Visible,(DateTime.UtcNow-closedAt).TotalMilliseconds);if(menu.Visible)menu.Close(ToolStripDropDownCloseReason.AppClicked);}
- public void Release(MouseButtons button){if(ShouldOpen(button,openAtPress,menu.Visible))menu.Show(Cursor.Position);}
+ public Action BeforeShow;
+ public void Release(MouseButtons button){if(ShouldOpen(button,openAtPress,menu.Visible))ShowAt(Cursor.Position);}
+ // Keeps the whole menu on the monitor that was clicked. Left to itself,
+ // WinForms can push it onto a neighbouring monitor near a screen edge.
+ public static Point MenuOrigin(Point cursor,Size menu,Rectangle screen){
+  int x=Math.Max(screen.Left,Math.Min(cursor.X,screen.Right-menu.Width));
+  int y=cursor.Y-menu.Height;if(y<screen.Top)y=Math.Max(screen.Top,Math.Min(cursor.Y,screen.Bottom-menu.Height));
+  return new Point(x,y);
+ }
+ void ShowAt(Point cursor){
+  if(BeforeShow!=null)BeforeShow();
+  menu.PerformLayout();var size=menu.GetPreferredSize(Size.Empty);
+  menu.Show(MenuOrigin(cursor,size,Screen.FromPoint(cursor).Bounds),ToolStripDropDownDirection.BelowRight);
+ }
 }
 
 static class DeviceReport {

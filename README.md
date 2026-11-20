@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.5
+# Wireless Battery 1.4.6
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 

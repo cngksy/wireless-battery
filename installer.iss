@@ -1,5 +1,5 @@
 #define MyAppName "Wireless Battery"
-#define MyAppVersion "1.4.5"
+#define MyAppVersion "1.4.6"
 #define MyAppExeName "WirelessBattery.exe"
 #ifndef SetupCompression
   #define SetupCompression "none"
