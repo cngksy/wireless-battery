@@ -39,13 +39,13 @@ public static class Taskbars {
 
 class WidgetManager:IDisposable {
  readonly Dictionary<IntPtr,Widget> widgets=new Dictionary<IntPtr,Widget>();
- readonly Timer timer=new Timer{Interval=2000};readonly ContextMenuStrip menu;readonly Action<bool> toggleMenu;
+ readonly Timer timer=new Timer{Interval=2000};readonly MenuToggle menuToggle;
  List<BatteryState> states=new List<BatteryState>();bool enabled;
- public WidgetManager(ContextMenuStrip context,Action<bool> toggle,bool show){menu=context;toggleMenu=toggle;enabled=show;timer.Tick+=(s,e)=>RefreshHosts();timer.Start();}
+ public WidgetManager(MenuToggle toggle,bool show){menuToggle=toggle;enabled=show;timer.Tick+=(s,e)=>RefreshHosts();timer.Start();}
  public void Update(List<BatteryState> values,bool show){states=values;enabled=show;RefreshHosts();foreach(var widget in widgets.Values){widget.EnabledByUser=show;widget.SetStates(values);if(!show)widget.Hide();}}
  void RefreshHosts(){
   var bars=Taskbars.List();foreach(var handle in new List<IntPtr>(widgets.Keys))if(!bars.Contains(handle)||widgets[handle].IsDisposed){widgets[handle].Dispose();widgets.Remove(handle);}
-  foreach(var handle in bars)if(!widgets.ContainsKey(handle)){var widget=new Widget(menu,toggleMenu,handle){EnabledByUser=enabled};widgets.Add(handle,widget);if(enabled)widget.Show();widget.SetStates(states);}
+  foreach(var handle in bars)if(!widgets.ContainsKey(handle)){var widget=new Widget(menuToggle,handle){EnabledByUser=enabled};widgets.Add(handle,widget);if(enabled)widget.Show();widget.SetStates(states);}
  }
  public void Dispose(){timer.Stop();timer.Dispose();foreach(var widget in widgets.Values)widget.Dispose();widgets.Clear();}
 }

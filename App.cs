@@ -31,11 +31,7 @@ class BatteryApp:ApplicationContext {
  NotifyIcon main;ContextMenuStrip menu;WidgetManager widgets;UserSettings settings=UserSettings.Load();List<ToolStripItem> deviceItems=new List<ToolStripItem>();ToolStripSeparator devicesStart;
  System.Windows.Forms.Timer timer,exitTimer;EventWaitHandle exitSignal;bool busy;bool disposed;List<BatteryState> states=new List<BatteryState>();HashSet<string> alerts=new HashSet<string>();
  [DllImport("user32.dll")] static extern bool DestroyIcon(IntPtr h);
- public static bool ShouldOpenMenu(bool wasVisibleOnRightDown,bool currentlyVisible){return !wasVisibleOnRightDown&&!currentlyVisible;}
- void ToggleMenu(bool wasVisibleOnRightDown){
-  if(!ShouldOpenMenu(wasVisibleOnRightDown,menu.Visible)){if(menu.Visible)menu.Close(ToolStripDropDownCloseReason.AppClicked);return;}
-  menu.Show(Cursor.Position);
- }
+ MenuToggle menuToggle;
  public BatteryApp(EventWaitHandle signal){
   exitSignal=signal;
   states=Program.SavedReadings();menu=new ContextMenuStrip();
@@ -55,10 +51,10 @@ class BatteryApp:ApplicationContext {
   menu.Items.Add(new ToolStripSeparator());menu.Items.Add(L.Exit,null,(s,e)=>ExitThread());
   menu.Opening+=(s,e)=>RebuildDeviceMenu();
   main=new NotifyIcon{Icon=MakeAppIcon(),Text="Wireless Battery • "+L.Scanning,Visible=true};
-  bool trayRightDownWhileOpen=false;
-  main.MouseDown+=(s,e)=>{if(e.Button==MouseButtons.Right)trayRightDownWhileOpen=menu.Visible;};
-  main.MouseUp+=(s,e)=>{if(e.Button==MouseButtons.Right)ToggleMenu(trayRightDownWhileOpen);};
-  widgets=new WidgetManager(menu,ToggleMenu,settings.ShowWidget);
+  menuToggle=new MenuToggle(menu);
+  main.MouseDown+=(s,e)=>menuToggle.Press();
+  main.MouseUp+=(s,e)=>menuToggle.Release(e.Button);
+  widgets=new WidgetManager(menuToggle,settings.ShowWidget);
   timer=new System.Windows.Forms.Timer{Interval=60000};timer.Tick+=(s,e)=>Refresh();timer.Start();Refresh();
   exitTimer=new System.Windows.Forms.Timer{Interval=250};exitTimer.Tick+=(s,e)=>{if(exitSignal.WaitOne(0))ExitThread();};exitTimer.Start();
   main.BalloonTipClicked+=(s,e)=>{if(balloonUrl!=null)OpenRelease(balloonUrl);};
@@ -96,4 +92,19 @@ class BatteryApp:ApplicationContext {
   }catch(Exception e){if(!disposed){main.Text="Wireless Battery • "+L.ReadError;try{File.WriteAllText(Program.DataPath("error.txt"),e.ToString());}catch{}}}finally{busy=false;}}
  static Icon MakeAppIcon(){using(var stream=System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("WirelessBattery.Icon"))using(var icon=new Icon(stream,16,16))return (Icon)icon.Clone();}
  protected override void ExitThreadCore(){disposed=true;timer.Stop();timer.Dispose();exitTimer.Stop();exitTimer.Dispose();updateTimer.Stop();updateTimer.Dispose();var appIcon=main.Icon;main.Visible=false;main.Dispose();appIcon.Dispose();widgets.Dispose();base.ExitThreadCore();}
+}
+
+// Shared by the tray icon and every taskbar indicator: while the menu is open,
+// any left or right click on them only closes it; a right click opens it only
+// when it was closed at the moment the button went down.
+class MenuToggle {
+ readonly ContextMenuStrip menu;DateTime closedAt=DateTime.MinValue;bool openAtPress;
+ // The menu may auto-close on the same mouse-down just before we see it.
+ public const double CloseGraceMs=300;
+ public MenuToggle(ContextMenuStrip context){menu=context;menu.Closed+=(s,e)=>closedAt=DateTime.UtcNow;}
+ public bool IsOpen {get{return menu.Visible;}}
+ public static bool WasOpen(bool visible,double msSinceClosed){return visible||msSinceClosed<CloseGraceMs;}
+ public static bool ShouldOpen(MouseButtons button,bool openAtPress,bool visible){return button==MouseButtons.Right&&!openAtPress&&!visible;}
+ public void Press(){openAtPress=WasOpen(menu.Visible,(DateTime.UtcNow-closedAt).TotalMilliseconds);if(menu.Visible)menu.Close(ToolStripDropDownCloseReason.AppClicked);}
+ public void Release(MouseButtons button){if(ShouldOpen(button,openAtPress,menu.Visible))menu.Show(Cursor.Position);}
 }

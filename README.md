@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.0
+# Wireless Battery 1.4.1
 
 Windows 10/11 x64 için taşınabilir kablosuz cihaz pil göstergesi.
 
@@ -17,7 +17,8 @@ Kurulum ve güncelleme başlamadan önce çalışan Wireless Battery örneği ot
 - Windows açılırken başlat seçeneği kullanıcı hesabındaki başlangıç kaydını yönetir; yeniden tıklanınca tik ve kayıt kaldırılır.
 - Windows görüntü dili Türkçeyse arayüz Türkçe, diğer sistemlerde İngilizce çalışır.
 - Sol tık veya çift tık pencere açmaz. Bildirim alanında yalnızca uygulamanın logo simgesi bulunur.
-- Sağ tık menüsü açıksa aynı simgeye veya cihaz göstergesine tekrar sağ tıklamak menüyü kapatır; yeniden açmaz.
+- Sağ tık menüsü açıksa simgeye veya cihaz göstergesine sol ya da sağ tıklamak menüyü kapatır; yeniden açmaz.
+- Cihaz bilgisi, fare göstergenin üstünde 1,2 saniye durunca açılır; menü açıkken gösterilmez.
 - Otomatik yenileme aralığı 60 saniyedir. Görev çubukları ve monitör değişiklikleri ayrıca izlenir.
 - Yeni cihaz takıldıktan sonra Şimdi yenile ile hemen taranabilir.
 

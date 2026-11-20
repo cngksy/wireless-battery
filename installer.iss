@@ -1,5 +1,5 @@
 #define MyAppName "Wireless Battery"
-#define MyAppVersion "1.4.0"
+#define MyAppVersion "1.4.1"
 #define MyAppExeName "WirelessBattery.exe"
 
 [Setup]

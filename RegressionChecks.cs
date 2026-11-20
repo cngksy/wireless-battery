@@ -39,11 +39,14 @@ static class RegressionChecks {
   check(new BatteryState{Percent=60,Approximate=true}.Level=="60%","Approximate values must display without a tilde marker");
   check(new BatteryState{Percent=60,Approximate=true,LevelText="Orta"}.Level=="Orta","Gamepad's honest coarse level remains allowed");
   check(Autostart.CommandFor(@"C:\Apps\WirelessBattery.exe")=="\"C:\\Apps\\WirelessBattery.exe\"","Autostart command must quote the executable path");
-  check(BatteryApp.ShouldOpenMenu(false,false)&&!BatteryApp.ShouldOpenMenu(true,false)&&!BatteryApp.ShouldOpenMenu(false,true),"Second right-click must close rather than reopen the context menu");
+  check(MenuToggle.ShouldOpen(System.Windows.Forms.MouseButtons.Right,false,false)&&!MenuToggle.ShouldOpen(System.Windows.Forms.MouseButtons.Right,true,false)&&!MenuToggle.ShouldOpen(System.Windows.Forms.MouseButtons.Right,false,true),"Second right-click must close rather than reopen the context menu");
+  check(!MenuToggle.ShouldOpen(System.Windows.Forms.MouseButtons.Left,false,false),"Left click must never open the menu");
+  check(MenuToggle.WasOpen(true,9999)&&MenuToggle.WasOpen(false,50)&&!MenuToggle.WasOpen(false,1000),"A menu auto-closed by the same click still counts as open"); 
   check(Updates.IsNewer("v1.4.1",new Version(1,4,0))&&Updates.IsNewer("1.5",new Version(1,4,9))&&!Updates.IsNewer("v1.4.0",new Version(1,4,0))&&!Updates.IsNewer("v1.3.9",new Version(1,4,0)),"Update version comparison");
   check(!Updates.IsNewer("latest",new Version(1,0,0))&&!Updates.IsNewer(null,new Version(1,0,0))&&!Updates.IsNewer("v2.0.0-beta",new Version(1,0,0)),"Malformed or prerelease tags must not trigger updates");
   check(Updates.IsSafeReleaseUrl("https://github.com/"+Updates.Repo+"/releases/tag/v1.4.0")&&!Updates.IsSafeReleaseUrl("https://evil.example/releases/")&&!Updates.IsSafeReleaseUrl("https://github.com/other/repo/releases/tag/v9"),"Only this repository's release pages may be opened");
   check(Updates.Current.Major>=1&&Updates.Current.Revision<=0,"Current version must come from the assembly");
+  check(Widget.TooltipDelayMs>=1000&&Widget.TooltipDelayMs<=1500,"Device details must wait 1-1.5 s so right-click is not blocked");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }

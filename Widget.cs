@@ -12,12 +12,14 @@ using System.Windows.Forms;
 // Only this application's window styles/parent are changed.
 class Widget:Form {
  public const float SlotDip=66f;
+ // Long enough that moving to an icon to right-click it does not pop the details.
+ public const int TooltipDelayMs=1200;
  const float TrayOverlapDip=9f;
  List<BatteryState> states=new List<BatteryState>();
  readonly System.Windows.Forms.Timer placement;
  readonly ToolTip tooltip=new ToolTip();
  readonly System.Windows.Forms.Timer hoverDelay;
- readonly ContextMenuStrip menu;readonly Action<bool> toggleMenu;bool rightDownWhileMenuOpen;
+ readonly MenuToggle menuToggle;
  string hoveredKey;
  IntPtr taskbar;readonly IntPtr host;
  float dpiScale=1;
@@ -43,14 +45,14 @@ class Widget:Form {
  [DllImport("user32.dll",EntryPoint="SetWindowLongPtrW")] static extern IntPtr SetWindowLongPtr(IntPtr h,int index,IntPtr value);
  [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr h,IntPtr after,int x,int y,int w,int height,uint flags);
  [DllImport("user32.dll")] static extern uint GetDpiForWindow(IntPtr h);
- public Widget(ContextMenuStrip context,Action<bool> toggle,IntPtr targetTaskbar) {
+ public Widget(MenuToggle toggle,IntPtr targetTaskbar) {
   host=targetTaskbar;
-  menu=context;toggleMenu=toggle;
+  menuToggle=toggle;
   Text="Wireless Battery taskbar";FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;
   BackColor=Color.Black;ForeColor=Color.White;
   DoubleBuffered=true;ClientSize=new Size(184,40);
   tooltip.ShowAlways=true;tooltip.UseAnimation=false;tooltip.UseFading=false;
-  hoverDelay=new System.Windows.Forms.Timer{Interval=350};hoverDelay.Tick+=(s,e)=>{hoverDelay.Stop();ShowDeviceTooltip();};
+  hoverDelay=new System.Windows.Forms.Timer{Interval=TooltipDelayMs};hoverDelay.Tick+=(s,e)=>{hoverDelay.Stop();ShowDeviceTooltip();};
   placement=new System.Windows.Forms.Timer{Interval=1000};placement.Tick+=(s,e)=>AnchorToTray();placement.Start();
  }
  protected override bool ShowWithoutActivation {get{return true;}}
@@ -95,11 +97,12 @@ class Widget:Form {
   string key=index>=0?states[index].Key:null;if(key==hoveredKey)return;
   ClearDeviceTooltip();hoveredKey=key;if(key!=null)hoverDelay.Start();
  }
- protected override void OnMouseDown(MouseEventArgs e){base.OnMouseDown(e);if(e.Button==MouseButtons.Right)rightDownWhileMenuOpen=menu.Visible;}
- protected override void OnMouseUp(MouseEventArgs e){base.OnMouseUp(e);if(e.Button==MouseButtons.Right)toggleMenu(rightDownWhileMenuOpen);}
+ protected override void OnMouseDown(MouseEventArgs e){base.OnMouseDown(e);ClearDeviceTooltip();menuToggle.Press();}
+ protected override void OnMouseUp(MouseEventArgs e){base.OnMouseUp(e);menuToggle.Release(e.Button);}
  protected override void OnMouseLeave(EventArgs e){base.OnMouseLeave(e);ClearDeviceTooltip();}
  void ClearDeviceTooltip(){hoverDelay.Stop();tooltip.Hide(this);hoveredKey=null;}
  void ShowDeviceTooltip() {
+  if(menuToggle.IsOpen)return;
   int index=states.FindIndex(x=>x.Key==hoveredKey);if(index<0)return;
   tooltip.Show(DeviceTooltip(states[index]),this,(int)Math.Round(DeviceLeftDip(states,index)*dpiScale),-(int)Math.Round(80*dpiScale),10000);
  }
