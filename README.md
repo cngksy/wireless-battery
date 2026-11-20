@@ -7,6 +7,20 @@ Windows 10/11 x64 için taşınabilir kablosuz cihaz pil göstergesi.
 Önerilen yöntem WirelessBattery-Setup.exe ile kullanıcı hesabına kurmaktır. Yönetici izni istemez, Başlat menüsü kısayolu ve kaldırıcı oluşturur. Portable kullanım için ZIP dosyasını çıkarıp WirelessBattery.exe dosyasını açmak da mümkündür. Windows'un .NET Framework 4.x bileşenlerini kullanır.
 Kurulum ve güncelleme başlamadan önce çalışan Wireless Battery örneği otomatik ve güvenli biçimde kapatılır; kullanıcının tray menüsünden ayrıca Çıkış seçmesi gerekmez.
 
+## Nasıl çalışır
+
+**Görev çubuğunda pil göstergesi.** Kulaklık, mouse ve klavye gibi kablosuz cihazların pili saatin yanında, sistem simgelerinin hemen solunda görünür. Şarj olan cihaz mavi renkte ve ⚡ işaretiyle gösterilir. %15 ve altındaki pil kırmızıya döner.
+
+![Görev çubuğunda kulaklık, mouse ve klavye pil seviyeleri](docs/taskbar.png)
+
+**Cihaz ayrıntısı.** Fareyi bir cihazın üstünde 1,2 saniye tutunca cihazın adı, pil yüzdesi, son ölçüm saati ve verinin kaynağı (G HUB, SteelSeries GG, Bluetooth vb.) açılır.
+
+![Cihazın üstüne gelince açılan bilgi kutusu](docs/hover.png)
+
+**Sağ tık menüsü.** Göstergeye veya bildirim alanındaki simgeye sağ tıklayınca menü açılır. Buradan cihazları tek tek gösterip gizleyebilir, göstergeyi kapatabilir, Windows ile başlatmayı ve güncelleme denetimini yönetebilirsiniz. Menü açıkken tekrar sol veya sağ tıklamak menüyü kapatır.
+
+![Sağ tık menüsü](docs/menu.png)
+
 ## Kullanım
 
 - Pil bildiren destekli aygıtları otomatik tarar ve her monitörün mevcut görev çubuğuna yerleştirir.
