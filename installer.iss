@@ -1,12 +1,27 @@
-﻿#define MyAppName "Wireless Battery"
-#define MyAppVersion "1.4.4"
+#define MyAppName "Wireless Battery"
+#define MyAppVersion "1.4.5"
 #define MyAppExeName "WirelessBattery.exe"
+#ifndef SetupCompression
+  #define SetupCompression "none"
+#endif
+#ifndef SetupOutput
+  #define SetupOutput "WirelessBattery-Setup"
+#endif
 
 [Setup]
 AppId={{D6195BA7-D34B-43F4-96B7-A0E34ED9AEBB}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher=Wireless Battery
+AppPublisherURL=https://github.com/cngksy/wireless-battery
+AppSupportURL=https://github.com/cngksy/wireless-battery/issues
+AppUpdatesURL=https://github.com/cngksy/wireless-battery/releases
+VersionInfoVersion={#MyAppVersion}.0
+VersionInfoProductVersion={#MyAppVersion}.0
+VersionInfoCompany=Wireless Battery
+VersionInfoDescription=Wireless Battery Setup
+VersionInfoProductName=Wireless Battery
+VersionInfoCopyright=GPL-3.0-or-later
 DefaultDirName={localappdata}\Programs\Wireless Battery
 DefaultGroupName=Wireless Battery
 DisableProgramGroupPage=yes
@@ -14,11 +29,13 @@ PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=.
-OutputBaseFilename=WirelessBattery-Setup
+OutputBaseFilename={#SetupOutput}
 SetupIconFile=assets\WirelessBattery.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
-Compression=lzma2
+Compression={#SetupCompression}
+#if SetupCompression != "none"
 SolidCompression=yes
+#endif
 WizardStyle=modern
 CloseApplications=no
 RestartApplications=no
@@ -34,7 +51,8 @@ Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Wireless Battery"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue
+; The app itself manages its startup entry; the installer only removes it on uninstall.
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "Wireless Battery"; Flags: uninsdeletevalue
 
 [Icons]
 Name: "{group}\Wireless Battery"; Filename: "{app}\{#MyAppExeName}"
@@ -56,10 +74,7 @@ begin
     Sleep(750);
   end;
 
-  { Required only when upgrading from versions older than 1.3.3. }
-  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM {#MyAppExeName}', '',
-    SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  Sleep(500);
+  { Versions since 1.3.3 exit cooperatively; nothing is force-killed. }
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
