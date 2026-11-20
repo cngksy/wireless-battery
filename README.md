@@ -2,6 +2,7 @@
 
 Windows 10/11 x64 için taşınabilir kablosuz cihaz pil göstergesi.
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Destek%20ol-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/cangoksoy)
 [![Son sürüm](https://img.shields.io/github/v/release/cngksy/wireless-battery?label=S%C3%BCr%C3%BCm&color=2ea44f)](https://github.com/cngksy/wireless-battery/releases/latest)
 [![İndirme](https://img.shields.io/github/downloads/cngksy/wireless-battery/total?label=%C4%B0ndirme&color=0a84ff)](https://github.com/cngksy/wireless-battery/releases)
 [![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white)](https://github.com/cngksy/wireless-battery/releases/latest)
