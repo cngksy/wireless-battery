@@ -45,6 +45,7 @@ class BatteryApp:ApplicationContext {
   startup.CheckedChanged+=(s,e)=>{if(changingStartup)return;try{Autostart.Set(startup.Checked);settings.StartWithWindows=startup.Checked;settings.Save();}catch{changingStartup=true;startup.Checked=Autostart.IsEnabled();changingStartup=false;if(main!=null)Balloon("Wireless Battery",L.StartupError,ToolTipIcon.Warning,null);}};
   menu.Items.Add(startup);
   updateItem=new ToolStripMenuItem(L.CheckUpdates);updateItem.Click+=(s,e)=>{if(available!=null)OpenRelease(available.Url);else CheckUpdates(true);};menu.Items.Add(updateItem);
+  menu.Items.Add(L.DeviceReport,null,(s,e)=>CopyDeviceReport());
   // Device entries are inserted between devicesStart and the separator after it.
   devicesStart=new ToolStripSeparator();menu.Items.Add(devicesStart);menu.Items.Add(new ToolStripSeparator());
   menu.Items.Add(L.Refresh,null,(s,e)=>Refresh());
@@ -63,6 +64,18 @@ class BatteryApp:ApplicationContext {
  }
  ToolStripMenuItem updateItem;UpdateInfo available;string balloonUrl;bool checkingUpdates;System.Windows.Forms.Timer updateTimer;
  void Balloon(string title,string text,ToolTipIcon icon,string url){balloonUrl=url;main.ShowBalloonTip(url!=null?10000:5000,title,text,icon);}
+ // Copies a list of connected HID devices (IDs, report sizes and product
+ // names only: no paths, serials or Bluetooth names) and opens the
+ // "report a device" page so a friend can paste it in.
+ async void CopyDeviceReport(){
+  string report;
+  try{var hid=await Task.Run(()=>Native.Scan());report=DeviceReport.Build(hid,states,Updates.Current.ToString(),Environment.OSVersion.VersionString);}
+  catch(Exception e){report="Wireless Battery "+Updates.Current+Environment.NewLine+"Scan failed: "+e.GetType().Name;}
+  if(disposed)return;
+  try{Clipboard.SetText(report);}catch{Balloon("Wireless Battery",L.DeviceReportError,ToolTipIcon.Warning,null);return;}
+  Balloon("Wireless Battery",L.DeviceReportCopied,ToolTipIcon.Info,null);
+  try{System.Diagnostics.Process.Start(DeviceReport.IssueUrl);}catch{}
+ }
  static void OpenRelease(string url){if(!Updates.IsSafeReleaseUrl(url))url=Updates.ReleasesPage;try{System.Diagnostics.Process.Start(url);}catch{}}
  async void CheckUpdates(bool manual){
   if(checkingUpdates||disposed)return;checkingUpdates=true;
@@ -84,7 +97,7 @@ class BatteryApp:ApplicationContext {
   if(states.Count==0){var item=new ToolStripMenuItem(L.NoDevices){Enabled=false};menu.Items.Insert(index++,item);deviceItems.Add(item);}
  }
  void ApplyVisibility(){widgets.Update(states.Where(settings.IsShown).ToList(),settings.ShowWidget);}
- async void Refresh(){if(busy||disposed)return;busy=true;try{var next=await Task.Run(()=>Batteries.Poll(Native.Scan()));if(disposed)return;if(!next.Any(x=>x.Key=="mouse")&&states.Any(x=>x.Key=="mouse"))next.Add(new BatteryState{Key="mouse",Name="VXE R1 / NordicMouse",Kind="Mouse",Status="Alıcı bulunamadı"});foreach(var item in next)Batteries.PreserveLastReading(item,states.Find(x=>x.Key==item.Key),DateTime.Now);states=next;File.WriteAllText(Program.DataPath("battery-report.json"),new JavaScriptSerializer().Serialize(states));
+ async void Refresh(){if(busy||disposed)return;busy=true;try{var next=await Task.Run(()=>Batteries.Poll(Native.Scan()));if(disposed)return;if(!next.Any(x=>x.Key=="mouse")&&states.Any(x=>x.Key=="mouse"))next.Add(new BatteryState{Key="mouse",Name=states.Find(x=>x.Key=="mouse").Name,Kind="Mouse",Status="Alıcı bulunamadı"});foreach(var item in next)Batteries.PreserveLastReading(item,states.Find(x=>x.Key==item.Key),DateTime.Now);states=next;File.WriteAllText(Program.DataPath("battery-report.json"),new JavaScriptSerializer().Serialize(states));
    foreach(var s in states){
     if(settings.IsShown(s)&&!s.Stale&&s.Percent>=0&&s.Percent<=15&&!s.Charging&&alerts.Add(s.Key))Balloon(s.Name,L.LowBattery(s.Level),ToolTipIcon.Warning,null);
     if(s.Charging||s.Percent>25)alerts.Remove(s.Key);
@@ -107,4 +120,17 @@ class MenuToggle {
  public static bool ShouldOpen(MouseButtons button,bool openAtPress,bool visible){return button==MouseButtons.Right&&!openAtPress&&!visible;}
  public void Press(){openAtPress=WasOpen(menu.Visible,(DateTime.UtcNow-closedAt).TotalMilliseconds);if(menu.Visible)menu.Close(ToolStripDropDownCloseReason.AppClicked);}
  public void Release(MouseButtons button){if(ShouldOpen(button,openAtPress,menu.Visible))menu.Show(Cursor.Position);}
+}
+
+static class DeviceReport {
+ public static string IssueUrl {get{return "https://github.com/"+Updates.Repo+"/issues/new?title=Cihaz%20deste%C4%9Fi%3A%20&body=Cihaz%20raporunu%20buraya%20yap%C4%B1%C5%9Ft%C4%B1r%C4%B1n%20(Ctrl%2BV).%0A%0AMarka%20%2F%20model%3A%0A%0A";}}
+ public static string Build(List<HidInfo> hid,List<BatteryState> states,string version,string windows) {
+  var lines=new List<string>{"Wireless Battery "+version,windows,"","Detected:"};
+  foreach(var s in states)lines.Add("  "+s.Kind+" | "+s.Level+" | "+Widget.DeviceSource(s)+(Widget.DeviceSource(s)=="Windows Bluetooth"?"":" | "+s.Name));
+  if(states.Count==0)lines.Add("  (none)");
+  lines.Add("");lines.Add("HID (VID:PID page:usage sizes product):");
+  // Product strings come from the device firmware; Path holds instance IDs and is left out.
+  foreach(var line in hid.Select(x=>"  "+x.ToString()).Distinct().OrderBy(x=>x))lines.Add(line);
+  return string.Join(Environment.NewLine,lines);
+ }
 }

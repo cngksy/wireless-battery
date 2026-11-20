@@ -38,23 +38,46 @@ public static class Batteries {
   int[] v={4102,4046,3993,3950,3915,3877,3838,3809,3789,3772,3758,3747,3736,3722,3707,3687,3661,3644,3548,3426,3293};
   if(mv>=v[0])return 100;if(mv<=v[v.Length-1])return 0;for(int i=1;i<v.Length;i++)if(mv>=v[i])return (int)Math.Round(100-(i-1)*5-5.0*(v[i-1]-mv)/(v[i-1]-v[i]));return -1;
  }
+ // ATK / VXE / Compx mice (receivers and charging cables under VID 3554 and
+ // 373B) share a 17-byte report-08 protocol. Any vendor collection large
+ // enough is a candidate; only a correctly checksummed reply is accepted.
+ // Same scope as BatteryHub's kysona.cpp (see README references).
+ public static bool IsCompxExcluded(ushort vid,ushort pid) {
+  // ATK headsets (serial protocol), ATK 8K Nano (Holtek) and AULA/MCHOSE keyboard receivers.
+  if(vid==0x373B)return pid==0x11CA||pid==0x11CB||pid==0x1203||pid==0x1204||pid==0x1178;
+  if(vid==0x3554)return pid==0xFA09||pid==0xFB40;
+  return true;
+ }
  public static bool IsVxeMouse(HidInfo x) {
-  return x!=null&&x.Page==0xFF02&&x.Usage==2&&((x.Vid==0x3554&&(x.Pid==0xF58A||x.Pid==0xF58C))||(x.Vid==0x373B&&(x.Pid==0x1272||x.Pid==0x1273)));
+  return x!=null&&(x.Vid==0x3554||x.Vid==0x373B)&&!IsCompxExcluded(x.Vid,x.Pid)&&x.Page>=0xFF00&&x.Input>=17&&x.Output>=17;
+ }
+ static bool IsCompxCable(HidInfo x){return (x.Vid==0x3554&&(x.Pid==0xF58C||x.Pid==0xF58F||x.Pid==0xF506||x.Pid==0xF55E))||(x.Vid==0x373B&&x.Pid==0x1273);}
+ public static bool IsVerifiedVxe(HidInfo x){return x!=null&&((x.Vid==0x3554&&(x.Pid==0xF58A||x.Pid==0xF58C))||(x.Vid==0x373B&&(x.Pid==0x1272||x.Pid==0x1273)));}
+ public static string MouseName(HidInfo x) {
+  if(x==null)return "Wireless mouse";
+  // Keep the established name for the verified VXE R1 ids so settings stay familiar.
+  if(IsVerifiedVxe(x))return "VXE R1 / NordicMouse";
+  string n=(x.Name??"").Trim();
+  foreach(var suffix in new[]{" Wireless Receiver"," Dongle"," Receiver"," 2.4G"})if(n.Length>suffix.Length&&n.EndsWith(suffix,StringComparison.OrdinalIgnoreCase))n=n.Substring(0,n.Length-suffix.Length).Trim();
+  if(n.Length==0||n.Equals("2.4G Wireless",StringComparison.OrdinalIgnoreCase))n=x.Vid==0x373B?"ATK wireless mouse":"Wireless mouse";
+  return n;
  }
  public static List<BatteryState> Poll(List<HidInfo> all) {
   var result=new List<BatteryState>();
   var mice=all.Where(IsVxeMouse)
-   .OrderByDescending(x=>(x.Vid==0x3554&&x.Pid==0xF58C)||(x.Vid==0x373B&&(x.Pid==0x1272||x.Pid==0x1273))).ToList();
+   .OrderByDescending(IsCompxCable).ThenByDescending(x=>x.Page==0xFF02&&x.Usage==2).ToList();
   if(mice.Count>0) {
-   var s=new BatteryState{Key="mouse",Name="VXE R1 / NordicMouse",Kind="Mouse",ReceiverPresent=mice.Count>0,Status=mice.Count==0?"Alıcı bulunamadı":"Alıcı bağlı • pil ölçümü bekleniyor"};
+   var s=new BatteryState{Key="mouse",Name=MouseName(mice[0]),Kind="Mouse",ReceiverPresent=mice.Count>0,Status=mice.Count==0?"Alıcı bulunamadı":"Alıcı bağlı • pil ölçümü bekleniyor"};
    // Receiver command 03 can report zero while the radio is idle. It is not
    // a reliable power-off signal, so always ask for the actual battery report.
    foreach(var info in mice)using(var d=new HidChannel(info)){if(!d.Valid){s.Status="HID erişimi yok";continue;}
     for(int attempt=0;attempt<2;attempt++){var r=MouseQuery(d,4);
-     if(r!=null && r[6]<=100){s.Percent=r[6];s.Charging=r[7]!=0;s.Millivolts=(r[8]<<8)|r[9];s.Sample=DateTime.Now;s.Status="Canlı • USB HID";break;}}
+     if(r!=null && r[6]<=100){s.Percent=r[6];s.Charging=r[7]!=0;s.Millivolts=(r[8]<<8)|r[9];s.Sample=DateTime.Now;s.Status="Canlı • USB HID";s.Name=MouseName(info);break;}}
     if(s.Percent>=0)break;
    }
-   result.Add(s);
+   // Unverified receivers appear only once they answer, so an unrelated
+   // ATK/Compx device never shows up as an empty mouse entry.
+   if(s.Percent>=0||mice.Any(IsVerifiedVxe))result.Add(s);
   }
   var headset=all.Where(x=>x.Vid==0x046D && x.Pid==0x0ABA && x.Page==0xFF43 && x.Usage==0x0202 && x.Output>=20).ToList();
   if(headset.Count>0){var s=new BatteryState{Key="headset",Name="Logitech PRO X Wireless",Kind="Kulaklık",Status="Pil okunamadı; uyuyor veya kapalı olabilir"};

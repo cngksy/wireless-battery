@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.1
+# Wireless Battery 1.4.2
 
 Windows 10/11 x64 için taşınabilir kablosuz cihaz pil göstergesi.
 
@@ -36,6 +36,7 @@ Kurulum ve güncelleme başlamadan önce çalışan Wireless Battery örneği ot
 - Bir cihazın üstüne gelince yalnızca o cihazın adı, pili ve son ölçümü görünür.
 - Sağ tık menüsündeki cihaz adını tıklayarak göster/gizle; tik görünürlük durumudur. Seçimler settings.json dosyasında kaydedilir.
 - Sağ tık menüsü sırası: Görev çubuğu göstergesi; Windows açılırken başlat ve Güncellemeleri denetle; cihaz listesi; Şimdi yenile; Çıkış.
+- Cihazınız görünmüyorsa menüden **Cihaz raporunu kopyala**yı seçin: bağlı USB cihazlarının kimlikleri panoya kopyalanır ve "Cihaz bildir" sayfası açılır, Ctrl+V ile yapıştırmanız yeterli. Raporda cihaz yolları, seri numaraları ve Bluetooth cihaz adları bulunmaz.
 - Uygulama açıldıktan 30 saniye sonra ve sonra her 6 saatte bir GitHub'daki son sürüme bakar. Yeni sürüm varsa bir kez bildirim gösterir ve menüdeki öğe "Yeni sürümü indir" olur; tıklayınca GitHub Releases sayfası açılır. İndirme ve kurulum kullanıcıya bırakılır.
 - Windows açılırken başlat seçeneği kullanıcı hesabındaki başlangıç kaydını yönetir; yeniden tıklanınca tik ve kayıt kaldırılır.
 - Windows görüntü dili Türkçeyse arayüz Türkçe, diğer sistemlerde İngilizce çalışır.
@@ -53,6 +54,7 @@ Her marka ve modelin pili okunamaz. Pil verisini hangi yoldan yayımladığına 
 - Windows XInput uyumlu kablosuz gamepad'ler: sürücü yalnızca dört kademe veriyorsa Boş/Az/Orta/Dolu gösterilir; kesin yüzde uydurulmaz.
 - Logitech G HUB'ın yerel API'si üzerinden pil yüzdesi verdiği uyumlu aygıtlar; G HUB arka plan servisi gerekir.
 - VXE R1 / NordicMouse ailesi: 3554:F58A alıcı; 3554:F58C ve doğrulanmış 373B:1273 kablolu/şarj bağlantıları üzerinden HID pil okuma.
+- Diğer ATK / VXE / Compx alıcıları (VID 3554 ve 373B, örn. ATK X1 serisinin bazı alıcıları): aynı protokolü konuşuyorsa otomatik okunur. Yalnızca doğrulanmış (checksum) yanıt kabul edilir; yanıt vermeyen tanımsız alıcı listede görünmez.
 - Logitech PRO X Wireless 046D:0ABA: önce G HUB veya HID++ kesin yüzdesi kullanılır. Bunlar yoksa voltajdan hesaplanan yüzde gösterilir; görev çubuğunda ayrıca `~` işareti eklenmez.
 - SteelSeries Apex Pro TKL Wireless: GG'nin yerel durum API'si; GG/Engine arka plan servisleri gerekir.
 

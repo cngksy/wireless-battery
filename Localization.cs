@@ -20,5 +20,8 @@ public static class L {
  public static string UpdateAvailable(string v){return Pick("Yeni sürüm hazır: "+v+". İndirme sayfasını açmak için tıklayın.","Version "+v+" is available. Click to open the download page.");}
  public static string UpToDate(string v){return Pick("Güncel sürümü kullanıyorsunuz ("+v+").","You are on the latest version ("+v+").");}
  public static string UpdateError {get{return Pick("Güncelleme denetlenemedi. İnternet bağlantısını kontrol edin.","Could not check for updates. Check your internet connection.");}}
+ public static string DeviceReport {get{return Pick("Cihaz raporunu kopyala","Copy device report");}}
+ public static string DeviceReportCopied {get{return Pick("Cihaz raporu panoya kopyalandı. Açılan sayfada Ctrl+V ile yapıştırın.","Device report copied. Paste it with Ctrl+V on the page that opens.");}}
+ public static string DeviceReportError {get{return Pick("Cihaz raporu panoya kopyalanamadı.","Could not copy the device report.");}}
  public static string StartupError {get{return Pick("Windows başlangıç ayarı değiştirilemedi.","Could not change the Windows startup setting.");}}
 }

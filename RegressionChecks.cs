@@ -28,7 +28,7 @@ static class RegressionChecks {
   check(tip=="Mouse only\n"+L.BatteryLabel(false)+"%95\n"+L.TimeLabel+"21:00\n"+L.By("USB HID"),"Tooltip must contain localized compact device details");
   check(Widget.DeviceTooltip(new BatteryState{Key="headset",Name="Headset",Percent=53,Charging=true,Sample=now,Status="G HUB tarafından bildirilen yüzde"})=="Headset\n"+L.BatteryLabel(true)+"%53\n"+L.TimeLabel+"23:00\n"+L.By("G HUB"),"Charging tooltip must replace the localized battery label");
   check(Batteries.VoltagePercent(4102)==100&&Batteries.VoltagePercent(3293)==0&&Batteries.VoltagePercent(3758)==50,"Headset voltage calibration");
-  check(Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=0xFF02,Usage=2})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=1,Usage=2}),"VXE R1 Pro Max wired charging interface");
+  check(Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=0xFF02,Usage=2,Input=17,Output=17})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=1,Usage=2}),"VXE R1 Pro Max wired charging interface");
   var settings=new UserSettings();var device=new BatteryState{Key="example",BatterySupported=true};
   check(settings.IsShown(device),"Supported devices should be visible by default");
   settings.Devices[device.Key]=false;check(!settings.IsShown(device),"Unchecked device must be hidden");
@@ -47,6 +47,11 @@ static class RegressionChecks {
   check(Updates.IsSafeReleaseUrl("https://github.com/"+Updates.Repo+"/releases/tag/v1.4.0")&&!Updates.IsSafeReleaseUrl("https://evil.example/releases/")&&!Updates.IsSafeReleaseUrl("https://github.com/other/repo/releases/tag/v9"),"Only this repository's release pages may be opened");
   check(Updates.Current.Major>=1&&Updates.Current.Revision<=0,"Current version must come from the assembly");
   check(Widget.TooltipDelayMs>=1000&&Widget.TooltipDelayMs<=1500,"Device details must wait 1-1.5 s so right-click is not blocked");
+  check(Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1290,Page=0xFF02,Usage=2,Input=17,Output=17})&&Batteries.IsVxeMouse(new HidInfo{Vid=0x3554,Pid=0xF505,Page=0xFF02,Usage=2,Input=17,Output=17}),"Other ATK/VXE receivers are tried");
+  check(!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x11CA,Page=0xFF02,Usage=2,Input=17,Output=17})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x3554,Pid=0xFA09,Page=0xFF02,Usage=2,Input=17,Output=17})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1290,Page=0xFF05,Usage=0,Input=8,Output=0}),"Headsets, keyboard receivers and small collections are never sent mouse frames");
+  check(Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x1273,Name="VXE R1 PRO MAX"})=="VXE R1 / NordicMouse"&&Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x1290,Name="ATK X1 SE 2.4G"})=="ATK X1 SE"&&Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x1290,Name=""})=="ATK wireless mouse","Mouse names come from the receiver");
+  var report=DeviceReport.Build(new List<HidInfo>{new HidInfo{Vid=0x373B,Pid=0x1290,Page=0xFF02,Usage=2,Input=17,Output=17,Name="ATK X1 SE",Path=@"\?\hid#vid_373b&pid_1290#7&secret"}},new List<BatteryState>{new BatteryState{Key="bt",Name="Private Phone",Kind="Kulaklık",Status="Windows Bluetooth",Percent=50}},"1.4.2","Windows");
+  check(report.Contains("373B:1290 FF02:0002")&&!report.Contains("secret")&&!report.Contains("Private Phone"),"Device report lists IDs without paths or Bluetooth names");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }
