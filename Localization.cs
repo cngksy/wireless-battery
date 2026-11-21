@@ -15,8 +15,8 @@ public static class L {
  public static string TimeLabel {get{return Pick("Saat: ","Time: ");}}
  public static string By(string provider){return Turkish?provider+" tarafından":"Via "+provider;}
  public static string LowBattery(string level){return Pick("Pil az: ","Low battery: ")+level;}
- public static string CheckUpdates {get{return Pick("Güncellemeleri denetle","Check for updates");}}
- public static string DownloadUpdate(string v){return Pick("Güncelle ve yeniden başlat ("+v+")","Update and restart ("+v+")");}
+ public static string CheckUpdates {get{return Pick("Otomatik güncelle","Automatic update");}}
+ public static string DownloadUpdate(string v){return Pick("Otomatik güncelle ("+v+")","Automatic update ("+v+")");}
  public static string UpdateAvailable(string v){return Pick("Yeni sürüm hazır: "+v+". İndirip kurmak için tıklayın.","Version "+v+" is available. Click to download and install.");}
  public static string UpToDate(string v){return Pick("Güncel sürümü kullanıyorsunuz ("+v+").","You are on the latest version ("+v+").");}
  public static string UpdateCompleted(string v){return Pick("Güncellendi! Yeni sürüm: "+v,"Updated successfully! Version: "+v);}
