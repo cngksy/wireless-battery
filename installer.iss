@@ -1,5 +1,5 @@
 #define MyAppName "Wireless Battery"
-#define MyAppVersion "1.4.6"
+#define MyAppVersion "1.4.7"
 #define MyAppExeName "WirelessBattery.exe"
 #ifndef SetupCompression
   #define SetupCompression "none"
@@ -61,7 +61,14 @@ Name: "{group}\Uninstall Wireless Battery"; Filename: "{uninstallexe}"
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,Wireless Battery}"; Flags: nowait postinstall skipifsilent
 
+Filename: "{app}\{#MyAppExeName}"; Parameters: "--updated-from={param:FROMVERSION|}"; Flags: nowait; Check: IsAutomaticUpdate
+
 [Code]
+function IsAutomaticUpdate(): Boolean;
+begin
+  Result := ExpandConstant('{param:AUTORESTART|0}') <> '0';
+end;
+
 procedure StopWirelessBattery();
 var
   ResultCode: Integer;

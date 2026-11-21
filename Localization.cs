@@ -16,12 +16,15 @@ public static class L {
  public static string By(string provider){return Turkish?provider+" tarafından":"Via "+provider;}
  public static string LowBattery(string level){return Pick("Pil az: ","Low battery: ")+level;}
  public static string CheckUpdates {get{return Pick("Güncellemeleri denetle","Check for updates");}}
- public static string DownloadUpdate(string v){return Pick("Yeni sürümü indir ("+v+")","Download new version ("+v+")");}
- public static string UpdateAvailable(string v){return Pick("Yeni sürüm hazır: "+v+". İndirme sayfasını açmak için tıklayın.","Version "+v+" is available. Click to open the download page.");}
+ public static string DownloadUpdate(string v){return Pick("Güncelle ve yeniden başlat ("+v+")","Update and restart ("+v+")");}
+ public static string UpdateAvailable(string v){return Pick("Yeni sürüm hazır: "+v+". İndirip kurmak için tıklayın.","Version "+v+" is available. Click to download and install.");}
  public static string UpToDate(string v){return Pick("Güncel sürümü kullanıyorsunuz ("+v+").","You are on the latest version ("+v+").");}
+ public static string UpdateCompleted(string v){return Pick("Güncellendi! Yeni sürüm: "+v,"Updated successfully! Version: "+v);}
+ public static string InstallingUpdate {get{return Pick("Güncelleme indiriliyor ve doğrulanıyor. Kurulum bitince uygulama yeniden açılacak.","Downloading and verifying the update. The app will restart after installation.");}}
+ public static string InstallUpdateError {get{return Pick("Güncelleme kurulamadı. Ayrıntılar update-error.txt dosyasında.","Could not install the update. See update-error.txt for details.");}}
  public static string UpdateError {get{return Pick("Güncelleme denetlenemedi. İnternet bağlantısını kontrol edin.","Could not check for updates. Check your internet connection.");}}
  public static string DeviceReport {get{return Pick("Cihaz raporunu kopyala","Copy device report");}}
- public static string DeviceReportCopied {get{return Pick("Cihaz raporu panoya kopyalandı. Açılan sayfada Ctrl+V ile yapıştırın.","Device report copied. Paste it with Ctrl+V on the page that opens.");}}
+ public static string DeviceReportCopied {get{return Pick("Cihaz raporu panoya kopyalandı. Ctrl+V ile yapıştırabilirsiniz.","Device report copied to clipboard. Paste it with Ctrl+V.");}}
  public static string DeviceReportListening(int s){return Pick("Cihaz raporu hazırlanıyor ("+s+" sn). Bu sırada cihazları kullanmaya devam edebilirsiniz.","Preparing the device report ("+s+" s). You can keep using your devices.");}
  public static string DeviceReportError {get{return Pick("Cihaz raporu panoya kopyalanamadı.","Could not copy the device report.");}}
  public static string StartupError {get{return Pick("Windows başlangıç ayarı değiştirilemedi.","Could not change the Windows startup setting.");}}

@@ -59,6 +59,8 @@ public static class Batteries {
   if(IsVerifiedVxe(x))return "VXE R1 / NordicMouse";
   string n=(x.Name??"").Trim();
   foreach(var suffix in new[]{" Wireless Receiver"," Dongle"," Receiver"," 2.4G"})if(n.Length>suffix.Length&&n.EndsWith(suffix,StringComparison.OrdinalIgnoreCase))n=n.Substring(0,n.Length-suffix.Length).Trim();
+  // Confirmed by an X1 SE owner; preserve an explicit product name if firmware supplies one.
+  if(x.Vid==0x373B&&x.Pid==0x10C9&&n.Equals("Nearlink Mouse",StringComparison.OrdinalIgnoreCase))return "ATK X1 SE";
   if(n.Length==0||n.Equals("2.4G Wireless",StringComparison.OrdinalIgnoreCase))n=x.Vid==0x373B?"ATK wireless mouse":"Wireless mouse";
   return n;
  }

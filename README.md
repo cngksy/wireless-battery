@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.6
+# Wireless Battery 1.4.7
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -16,7 +16,7 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 
 **Download:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (recommended) or `WirelessBattery-portable.zip`. No GitHub account needed.
 
-**VirusTotal (1.4.5):** [installer: 3/71](https://www.virustotal.com/gui/file/4f586f4611add569e60ad887210f3caa0e69485604e6802589578d96b1425620) · [portable ZIP: 0/66](https://www.virustotal.com/gui/file/9bad84c3049d117841410af8f6359fd88747ae40508e97e71b9dfe20332b71fa). The installer hits are generic machine-learning guesses (e.g. "ObfuscatedPoly") that unsigned installers commonly get, and have been reported as false positives; no major antivirus flags it. If you prefer, use the portable ZIP.
+**VirusTotal (1.4.5):** [installer: 3/71](https://www.virustotal.com/gui/file/4f586f4611add569e60ad887210f3caa0e69485604e6802589578d96b1425620) · [portable ZIP: 0/66](https://www.virustotal.com/gui/file/9bad84c3049d117841410af8f6359fd88747ae40508e97e71b9dfe20332b71fa). The installer hits are generic machine-learning guesses (e.g. "ObfuscatedPoly") that unsigned installers commonly get, and need review by the antivirus vendors; no major antivirus flags it. If you prefer, use the portable ZIP.
 
 The installer sets the app up for your user account only. It needs no administrator rights and adds a Start menu shortcut and an uninstaller. For portable use, extract the ZIP and run `WirelessBattery.exe`. The app uses the .NET Framework 4.x that ships with Windows.
 Before installing or updating, any running copy of Wireless Battery is closed automatically and safely; there is no need to choose Exit from the tray menu first.
@@ -41,8 +41,8 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - Hovering over a device shows only that device's name, battery level and last reading.
 - Click a device in the right-click menu to show or hide it; the check mark shows its visibility. Choices are saved in `settings.json`.
 - Menu order: Taskbar indicator; Start with Windows and Check for updates; device list; Refresh now; Exit.
-- If your device does not show up, choose **Copy device report** in the menu. The IDs of connected USB devices are copied to the clipboard and the "Report a device" page opens; just paste with Ctrl+V. The report contains no device paths, serial numbers or Bluetooth device names. It also listens for 10 seconds to the vendor channels of devices that are not supported yet and includes what they send; nothing is sent to any device. For a headset, one report while charging and one while not charging helps the most.
-- The app checks GitHub for the latest version 30 seconds after starting and every 6 hours after that. When a new version is out, it shows one notification and the menu item becomes "Download new version"; clicking it opens the GitHub Releases page. Downloading and installing are left to you.
+- If your device does not show up, choose **Copy device report** in the menu. The IDs of connected USB devices are copied to the clipboard; paste the report wherever you want with Ctrl+V. No browser page is opened. The report contains no device paths, serial numbers or Bluetooth device names. It also listens for 10 seconds to the vendor channels of devices that are not supported yet and includes what they send; nothing is sent to any device. For a headset, one report while charging and one while not charging helps the most.
+- The app checks GitHub for the latest version 30 seconds after starting and every 6 hours after that. When a new version is out, it shows one notification. Clicking **Check for updates**, **Update and restart**, or the update notification downloads the official installer, checks its SHA-256 against the release checksums, and installs it in the background. The app closes during installation, restarts, and confirms the new version with an "Updated successfully" notification. Versions older than 1.4.7 need one final manual update to enable this flow.
 - "Start with Windows" manages the startup entry for your user account; clicking it again removes the check mark and the entry.
 - The interface is in Turkish when the Windows display language is Turkish, and in English otherwise.
 - A left click or double click does not open a window. Only the app's logo icon sits in the notification area.
@@ -80,8 +80,8 @@ Each report takes about 10 seconds. It contains only device IDs and the data you
 ## Local data and privacy
 
 Battery readings, settings and error/layout logs are written to `%LOCALAPPDATA%\Wireless Battery`. Settings next to an older portable copy are moved there automatically on first run. The shared ZIP and the installer contain no personal settings or device reports.
-Depending on your menu choice, the app can add or remove a Windows startup entry for the current user only. It uploads no data, never downloads or installs updates by itself, and never changes device settings or firmware.
-It goes online only to check for updates: it reads this project's latest version number from GitHub's public API (api.github.com). No device, battery or personal information is sent. To turn off automatic checks, set `"CheckUpdates"` to `false` in `settings.json`.
+Depending on your menu choice, the app can add or remove a Windows startup entry for the current user only. It uploads no data, downloads and installs an update only when you click the update action, and never changes device settings or firmware.
+It uses GitHub's public API (api.github.com) to check this project's latest version. When you request an update, it also downloads the installer and checksums from this repository's release assets. No device, battery or personal information is sent. To turn off automatic checks, set `"CheckUpdates"` to `false` in `settings.json`.
 Only local devices, the G HUB WebSocket at 127.0.0.1:9010 and the 127.0.0.1 GG HTTPS services listed in `coreProps.json` are read. Remote servers, proxies or redirects are not accepted for the GG address; GG's local self-signed certificate is allowed for that request only.
 The EXE is built locally and is not digitally signed, so no antivirus can be guaranteed to stay silent. If Windows SmartScreen warns you, choose "More info → Run anyway".
 

@@ -61,6 +61,14 @@ static class RegressionChecks {
   check(leftEdge.X==-1910&&leftEdge.X>=second.Left,"Menu never crosses the left edge either");
   var top=MenuToggle.MenuOrigin(new System.Drawing.Point(100,90),menuSize,second);
   check(top.Y==90,"Menu opens below the cursor when there is no room above");
+  string testHash=new string('a',64);
+  check(Updates.InstallerHash(testHash+"  WirelessBattery-Setup.exe\r\n")==testHash,"Installer hash supports release checksum format");
+  bool rejected=false;try{Updates.InstallerHash(testHash+"  Other.exe");}catch(InvalidDataException){rejected=true;}check(rejected,"Wrong checksum filename is rejected");
+  rejected=false;try{Updates.InstallerHash(testHash+"  WirelessBattery-Setup.exe\n"+testHash+"  WirelessBattery-Setup.exe");}catch(InvalidDataException){rejected=true;}check(rejected,"Ambiguous checksum entries are rejected");
+  check(Updates.IsAssetUrl("https://github.com/"+Updates.Repo+"/releases/download/v1.4.7/WirelessBattery-Setup.exe")&&!Updates.IsAssetUrl("https://github.com.evil.test/"+Updates.Repo+"/releases/download/v1/a.exe")&&!Updates.IsAssetUrl("http://github.com/"+Updates.Repo+"/releases/download/v1/a.exe"),"Installer downloads require the official repository over HTTPS");
+  string hashTest=Path.Combine(Program.Root,"hash-test.tmp");try{File.WriteAllBytes(hashTest,new byte[0]);check(Updates.VerifyFile(hashTest,"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")&&!Updates.VerifyFile(hashTest,testHash),"Corrupted installer bytes fail verification");}finally{File.Delete(hashTest);}
+  check(Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x10C9,Name="Nearlink Mouse Dongle"})=="ATK X1 SE"&&Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x10C9,Name="Other ATK Mouse Dongle"})=="Other ATK Mouse","Confirmed X1 SE receiver alias preserves explicit names");
+  check(Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x9999,Name="Nearlink Mouse Dongle"})=="Nearlink Mouse"&&Batteries.MouseName(new HidInfo{Vid=0x3554,Pid=0x10C9,Name="Nearlink Mouse Dongle"})=="Nearlink Mouse","Other VID or PID Nearlink receivers must not get the X1 SE name");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }

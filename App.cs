@@ -24,7 +24,7 @@ static class Program {
   PrepareData();
   using(var exitSignal=new EventWaitHandle(false,EventResetMode.AutoReset,"Local\\WirelessBatteryExit")){
    if(args.Contains("--exit")){exitSignal.Set();return;}
-   bool first;using(var mutex=new Mutex(true,"Local\\WirelessBatteryMonitor",out first)){if(!first)return;Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Application.Run(new BatteryApp(exitSignal));}
+   bool first;using(var mutex=new Mutex(true,"Local\\WirelessBatteryMonitor",out first)){if(!first)return;Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);Application.Run(new BatteryApp(exitSignal,args.FirstOrDefault(x=>x.StartsWith("--updated-from="))));}
   }
  }
 }
@@ -33,7 +33,7 @@ class BatteryApp:ApplicationContext {
  System.Windows.Forms.Timer timer,exitTimer;EventWaitHandle exitSignal;bool busy;bool disposed;List<BatteryState> states=new List<BatteryState>();HashSet<string> alerts=new HashSet<string>();
  [DllImport("user32.dll")] static extern bool DestroyIcon(IntPtr h);
  MenuToggle menuToggle;
- public BatteryApp(EventWaitHandle signal){
+ public BatteryApp(EventWaitHandle signal,string updatedFrom=null){
   exitSignal=signal;
   states=Program.SavedReadings();menu=new ContextMenuStrip();
   menu.Items.Add("Wireless Battery").Enabled=false;menu.Items.Add(new ToolStripSeparator());
@@ -45,7 +45,7 @@ class BatteryApp:ApplicationContext {
   bool changingStartup=false;
   startup.CheckedChanged+=(s,e)=>{if(changingStartup)return;try{Autostart.Set(startup.Checked);settings.StartWithWindows=startup.Checked;settings.Save();}catch{changingStartup=true;startup.Checked=Autostart.IsEnabled();changingStartup=false;if(main!=null)Balloon("Wireless Battery",L.StartupError,ToolTipIcon.Warning,null);}};
   menu.Items.Add(startup);
-  updateItem=new ToolStripMenuItem(L.CheckUpdates);updateItem.Click+=(s,e)=>{if(available!=null)OpenRelease(available.Url);else CheckUpdates(true);};menu.Items.Add(updateItem);
+  updateItem=new ToolStripMenuItem(L.CheckUpdates);updateItem.Click+=(s,e)=>{if(available!=null)InstallUpdate(available);else CheckUpdates(true);};menu.Items.Add(updateItem);
   menu.Items.Add(L.DeviceReport,null,(s,e)=>CopyDeviceReport());
   // Device entries are inserted between devicesStart and the separator after it.
   devicesStart=new ToolStripSeparator();menu.Items.Add(devicesStart);menu.Items.Add(new ToolStripSeparator());
@@ -59,15 +59,18 @@ class BatteryApp:ApplicationContext {
   widgets=new WidgetManager(menuToggle,settings.ShowWidget);
   timer=new System.Windows.Forms.Timer{Interval=60000};timer.Tick+=(s,e)=>Refresh();timer.Start();Refresh();
   exitTimer=new System.Windows.Forms.Timer{Interval=250};exitTimer.Tick+=(s,e)=>{if(exitSignal.WaitOne(0))ExitThread();};exitTimer.Start();
-  main.BalloonTipClicked+=(s,e)=>{if(balloonUrl!=null)OpenRelease(balloonUrl);};
+  main.BalloonTipClicked+=(s,e)=>{if(balloonUrl!=null&&available!=null)InstallUpdate(available);};
   // First automatic check shortly after start, then every six hours.
+  Version previous;
+  if(updatedFrom!=null&&Version.TryParse(updatedFrom.Substring("--updated-from=".Length),out previous)&&Updates.Current>previous){
+   updatedTimer=new System.Windows.Forms.Timer{Interval=2000};updatedTimer.Tick+=(s,e)=>{updatedTimer.Stop();Balloon("Wireless Battery",L.UpdateCompleted(Updates.Current.ToString()),ToolTipIcon.Info,null);};updatedTimer.Start();
+  }
   updateTimer=new System.Windows.Forms.Timer{Interval=30000};updateTimer.Tick+=(s,e)=>{updateTimer.Interval=6*60*60*1000;if(settings.CheckUpdates)CheckUpdates(false);};updateTimer.Start();
  }
- ToolStripMenuItem updateItem;UpdateInfo available;string balloonUrl;bool checkingUpdates;System.Windows.Forms.Timer updateTimer;
+ ToolStripMenuItem updateItem;UpdateInfo available;string balloonUrl;bool checkingUpdates;System.Windows.Forms.Timer updateTimer,updatedTimer;
  void Balloon(string title,string text,ToolTipIcon icon,string url){balloonUrl=url;main.ShowBalloonTip(url!=null?10000:5000,title,text,icon);}
  // Copies a list of connected HID devices (IDs, report sizes and product
- // names only: no paths, serials or Bluetooth names) and opens the
- // "report a device" page so a friend can paste it in.
+ // names only: no paths, serials or Bluetooth names) to the clipboard.
  async void CopyDeviceReport(){
   string report;
   Balloon("Wireless Battery",L.DeviceReportListening(DeviceReport.ListenSeconds),ToolTipIcon.Info,null);
@@ -76,16 +79,28 @@ class BatteryApp:ApplicationContext {
   if(disposed)return;
   try{Clipboard.SetText(report);}catch{Balloon("Wireless Battery",L.DeviceReportError,ToolTipIcon.Warning,null);return;}
   Balloon("Wireless Battery",L.DeviceReportCopied,ToolTipIcon.Info,null);
-  try{System.Diagnostics.Process.Start(DeviceReport.IssueUrl);}catch{}
  }
  static void OpenRelease(string url){if(!Updates.IsSafeReleaseUrl(url))url=Updates.ReleasesPage;try{System.Diagnostics.Process.Start(url);}catch{}}
+ bool installingUpdate;
+ async void InstallUpdate(UpdateInfo info){
+  if(installingUpdate||disposed)return;installingUpdate=true;updateItem.Enabled=false;
+  try{
+   Balloon("Wireless Battery",L.InstallingUpdate,ToolTipIcon.Info,null);
+   string installer=await Task.Run(()=>Updates.DownloadVerified(info));if(disposed)return;
+   // Upgrade this installation, including a writable portable directory.
+   var start=new System.Diagnostics.ProcessStartInfo(installer,"/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /AUTORESTART=1 /FROMVERSION="+Updates.Current+" /DIR=\""+Program.Root.TrimEnd('\\')+"\""){UseShellExecute=true};
+   System.Diagnostics.Process.Start(start);
+  }catch(Exception e){if(!disposed)Balloon("Wireless Battery",L.InstallUpdateError,ToolTipIcon.Warning,null);try{File.WriteAllText(Program.DataPath("update-error.txt"),e.ToString());}catch{}}
+  finally{installingUpdate=false;if(!disposed)updateItem.Enabled=true;}
+ }
  async void CheckUpdates(bool manual){
   if(checkingUpdates||disposed)return;checkingUpdates=true;
   try{
    var found=await Task.Run(()=>Updates.Check());if(disposed)return;
    if(found==null){available=null;updateItem.Text=L.CheckUpdates;if(manual)Balloon("Wireless Battery",L.UpToDate(Updates.Current.ToString()),ToolTipIcon.Info,null);return;}
    available=found;updateItem.Text=L.DownloadUpdate(found.Version.ToString());
-   if(manual||settings.NotifiedUpdate!=found.Tag){settings.NotifiedUpdate=found.Tag;settings.Save();Balloon("Wireless Battery",L.UpdateAvailable(found.Version.ToString()),ToolTipIcon.Info,found.Url);}
+   if(manual){InstallUpdate(found);return;}
+   if(settings.NotifiedUpdate!=found.Tag){settings.NotifiedUpdate=found.Tag;settings.Save();Balloon("Wireless Battery",L.UpdateAvailable(found.Version.ToString()),ToolTipIcon.Info,found.Url);}
   }catch(Exception e){if(manual&&!disposed)Balloon("Wireless Battery",L.UpdateError,ToolTipIcon.Warning,null);try{File.WriteAllText(Program.DataPath("update-error.txt"),e.ToString());}catch{}}
   finally{checkingUpdates=false;}
  }
@@ -106,7 +121,7 @@ class BatteryApp:ApplicationContext {
    }main.Text="Wireless Battery • "+L.DeviceCount(states.Count)+" • "+DateTime.Now.ToString("HH:mm");ApplyVisibility();
   }catch(Exception e){if(!disposed){main.Text="Wireless Battery • "+L.ReadError;try{File.WriteAllText(Program.DataPath("error.txt"),e.ToString());}catch{}}}finally{busy=false;}}
  static Icon MakeAppIcon(){using(var stream=System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("WirelessBattery.Icon"))using(var icon=new Icon(stream,16,16))return (Icon)icon.Clone();}
- protected override void ExitThreadCore(){disposed=true;timer.Stop();timer.Dispose();exitTimer.Stop();exitTimer.Dispose();updateTimer.Stop();updateTimer.Dispose();var appIcon=main.Icon;main.Visible=false;main.Dispose();appIcon.Dispose();widgets.Dispose();base.ExitThreadCore();}
+ protected override void ExitThreadCore(){disposed=true;timer.Stop();timer.Dispose();exitTimer.Stop();exitTimer.Dispose();updateTimer.Stop();updateTimer.Dispose();if(updatedTimer!=null)updatedTimer.Dispose();var appIcon=main.Icon;main.Visible=false;main.Dispose();appIcon.Dispose();widgets.Dispose();base.ExitThreadCore();}
 }
 
 // Shared by the tray icon and every taskbar indicator: while the menu is open,
@@ -138,7 +153,6 @@ class MenuToggle {
 }
 
 static class DeviceReport {
- public static string IssueUrl {get{return "https://github.com/"+Updates.Repo+"/issues/new?title=Device%20support%3A%20&body=Brand%20%2F%20model%3A%0AWas%20it%20charging%20or%20at%20a%20known%20battery%20level%3F%0A%0APaste%20the%20device%20report%20below%20(Ctrl%2BV)%3A%0A%0A";}}
  public const int ListenSeconds=10;
  static readonly ushort[] SupportedVendors={0x046D,0x1038,0x3554,0x373B};
  // Vendor-defined input channels of devices we cannot read yet. Many headset
