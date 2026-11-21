@@ -53,7 +53,7 @@ class BatteryApp:ApplicationContext {
   menu.Items.Add(new ToolStripSeparator());menu.Items.Add(L.Exit,null,(s,e)=>ExitThread());
   // Device entries are rebuilt right before showing, so the menu size used for placement is final.
   main=new NotifyIcon{Icon=MakeAppIcon(),Text="Wireless Battery • "+L.Scanning,Visible=true};
-  menuToggle=new MenuToggle(menu){BeforeShow=RebuildDeviceMenu};
+  menuToggle=new MenuToggle(menu){BeforeShow=()=>{RebuildDeviceMenu();if(settings.CheckUpdates&&(DateTime.UtcNow-lastUpdateCheck).TotalMinutes>=5)CheckUpdates(false,false);}};
   main.MouseDown+=(s,e)=>menuToggle.Press();
   main.MouseUp+=(s,e)=>menuToggle.Release(e.Button);
   widgets=new WidgetManager(menuToggle,settings.ShowWidget);
@@ -93,14 +93,15 @@ class BatteryApp:ApplicationContext {
   }catch(Exception e){if(!disposed)Balloon("Wireless Battery",L.InstallUpdateError,ToolTipIcon.Warning,null);try{File.WriteAllText(Program.DataPath("update-error.txt"),e.ToString());}catch{}}
   finally{installingUpdate=false;if(!disposed)updateItem.Enabled=true;}
  }
- async void CheckUpdates(bool manual){
-  if(checkingUpdates||disposed)return;checkingUpdates=true;
+ DateTime lastUpdateCheck=DateTime.MinValue;
+ async void CheckUpdates(bool manual,bool notify=true){
+  if(checkingUpdates||installingUpdate||disposed)return;checkingUpdates=true;
   try{
-   var found=await Task.Run(()=>Updates.Check());if(disposed)return;
+   var found=await Task.Run(()=>Updates.Check());if(disposed)return;lastUpdateCheck=DateTime.UtcNow;
    if(found==null){available=null;updateItem.Text=manual?L.UpToDate(Updates.Current.ToString()):L.CheckUpdates;return;}
    available=found;updateItem.Text=L.DownloadUpdate(found.Version.ToString());
    if(manual){InstallUpdate(found);return;}
-   if(settings.NotifiedUpdate!=found.Tag){settings.NotifiedUpdate=found.Tag;settings.Save();Balloon("Wireless Battery",L.UpdateAvailable(found.Version.ToString()),ToolTipIcon.Info,found.Url);}
+   if(notify&&settings.NotifiedUpdate!=found.Tag){settings.NotifiedUpdate=found.Tag;settings.Save();Balloon("Wireless Battery",L.UpdateAvailable(found.Version.ToString()),ToolTipIcon.Info,found.Url);}
   }catch(Exception e){if(manual&&!disposed)Balloon("Wireless Battery",L.UpdateError,ToolTipIcon.Warning,null);try{File.WriteAllText(Program.DataPath("update-error.txt"),e.ToString());}catch{}}
   finally{checkingUpdates=false;}
  }
