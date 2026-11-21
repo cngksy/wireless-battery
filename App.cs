@@ -97,7 +97,7 @@ class BatteryApp:ApplicationContext {
   if(checkingUpdates||disposed)return;checkingUpdates=true;
   try{
    var found=await Task.Run(()=>Updates.Check());if(disposed)return;
-   if(found==null){available=null;updateItem.Text=L.CheckUpdates;if(manual)Balloon("Wireless Battery",L.UpToDate(Updates.Current.ToString()),ToolTipIcon.Info,null);return;}
+   if(found==null){available=null;updateItem.Text=manual?L.UpToDate(Updates.Current.ToString()):L.CheckUpdates;return;}
    available=found;updateItem.Text=L.DownloadUpdate(found.Version.ToString());
    if(manual){InstallUpdate(found);return;}
    if(settings.NotifiedUpdate!=found.Tag){settings.NotifiedUpdate=found.Tag;settings.Save();Balloon("Wireless Battery",L.UpdateAvailable(found.Version.ToString()),ToolTipIcon.Info,found.Url);}
@@ -118,7 +118,7 @@ class BatteryApp:ApplicationContext {
    foreach(var s in states){
     if(settings.IsShown(s)&&!s.Stale&&s.Percent>=0&&s.Percent<=15&&!s.Charging&&alerts.Add(s.Key))Balloon(s.Name,L.LowBattery(s.Level),ToolTipIcon.Warning,null);
     if(s.Charging||s.Percent>25)alerts.Remove(s.Key);
-   }main.Text="Wireless Battery • "+L.DeviceCount(states.Count)+" • "+DateTime.Now.ToString("HH:mm");ApplyVisibility();
+   }string trayText="Wireless Battery • "+L.DeviceCount(states.Count);if(main.Text!=trayText)main.Text=trayText;ApplyVisibility();
   }catch(Exception e){if(!disposed){main.Text="Wireless Battery • "+L.ReadError;try{File.WriteAllText(Program.DataPath("error.txt"),e.ToString());}catch{}}}finally{busy=false;}}
  static Icon MakeAppIcon(){using(var stream=System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("WirelessBattery.Icon"))using(var icon=new Icon(stream,16,16))return (Icon)icon.Clone();}
  protected override void ExitThreadCore(){disposed=true;timer.Stop();timer.Dispose();exitTimer.Stop();exitTimer.Dispose();updateTimer.Stop();updateTimer.Dispose();if(updatedTimer!=null)updatedTimer.Dispose();var appIcon=main.Icon;main.Visible=false;main.Dispose();appIcon.Dispose();widgets.Dispose();base.ExitThreadCore();}
