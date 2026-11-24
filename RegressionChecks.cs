@@ -28,6 +28,19 @@ static class RegressionChecks {
   check(tip=="Mouse only\n"+L.BatteryLabel(false)+"%95\n"+L.TimeLabel+"21:00\n"+L.By("USB HID"),"Tooltip must contain localized compact device details");
   check(Widget.DeviceTooltip(new BatteryState{Key="headset",Name="Headset",Percent=53,Charging=true,Sample=now,Status="G HUB tarafından bildirilen yüzde"})=="Headset\n"+L.BatteryLabel(true)+"%53\n"+L.TimeLabel+"23:00\n"+L.By("G HUB"),"Charging tooltip must replace the localized battery label");
   check(Batteries.VoltagePercent(4102)==100&&Batteries.VoltagePercent(3293)==0&&Batteries.VoltagePercent(3758)==50,"Headset voltage calibration");
+  var g735 = new HidInfo { Vid=0x046D, Pid=0x0AD8, Page=0xFF03, Usage=1, Input=271, Output=271 };
+  check(LogitechG735.Matches(g735),"G735 recognizes its bidirectional vendor collection");
+  g735.Pid=0x0AB5;
+  check(!LogitechG735.Matches(g735),"G735 does not send requests to other Logitech models");
+  var g735Reply = new byte[]{0xF2,0,0,0x0C,0x1E,0x82,0x40,0,0,0xF2,0,6,0,0,0,0,2,0x0B,0x41,0x3C,0};
+  int g735Percent;
+  byte g735Charge;
+  check(LogitechG735.TryDecodeBattery(LogitechG735.ReplyData(g735Reply,2),out g735Percent,out g735Charge)
+        && g735Percent==65 && g735Charge==0,"G735 decodes a captured 65% battery reply");
+  g735Reply[17]=0x0D;
+  check(LogitechG735.ReplyData(g735Reply,2)==null,"G735 ignores replies addressed to G HUB");
+  check(!LogitechG735.TryDecodeBattery(new byte[]{0xFF,0xFF,0},out g735Percent,out g735Charge)
+        && g735Percent==-1,"G735 rejects unavailable battery values");
   check(Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=0xFF02,Usage=2,Input=17,Output=17})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=1,Usage=2}),"VXE R1 Pro Max wired charging interface");
   var settings=new UserSettings();var device=new BatteryState{Key="example",BatterySupported=true};
   check(settings.IsShown(device),"Supported devices should be visible by default");

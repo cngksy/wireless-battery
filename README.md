@@ -63,6 +63,7 @@ Not every brand and model can be read; it depends on how the device publishes it
 - VXE R1 / NordicMouse family: battery over HID through the 3554:F58A receiver, and the 3554:F58C and verified 373B:1273 cable/charging connections.
 - Other ATK / VXE / Compx receivers (VID 3554 and 373B, e.g. the ATK X1 SE on the Nearlink 373B:10C9 receiver): read automatically when they speak the same protocol. Only a reply with a valid checksum is accepted; an unknown receiver that does not answer is not listed.
 - Logitech PRO X Wireless 046D:0ABA: the exact percentage from G HUB or HID++ is used first. Without those, a percentage calculated from the voltage is shown.
+- Logitech G735 LIGHTSPEED (046D:0AD8): reads the exact percentage and charging status directly from the USB receiver when G HUB has no reading. The HID protocol is based on [erzhenin-alex's G735 implementation and USB capture](https://github.com/erzhenin-alex/Wireless-Device-Battery-Monitor/commit/6ff09641e99b68b647f034f2ed91cb6aac75c292).
 - SteelSeries Apex Pro TKL Wireless: through GG's local status API. The GG/Engine background services must be running.
 - Razer BlackShark V3 Pro PC (1532:0577): exact percentage and charging state directly from its USB receiver; Synapse is not required.
 - HyperX Cloud Alpha Wireless (03F0:098D): exact percentage and charging state directly from its USB receiver; NGENUITY is not required.
