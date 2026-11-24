@@ -78,6 +78,10 @@ class Widget:Form {
   for(int i=0;i<values.Count;i++){left+=SlotWidthDip(values[i]);if(dip<left)return i;}return -1;
  }
  public static string DeviceTooltip(BatteryState state) {
+  var text=DeviceTooltipText(state);
+  return state.Key=="mouse"&&state.Stale&&state.ReceiverPresent?text+"\n"+L.MouseReceiverWaiting:text;
+ }
+ static string DeviceTooltipText(BatteryState state) {
   string level=state.Percent>=0?"%"+state.Percent:state.Level;
   string time=state.Sample==default(DateTime)?"--:--":state.Sample.ToString("HH:mm");
   return state.Name+"\n"+L.BatteryLabel(state.Charging)+level+"\n"+L.TimeLabel+time+"\n"+L.By(DeviceSource(state));

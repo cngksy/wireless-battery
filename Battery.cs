@@ -66,12 +66,16 @@ public static class Batteries {
   if(n.Length==0||n.Equals("2.4G Wireless",StringComparison.OrdinalIgnoreCase))n=x.Vid==0x373B?"ATK wireless mouse":"Wireless mouse";
   return n;
  }
- public static List<BatteryState> Poll(List<HidInfo> all) {
+ internal static HidInfo FindKnownMouseReceiver(IEnumerable<HidInfo> candidates,string knownMouseName) {
+  return string.IsNullOrEmpty(knownMouseName)?null:candidates.FirstOrDefault(x=>string.Equals(MouseName(x),knownMouseName,StringComparison.OrdinalIgnoreCase));
+ }
+ public static List<BatteryState> Poll(List<HidInfo> all,string knownMouseName=null) {
   var result=new List<BatteryState>();
   var mice=all.Where(IsVxeMouse)
    .OrderByDescending(IsCompxCable).ThenByDescending(x=>x.Page==0xFF02&&x.Usage==2).ToList();
   if(mice.Count>0) {
-   var s=new BatteryState{Key="mouse",Name=MouseName(mice[0]),Kind="Mouse",ReceiverPresent=mice.Count>0,Status=mice.Count==0?"Alıcı bulunamadı":"Alıcı bağlı • pil ölçümü bekleniyor"};
+   var knownReceiver=FindKnownMouseReceiver(mice,knownMouseName);
+   var s=new BatteryState{Key="mouse",Name=MouseName(knownReceiver??mice[0]),Kind="Mouse",ReceiverPresent=true,Status="Alıcı bağlı • pil ölçümü bekleniyor"};
    // Receiver command 03 can report zero while the radio is idle. It is not
    // a reliable power-off signal, so always ask for the actual battery report.
    foreach(var info in mice)using(var d=new HidChannel(info)){if(!d.Valid){s.Status="HID erişimi yok";continue;}
@@ -79,9 +83,9 @@ public static class Batteries {
      if(r!=null && r[6]<=100){s.Percent=r[6];s.Charging=r[7]!=0;s.Millivolts=(r[8]<<8)|r[9];s.Sample=DateTime.Now;s.Status="Canlı • USB HID";s.Name=MouseName(info);break;}}
     if(s.Percent>=0)break;
    }
-   // Unverified receivers appear only once they answer, so an unrelated
-   // ATK/Compx device never shows up as an empty mouse entry.
-   if(s.Percent>=0||mice.Any(IsVerifiedVxe))result.Add(s);
+   // A matching receiver can stay listed after its first valid reading.
+   // Unrelated ATK/Compx devices still need a valid reply before appearing.
+   if(s.Percent>=0||knownReceiver!=null||mice.Any(IsVerifiedVxe))result.Add(s);
   }
   var headset=all.Where(x=>x.Vid==0x046D && x.Pid==0x0ABA && x.Page==0xFF43 && x.Usage==0x0202 && x.Output>=20).ToList();
   if(headset.Count>0){var s=new BatteryState{Key="headset",Name="Logitech PRO X Wireless",Kind="Kulaklık",Status="Pil okunamadı; uyuyor veya kapalı olabilir"};

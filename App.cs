@@ -116,7 +116,9 @@ class BatteryApp:ApplicationContext {
  }
  void ApplyVisibility(){widgets.Update(states.Where(settings.IsShown).ToList(),settings.ShowWidget);}
  async void Refresh(){if(busy||disposed)return;busy=true;try{
-   var next=await Task.Run(()=>Batteries.Poll(Native.Scan()));
+   var knownMouse=states.Find(x=>x.Key=="mouse"&&x.Percent>=0);
+   string mouseName=knownMouse==null?null:knownMouse.Name;
+   var next=await Task.Run(()=>Batteries.Poll(Native.Scan(),mouseName));
    if(disposed)return;
    if(!next.Any(x=>x.Key=="mouse")&&states.Any(x=>x.Key=="mouse"))next.Add(new BatteryState{Key="mouse",Name=states.Find(x=>x.Key=="mouse").Name,Kind="Mouse",Status="Alıcı bulunamadı"});
    foreach(var item in next)Batteries.PreserveLastReading(item,states.Find(x=>x.Key==item.Key),DateTime.Now);

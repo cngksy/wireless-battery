@@ -25,7 +25,7 @@ static class RegressionChecks {
   var chargingHitStates=new List<BatteryState>{new BatteryState{Percent=95},new BatteryState{Percent=100,Charging=true},new BatteryState{Percent=95}};
   check(Widget.StripWidthDip(chargingHitStates)==214&&Widget.HitDevice(147,1,chargingHitStates)==1&&Widget.HitDevice(148,1,chargingHitStates)==2,"Charging indicator must expand its cell instead of colliding with neighbors");
   string tip=Widget.DeviceTooltip(waiting);
-  check(tip=="Mouse only\n"+L.BatteryLabel(false)+"%95\n"+L.TimeLabel+"21:00\n"+L.By("USB HID"),"Tooltip must contain localized compact device details");
+  check(tip=="Mouse only\n"+L.BatteryLabel(false)+"%95\n"+L.TimeLabel+"21:00\n"+L.By("USB HID")+"\n"+L.MouseReceiverWaiting,"The cached mouse tooltip reports receiver presence");
   check(Widget.DeviceTooltip(new BatteryState{Key="headset",Name="Headset",Percent=53,Charging=true,Sample=now,Status="G HUB tarafından bildirilen yüzde"})=="Headset\n"+L.BatteryLabel(true)+"%53\n"+L.TimeLabel+"23:00\n"+L.By("G HUB"),"Charging tooltip must replace the localized battery label");
   check(Batteries.VoltagePercent(4102)==100&&Batteries.VoltagePercent(3293)==0&&Batteries.VoltagePercent(3758)==50,"Headset voltage calibration");
   check(Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=0xFF02,Usage=2,Input=17,Output=17})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=1,Usage=2}),"VXE R1 Pro Max wired charging interface");
@@ -69,6 +69,13 @@ static class RegressionChecks {
   string hashTest=Path.Combine(Program.Root,"hash-test.tmp");try{File.WriteAllBytes(hashTest,new byte[0]);check(Updates.VerifyFile(hashTest,"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")&&!Updates.VerifyFile(hashTest,testHash),"Corrupted installer bytes fail verification");}finally{File.Delete(hashTest);}
   check(Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x10C9,Name="Nearlink Mouse Dongle"})=="ATK X1 SE"&&Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x10C9,Name="Other ATK Mouse Dongle"})=="Other ATK Mouse","Confirmed X1 SE receiver alias preserves explicit names");
   check(Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x9999,Name="Nearlink Mouse Dongle"})=="Nearlink Mouse"&&Batteries.MouseName(new HidInfo{Vid=0x3554,Pid=0x10C9,Name="Nearlink Mouse Dongle"})=="Nearlink Mouse","Other VID or PID Nearlink receivers must not get the X1 SE name");
+  var teevo=new HidInfo{Vid=0x3554,Pid=0xF520,Name="Teevo Terra Pro",Page=0xFF02,Usage=2,Input=17,Output=17};
+  var other=new HidInfo{Vid=0x3554,Pid=0xF505,Name="Other Mouse",Page=0xFF02,Usage=2,Input=17,Output=17};
+  check(Batteries.FindKnownMouseReceiver(new[]{other,teevo},"Teevo Terra Pro")==teevo
+   &&Batteries.FindKnownMouseReceiver(new[]{other},"Teevo Terra Pro")==null
+   &&Batteries.FindKnownMouseReceiver(new[]{teevo},null)==null,"A silent receiver is retained only for the mouse that previously provided a reading");
+  var wrongMouse=Batteries.PreserveLastReading(new BatteryState{Key="mouse",Name="Other Mouse",ReceiverPresent=true},last,now);
+  check(wrongMouse.Percent<0,"A different mouse must not inherit a saved battery level");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }
