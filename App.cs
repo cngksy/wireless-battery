@@ -15,7 +15,7 @@ static class Program {
  public static string DataRoot=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Wireless Battery");
  public static string DataPath(string name){Directory.CreateDirectory(DataRoot);return Path.Combine(DataRoot,name);}
  static void PrepareData(){Directory.CreateDirectory(DataRoot);foreach(var name in new[]{"settings.json","battery-report.json"}){string oldPath=Path.Combine(Root,name),newPath=DataPath(name);try{if(!File.Exists(newPath)&&File.Exists(oldPath))File.Copy(oldPath,newPath);}catch{}}}
- public static List<BatteryState> SavedReadings(){try{return new JavaScriptSerializer().Deserialize<List<BatteryState>>(File.ReadAllText(DataPath("battery-report.json"))).Where(x=>x.Percent>=0&&x.Percent<=100&&x.Sample!=default(DateTime)).ToList();}catch{return new List<BatteryState>();}}
+ public static List<BatteryState> SavedReadings(){try{return new JavaScriptSerializer().Deserialize<List<BatteryState>>(File.ReadAllText(DataPath("battery-report.json")))??new List<BatteryState>();}catch{return new List<BatteryState>();}}
  [STAThread] static void Main(string[] args) {
   if(args.Contains("--scan")) {try{var all=Native.Scan();File.WriteAllText(Path.Combine(Root,"devices.txt"),string.Join(Environment.NewLine,all.Select(x=>x.ToString())));var states=Batteries.Poll(all);File.WriteAllText(Path.Combine(Root,"battery-report.json"),new JavaScriptSerializer().Serialize(states));}catch(Exception e){File.WriteAllText(Path.Combine(Root,"scan-error.txt"),e.ToString());Environment.ExitCode=1;}return;}
   if(args.Contains("--render")){var values=new JavaScriptSerializer().Deserialize<List<BatteryState>>(File.ReadAllText(Path.Combine(Root,"battery-report.json"))).Where(x=>x.Key!="keyboard"||x.Percent>=0).OrderBy(x=>x.Kind=="Kulaklık"?0:1).ToList();using(var bmp=new Bitmap((int)Math.Ceiling(Widget.StripWidthDip(values)),44)){using(var g=Graphics.FromImage(bmp)){g.Clear(Color.FromArgb(24,24,24));Widget.DrawStrip(g,bmp.Size,values);}bmp.Save(Path.Combine(Root,"taskbar-preview.png"));}return;}
@@ -35,11 +35,14 @@ class BatteryApp:ApplicationContext {
  MenuToggle menuToggle;
  public BatteryApp(EventWaitHandle signal,string updatedFrom=null){
   exitSignal=signal;
-  states=Program.SavedReadings();menu=new ContextMenuStrip();
+  states=Batteries.MergeReadings(new BatteryState[0],Program.SavedReadings(),DateTime.Now,false);menu=new ContextMenuStrip();
   menu.Items.Add("Wireless Battery").Enabled=false;menu.Items.Add(new ToolStripSeparator());
   var toggle=new ToolStripMenuItem(L.TaskbarIndicator){Checked=settings.ShowWidget,CheckOnClick=true};
   toggle.CheckedChanged+=(s,e)=>{settings.ShowWidget=toggle.Checked;settings.Save();ApplyVisibility();};
-  menu.Items.Add(toggle);menu.Items.Add(new ToolStripSeparator());
+  menu.Items.Add(toggle);
+  var remember=new ToolStripMenuItem(L.RememberLastCharge){Checked=settings.RememberLastCharge,CheckOnClick=true};
+  remember.CheckedChanged+=(s,e)=>{settings.RememberLastCharge=remember.Checked;settings.Save();ApplyVisibility();};
+  menu.Items.Add(remember);menu.Items.Add(new ToolStripSeparator());
   try{Autostart.Set(settings.StartWithWindows);}catch{settings.StartWithWindows=false;}
   var startup=new ToolStripMenuItem(L.StartWithWindows){Checked=Autostart.IsEnabled(),CheckOnClick=true};
   bool changingStartup=false;
@@ -57,6 +60,7 @@ class BatteryApp:ApplicationContext {
   main.MouseDown+=(s,e)=>menuToggle.Press();
   main.MouseUp+=(s,e)=>menuToggle.Release(e.Button);
   widgets=new WidgetManager(menuToggle,settings.ShowWidget);
+  ApplyVisibility();
   timer=new System.Windows.Forms.Timer{Interval=60000};timer.Tick+=(s,e)=>Refresh();timer.Start();Refresh();
   exitTimer=new System.Windows.Forms.Timer{Interval=250};exitTimer.Tick+=(s,e)=>{if(exitSignal.WaitOne(0))ExitThread();};exitTimer.Start();
   main.BalloonTipClicked+=(s,e)=>{if(balloonUrl!=null&&available!=null)InstallUpdate(available);};
@@ -74,7 +78,7 @@ class BatteryApp:ApplicationContext {
  async void CopyDeviceReport(){
   string report;
   Balloon("Wireless Battery",L.DeviceReportListening(DeviceReport.ListenSeconds),ToolTipIcon.Info,null);
-  try{var snapshot=states.ToList();report=await Task.Run(()=>{var hid=Native.Scan();return DeviceReport.Build(hid,snapshot,Updates.Current.ToString(),Environment.OSVersion.VersionString)+Environment.NewLine+Environment.NewLine+DeviceReport.Listen(hid,DeviceReport.ListenSeconds*1000);});}
+  try{var snapshot=states.Where(settings.IncludesReading).ToList();report=await Task.Run(()=>{var hid=Native.Scan();return DeviceReport.Build(hid,snapshot,Updates.Current.ToString(),Environment.OSVersion.VersionString)+Environment.NewLine+Environment.NewLine+DeviceReport.Listen(hid,DeviceReport.ListenSeconds*1000);});}
   catch(Exception e){report="Wireless Battery "+Updates.Current+Environment.NewLine+"Scan failed: "+e.GetType().Name;}
   if(disposed)return;
   try{Clipboard.SetText(report);}catch{Balloon("Wireless Battery",L.DeviceReportError,ToolTipIcon.Warning,null);return;}
@@ -107,27 +111,31 @@ class BatteryApp:ApplicationContext {
  }
  void RebuildDeviceMenu(){
   foreach(var item in deviceItems){menu.Items.Remove(item);item.Dispose();}deviceItems.Clear();int index=menu.Items.IndexOf(devicesStart)+1;
-  foreach(var state in states.OrderBy(x=>x.Name)){
+  foreach(var state in states.Where(settings.IncludesReading).OrderBy(x=>x.Name)){
    string key=state.Key;var entry=new ToolStripMenuItem(state.Name+"  "+state.Level){Checked=settings.IsShown(state),ToolTipText=Widget.DeviceTooltip(state)};
    entry.Click+=(s,e)=>{settings.SetShown(key,!entry.Checked);entry.Checked=settings.IsShown(state);ApplyVisibility();};
    menu.Items.Insert(index++,entry);deviceItems.Add(entry);
   }
-  if(states.Count==0){var item=new ToolStripMenuItem(L.NoDevices){Enabled=false};menu.Items.Insert(index++,item);deviceItems.Add(item);}
+  if(deviceItems.Count==0){var item=new ToolStripMenuItem(L.NoDevices){Enabled=false};menu.Items.Insert(index++,item);deviceItems.Add(item);}
  }
- void ApplyVisibility(){widgets.Update(states.Where(settings.IsShown).ToList(),settings.ShowWidget);}
+ void ApplyVisibility(){
+  var readings=states.Where(settings.IncludesReading).ToList();
+  widgets.Update(readings.Where(settings.IsShown).ToList(),settings.ShowWidget);
+  string trayText="Wireless Battery • "+L.DeviceCount(readings.Count);if(main.Text!=trayText)main.Text=trayText;
+ }
  async void Refresh(){if(busy||disposed)return;busy=true;try{
    var knownMouse=states.Find(x=>x.Key=="mouse"&&x.Percent>=0);
    string mouseName=knownMouse==null?null:knownMouse.Name;
    var next=await Task.Run(()=>Batteries.Poll(Native.Scan(),mouseName));
    if(disposed)return;
-   if(!next.Any(x=>x.Key=="mouse")&&states.Any(x=>x.Key=="mouse"))next.Add(new BatteryState{Key="mouse",Name=states.Find(x=>x.Key=="mouse").Name,Kind="Mouse",Status="Alıcı bulunamadı"});
-   foreach(var item in next)Batteries.PreserveLastReading(item,states.Find(x=>x.Key==item.Key),DateTime.Now);
-   states=next;
-   File.WriteAllText(Program.DataPath("battery-report.json"),new JavaScriptSerializer().Serialize(states));
+   states=Batteries.MergeReadings(next,states,DateTime.Now,true);
    foreach(var s in states){
-    if(settings.IsShown(s)&&!s.Stale&&s.Percent>=0&&s.Percent<=15&&!s.Charging&&alerts.Add(s.Key))Balloon(s.Name,L.LowBattery(s.Level),ToolTipIcon.Warning,null);
+    if(s.Stale||s.Dimmed)continue;
+    if(settings.IsShown(s)&&s.Percent>=0&&s.Percent<=15&&!s.Charging&&alerts.Add(s.Key))Balloon(s.Name,L.LowBattery(s.Level),ToolTipIcon.Warning,null);
     if(s.Charging||s.Percent>25)alerts.Remove(s.Key);
-   }string trayText="Wireless Battery • "+L.DeviceCount(states.Count);if(main.Text!=trayText)main.Text=trayText;ApplyVisibility();
+   }
+   ApplyVisibility();
+   File.WriteAllText(Program.DataPath("battery-report.json"),new JavaScriptSerializer().Serialize(states));
   }catch(Exception e){if(!disposed){main.Text="Wireless Battery • "+L.ReadError;try{File.WriteAllText(Program.DataPath("error.txt"),e.ToString());}catch{}}}finally{busy=false;}}
  static Icon MakeAppIcon(){using(var stream=System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("WirelessBattery.Icon"))using(var icon=new Icon(stream,16,16))return (Icon)icon.Clone();}
  protected override void ExitThreadCore(){disposed=true;timer.Stop();timer.Dispose();exitTimer.Stop();exitTimer.Dispose();updateTimer.Stop();updateTimer.Dispose();if(updatedTimer!=null)updatedTimer.Dispose();var appIcon=main.Icon;main.Visible=false;main.Dispose();appIcon.Dispose();widgets.Dispose();base.ExitThreadCore();}

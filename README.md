@@ -40,7 +40,7 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - Supported devices that report a battery level are detected automatically and placed on the taskbar of every monitor.
 - Hovering over a device shows only that device's name, battery level and last reading.
 - Click a device in the right-click menu to show or hide it; the check mark shows its visibility. Choices are saved in `settings.json`.
-- Menu order: Taskbar indicator; Start with Windows and Check for updates; device list; Refresh now; Exit.
+- Menu order: Taskbar indicator and Remember last charge; Start with Windows and Check for updates; device list; Refresh now; Exit.
 - If your device does not show up, choose **Copy device report** in the menu. The IDs of connected USB devices are copied to the clipboard; paste the report wherever you want with Ctrl+V. No browser page is opened. The report contains no device paths, serial numbers or Bluetooth device names. It also listens for 10 seconds to the vendor channels of devices that are not supported yet and includes what they send; nothing is sent to any device. For a headset, one report while charging and one while not charging helps the most.
 - The app checks GitHub for the latest version 30 seconds after starting and every 6 hours after that. When a new version is out, it shows one notification. Clicking **Check for updates**, **New version: … — Install**, or the update notification downloads the official installer, checks its SHA-256 against the release checksums, and installs it in the background. The app closes during installation, restarts, and confirms the new version with an "Updated successfully" notification. Versions older than 1.4.7 need one final manual update to enable this flow.
 - Opening the menu silently refreshes update availability when the last successful check was over five minutes ago.
@@ -70,7 +70,8 @@ Not every brand and model can be read; it depends on how the device publishes it
 
 Proprietary protocols of other vendors' USB receivers, the PlayStation-specific battery protocol and wireless microphones in general are not supported in this version. If Windows or G HUB publishes their battery level, the generic readers may still pick it up. Wired devices and devices that do not publish battery information are never given a percentage.
 
-An idle VXE receiver does not mean the mouse is off. While the receiver stays connected, a temporarily missing reading keeps the last real percentage in normal color; hovering clearly shows that it is the last reading and when it was taken. If the receiver is unplugged, the old value is kept dimmed for up to 30 minutes. Low battery alerts are raised only for current readings. Hidden devices never raise alerts.
+**Remember last charge** is off by default to keep disconnected devices out of the taskbar. Enable it to show their last recorded charge in gray, including after an app restart. Hover to see when the charge was last read and whether the connection is confirmed. A known mouse whose receiver is still present keeps its last reading visible during a temporary read failure. Low battery alerts use current readings.
+
 
 ## Bug Report
 

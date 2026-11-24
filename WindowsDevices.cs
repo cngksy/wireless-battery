@@ -41,12 +41,12 @@ public static class WindowsDevices {
    bytes=Property(set,ref info,Container,out type);string key=bytes!=null&&bytes.Length==16?new Guid(bytes).ToString():instance;
    bytes=Property(set,ref info,Connected,out type);bool connected=bytes==null||type!=17||bytes.Length<1||bytes[0]!=0;
    bytes=Property(set,ref info,BluetoothClass,out type);uint cod=bytes!=null&&type==7&&bytes.Length>=4?BitConverter.ToUInt32(bytes,0):0;
-   var state=new BatteryState{Key="windows:"+key,Name=name,Kind=KindFromClass(cod,name),Percent=percent,Stale=!connected,Sample=DateTime.Now,Status=connected?"Windows Bluetooth pil bilgisi":"Windows son pil bilgisi • bağlı değil"};
+   var state=new BatteryState{Key="windows:"+key,Name=name,Kind=KindFromClass(cod,name),Percent=percent,Stale=!connected,Connection=connected?DeviceConnection.Connected:DeviceConnection.Disconnected,Sample=connected?DateTime.Now:default(DateTime),Status="Windows Bluetooth pil bilgisi"};
    BatteryState existing;if(!merged.TryGetValue(state.Key,out existing)||(!existing.Stale&&connected)||existing.Stale&&!state.Stale)merged[state.Key]=state;
   }}finally{SetupDiDestroyDeviceInfoList(set);}
   result.AddRange(merged.Values);
   try{for(uint index=0;index<4;index++){XBattery battery;if(XInputGetBatteryInformation(index,0,out battery)!=0||battery.Type==0||battery.Type==1)continue;
-   var state=new BatteryState{Key="xinput:"+index,Name="Xbox / XInput Gamepad "+(index+1),Kind="Gamepad",Status="Windows XInput • pil seviyesi",Sample=DateTime.Now};
+   var state=new BatteryState{Key="xinput:"+index,Name="Xbox / XInput Gamepad "+(index+1),Kind="Gamepad",Status="Windows XInput • pil seviyesi",Connection=DeviceConnection.Connected,Sample=DateTime.Now};
    if((battery.Type==2||battery.Type==3)&&battery.Level<=3){state.Percent=new[]{0,15,60,100}[battery.Level];state.LevelText=new[]{"Boş","Az","Orta","Dolu"}[battery.Level];state.Approximate=true;}
    else{state.Status="Gamepad algılandı • pil seviyesi bildirilmedi";}result.Add(state);
   }}catch(DllNotFoundException){}catch(EntryPointNotFoundException){}
