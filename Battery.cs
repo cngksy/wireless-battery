@@ -15,7 +15,9 @@ public class BatteryState {
 }
 public static class Batteries {
  public static BatteryState PreserveLastReading(BatteryState current,BatteryState previous,DateTime now) {
-  if(current.Percent>=0||previous==null||previous.Percent<0||previous.Sample==default(DateTime)||previous.Sample>now)return current;
+  if(current.Percent>=0||previous==null||previous.Percent<0||previous.Sample==default(DateTime)
+   ||previous.Sample.ToUniversalTime()>now.ToUniversalTime())return current;
+  if(current.Key=="mouse"&&!string.Equals(current.Name,previous.Name,StringComparison.OrdinalIgnoreCase))return current;
   bool receiverWaiting=current.Key=="mouse"&&current.ReceiverPresent;
   if(!receiverWaiting&&(now-previous.Sample).TotalMinutes>=30)return current;
   current.LevelText=previous.LevelText;current.Percent=previous.Percent;current.Approximate=previous.Approximate;current.Sample=previous.Sample;current.Millivolts=previous.Millivolts;current.Stale=true;
