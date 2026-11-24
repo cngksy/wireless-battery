@@ -32,13 +32,20 @@ public static class GHub {
    foreach(var item in devices) {
     var device=Map(item);if(device==null||!true.Equals(Field(Map(Field(device,"capabilities")),"hasBatteryStatus")))continue;
     string id=Field(device,"id") as string;if(string.IsNullOrEmpty(id))continue;
+    string type=Field(device,"deviceType") as string;string kind=type=="MOUSE"?"Mouse":type=="KEYBOARD"?"Klavye":type=="HEADSET"?"Kulaklık":type=="GAMEPAD"?"Gamepad":"Aygıt";
+    bool proX=Convert.ToInt32(Field(device,"pid"))==0x0ABA;
+    string key=proX?"headset":"ghub:"+(Field(device,"path") as string??id);
+    string name=Field(device,"extendedDisplayName") as string??Field(device,"displayName") as string??"Logitech";
+    string connection=Field(device,"state") as string;
+    if(connection=="INACTIVE"||connection=="DISCONNECTED"){
+     states.Add(new BatteryState{Key=key,Name=name,Kind=kind,Connection=DeviceConnection.Disconnected,Stale=true,Status="G HUB"});
+     continue;
+    }
     var result=await Get(socket,"/battery/"+Uri.EscapeDataString(id)+"/state",timeout.Token);
     if((string)Field(Map(Field(result,"result")),"code")!="SUCCESS")continue;
     var payload=Map(Field(result,"payload"));object percentage=Field(payload,"percentage");if(percentage==null)continue;
     double raw=Convert.ToDouble(percentage);if(double.IsNaN(raw)||raw<0||raw>100)continue;
-    string type=Field(device,"deviceType") as string;string kind=type=="MOUSE"?"Mouse":type=="KEYBOARD"?"Klavye":type=="HEADSET"?"Kulaklık":type=="GAMEPAD"?"Gamepad":"Aygıt";
-    bool proX=Convert.ToInt32(Field(device,"pid"))==0x0ABA;
-    states.Add(new BatteryState{Key=proX?"headset":"ghub:"+(Field(device,"path") as string??id),Name=Field(device,"extendedDisplayName") as string??Field(device,"displayName") as string??"Logitech",Kind=kind,Percent=(int)Math.Round(raw),Charging=true.Equals(Field(payload,"charging"))||(string)Field(payload,"chargeStatus")=="CHARGING",Sample=DateTime.Now,Status="G HUB tarafından bildirilen yüzde"});
+    states.Add(new BatteryState{Key=key,Name=name,Kind=kind,Percent=(int)Math.Round(raw),Charging=true.Equals(Field(payload,"charging"))||(string)Field(payload,"chargeStatus")=="CHARGING",Connection=DeviceConnection.Connected,Sample=DateTime.Now,Status="G HUB tarafından bildirilen yüzde"});
    }
   }catch(Exception){}finally{socket.Abort();}
   return states;

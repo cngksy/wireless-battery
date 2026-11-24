@@ -4,25 +4,62 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 
+public enum DeviceConnection { Unknown, Connected, Disconnected }
+
 public class BatteryState {
  public string Key,Name,Kind,Status,LevelText;
  public bool BatterySupported=true;
  public int Percent=-1,Millivolts;
  public bool Charging,Approximate,Stale,ReceiverPresent;
+ public DeviceConnection Connection;
  public DateTime Sample;
  public string Level {get{return !string.IsNullOrEmpty(LevelText)?LevelText:Percent<0?"--":Percent+"%";}}
- public bool Dimmed {get{return Percent<0||(Stale&&!(Key=="mouse"&&ReceiverPresent));}}
+ public bool Dimmed {get{
+  if(Connection==DeviceConnection.Disconnected)return true;
+  if(Connection==DeviceConnection.Connected)return false;
+  return Percent<0||(Stale&&!(Key=="mouse"&&ReceiverPresent));
+ }}
 }
 public static class Batteries {
  public static BatteryState PreserveLastReading(BatteryState current,BatteryState previous,DateTime now) {
-  if(current.Percent>=0||previous==null||previous.Percent<0||previous.Sample==default(DateTime)
+  if((current.Percent>=0&&!current.Stale&&current.Connection!=DeviceConnection.Disconnected)
+   ||previous==null||previous.Percent<0||previous.Percent>100
    ||previous.Sample.ToUniversalTime()>now.ToUniversalTime())return current;
   if(current.Key=="mouse"&&!string.Equals(current.Name,previous.Name,StringComparison.OrdinalIgnoreCase))return current;
-  bool receiverWaiting=current.Key=="mouse"&&current.ReceiverPresent;
-  if(!receiverWaiting&&(now-previous.Sample).TotalMinutes>=30)return current;
   current.LevelText=previous.LevelText;current.Percent=previous.Percent;current.Approximate=previous.Approximate;current.Sample=previous.Sample;current.Millivolts=previous.Millivolts;current.Stale=true;
-  current.Status=receiverWaiting?"Alıcı bağlı • yeni pil ölçümü bekleniyor":"Son bilinen • "+current.Status;
+  current.Status=previous.Status;current.BatterySupported=previous.BatterySupported;current.Charging=false;
   return current;
+ }
+ public static List<BatteryState> MergeReadings(IEnumerable<BatteryState> observed,IEnumerable<BatteryState> previous,DateTime now,bool scanned) {
+  var remembered=new Dictionary<string,BatteryState>();
+  var nowUtc=now.ToUniversalTime();
+  foreach(var reading in previous) {
+   if(reading==null||string.IsNullOrEmpty(reading.Key)||reading.Percent<0||reading.Percent>100||reading.Sample.ToUniversalTime()>nowUtc)continue;
+   BatteryState existing;
+   if(!remembered.TryGetValue(reading.Key,out existing)||reading.Sample.ToUniversalTime()>existing.Sample.ToUniversalTime())
+    remembered[reading.Key]=reading;
+  }
+  var result=new List<BatteryState>();
+  foreach(var reading in observed) {
+   BatteryState saved;
+   if(remembered.TryGetValue(reading.Key,out saved)) {
+    remembered.Remove(reading.Key);
+    PreserveLastReading(reading,saved,now);
+   }
+   if(reading.Connection==DeviceConnection.Disconnected) {
+    if(reading.Percent<0)continue;
+    reading.Stale=true;reading.Charging=false;
+   }
+   result.Add(reading);
+  }
+  foreach(var saved in remembered.Values) {
+   // Loss of the G HUB API alone does not establish a radio disconnect.
+   var connection=scanned&&!saved.Key.StartsWith("ghub:",StringComparison.Ordinal)
+    ?DeviceConnection.Disconnected:DeviceConnection.Unknown;
+   var missing=new BatteryState{Key=saved.Key,Name=saved.Name,Kind=saved.Kind,Connection=connection};
+   result.Add(PreserveLastReading(missing,saved,now));
+  }
+  return result;
  }
  static byte Checksum(byte[] b) {int sum=0;for(int i=0;i<16;i++)sum+=b[i];return unchecked((byte)(0x55-sum));}
  public static byte[] MouseQuery(HidChannel d,byte command) {
@@ -90,13 +127,16 @@ public static class Batteries {
      if(fid==0x1000 && p[0]<=100){s.Percent=p[0];s.Charging=p[2]>=1&&p[2]<=4;}
      else if(fid==0x1004 && p[0]<=100){s.Percent=p[0];s.Charging=p[2]>=1&&p[2]<=3;}
      else if(fid==0x1F20){int mv=(p[0]<<8)|p[1];if(mv<2500||mv>5000)continue;s.Millivolts=mv;s.Percent=VoltagePercent(mv);s.Approximate=true;s.Charging=p[2]==3;}
-     if(s.Percent>=0){s.Sample=DateTime.Now;s.Status=s.Approximate?"Canlı • voltajdan yaklaşık yüzde":"Canlı • HID++";break;}
+     if(s.Percent>=0){s.Sample=DateTime.Now;s.Connection=DeviceConnection.Connected;s.Status=s.Approximate?"Canlı • voltajdan yaklaşık yüzde":"Canlı • HID++";break;}
     }if(s.Percent>=0)break;
    }result.Add(s);
   }
   var keyboard=SteelSeries.ReadKeyboard();
-  if(keyboard.Percent>=0||all.Any(x=>x.Vid==0x1038&&(x.Pid==0x1630||x.Pid==0x1632||x.Pid==0x1633)))result.Add(keyboard);
-  foreach(var ghub in GHub.Poll()){result.RemoveAll(x=>x.Key==ghub.Key);result.Add(ghub);}
+  if(keyboard.Percent>=0||keyboard.Connection!=DeviceConnection.Unknown||all.Any(x=>x.Vid==0x1038&&(x.Pid==0x1630||x.Pid==0x1632||x.Pid==0x1633)))result.Add(keyboard);
+  foreach(var ghub in GHub.Poll()){
+   if(ghub.Stale&&result.Any(x=>x.Key==ghub.Key&&x.Percent>=0&&!x.Stale))continue;
+   result.RemoveAll(x=>x.Key==ghub.Key);result.Add(ghub);
+  }
   result.AddRange(WindowsDevices.Poll());
   return result;
  }

@@ -79,8 +79,13 @@ class Widget:Form {
  }
  public static string DeviceTooltip(BatteryState state) {
   string level=state.Percent>=0?"%"+state.Percent:state.Level;
-  string time=state.Sample==default(DateTime)?"--:--":state.Sample.ToString("HH:mm");
-  return state.Name+"\n"+L.BatteryLabel(state.Charging)+level+"\n"+L.TimeLabel+time+"\n"+L.By(DeviceSource(state));
+  var sample=state.Sample.Kind==DateTimeKind.Utc?state.Sample.ToLocalTime():state.Sample;
+  string time=sample==default(DateTime)?"--:--":sample.ToString("HH:mm");
+  bool remembered=state.Stale&&state.Dimmed;
+  string connection=state.Connection==DeviceConnection.Disconnected?L.Disconnected:
+   remembered&&state.Connection==DeviceConnection.Unknown?L.ConnectionUnknown:"";
+  return state.Name+"\n"+(remembered?L.LastCharge:L.BatteryLabel(state.Charging))+level+"\n"+L.TimeLabel+time+"\n"+L.By(DeviceSource(state))
+   +(connection.Length==0?"":"\n"+connection);
  }
  public static string DeviceSource(BatteryState state) {
   string status=state.Status??"";
@@ -150,7 +155,7 @@ class Widget:Form {
   g.SmoothingMode=SmoothingMode.AntiAlias;g.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
   float leftDip=0;
   for(int i=0;i<values.Count;i++) {
-   var s=values[i];float origin=leftDip*scale;Color color=s.Dimmed?Color.FromArgb(155,155,155):s.Charging?Color.FromArgb(103,204,255):s.Percent<=15?Color.FromArgb(255,112,112):Color.White;
+   var s=values[i];float origin=leftDip*scale;Color color=s.Dimmed?Color.FromArgb(155,155,155):s.Charging?Color.FromArgb(103,204,255):s.Percent>=0&&s.Percent<=15?Color.FromArgb(255,112,112):Color.White;
    var saved=g.Save();g.TranslateTransform((float)Math.Round(origin+3*scale),(float)Math.Round((size.Height-16*scale)/2));g.ScaleTransform(scale*16/28,scale*16/28);
    using(var pen=new Pen(color,2.0f)){pen.StartCap=pen.EndCap=LineCap.Round;pen.LineJoin=LineJoin.Round;
     if(s.Kind=="Kulaklık") {g.DrawArc(pen,2,2,23,24,180,180);g.DrawLine(pen,2,14,2,24);g.DrawLine(pen,25,14,25,24);g.DrawRectangle(pen,2,17,6,9);g.DrawRectangle(pen,19,17,6,9);}

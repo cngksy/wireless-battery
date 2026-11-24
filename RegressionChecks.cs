@@ -16,8 +16,16 @@ static class RegressionChecks {
   check(fresh.Percent==90&&!fresh.Stale&&fresh.Sample==now,"Fresh battery must replace previous sample");
   var missing=Batteries.PreserveLastReading(new BatteryState{Key="mouse",Status="Alıcı bulunamadı"},new BatteryState{Percent=95,Sample=now.AddMinutes(-1)},now);
   check(missing.Dimmed&&missing.Stale&&missing.Percent==95,"Unplugged receiver must be distinguished from idle radio");
-  var expired=Batteries.PreserveLastReading(new BatteryState{Key="mouse"},last,now);
-  check(expired.Percent<0,"Unplugged receiver must not retain an expired sample");
+  var absent=Batteries.MergeReadings(new BatteryState[0],new[]{last,new BatteryState{
+   Key="headset",Name="Headset",Kind="Kulaklık",Percent=62,Sample=now.AddHours(-2),Charging=true,Status="USB HID"}},now,true);
+  check(absent.Count==2&&absent.TrueForAll(x=>x.Dimmed&&x.Stale&&!x.Charging&&x.Connection==DeviceConnection.Disconnected),
+   "Disconnected devices keep dimmed readings without an expiry or charging indicator");
+  var connected=Batteries.MergeReadings(new[]{new BatteryState{Key="headset",Name="Headset",Percent=64,Connection=DeviceConnection.Connected,Sample=now}},absent,now,true);
+  check(connected[0].Percent==64&&!connected[0].Stale&&!connected[0].Dimmed,"A fresh reading replaces the old one on reconnect");
+  var offBt=new BatteryState{Key="windows:test",Name="Bluetooth headset",Percent=70,Stale=true,Connection=DeviceConnection.Disconnected,Status="Windows Bluetooth"};
+  var cachedBluetooth=Batteries.MergeReadings(new[]{offBt},new[]{new BatteryState{Key=offBt.Key,Percent=68,Sample=now.AddHours(-1),Status="Windows Bluetooth"}},now,true)[0];
+  check(cachedBluetooth.Percent==68&&cachedBluetooth.Sample==now.AddHours(-1)&&cachedBluetooth.Dimmed,
+   "An offline Bluetooth snapshot does not replace the saved sample or timestamp");
   var hitStates=new List<BatteryState>{new BatteryState{Percent=95},new BatteryState{Percent=95},new BatteryState{Percent=95}};
   check(Widget.HitDevice(0,1,hitStates)==0&&Widget.HitDevice(65,1,hitStates)==0&&Widget.HitDevice(66,1,hitStates)==1&&Widget.HitDevice(132,1,hitStates)==2,"Device boundaries must select separate cells");
   check(Widget.HitDevice(-1,1,hitStates)==-1&&Widget.HitDevice(198,1,hitStates)==-1,"Outside strip must not select a device");
@@ -30,11 +38,20 @@ static class RegressionChecks {
   check(Batteries.VoltagePercent(4102)==100&&Batteries.VoltagePercent(3293)==0&&Batteries.VoltagePercent(3758)==50,"Headset voltage calibration");
   check(Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=0xFF02,Usage=2,Input=17,Output=17})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=1,Usage=2}),"VXE R1 Pro Max wired charging interface");
   var settings=new UserSettings();var device=new BatteryState{Key="example",BatterySupported=true};
+  check(absent.TrueForAll(settings.IncludesReading),"Remember last charge defaults to on");
+  settings.RememberLastCharge=false;
+  check(!absent.Exists(settings.IncludesReading)&&settings.IncludesReading(fresh)&&settings.IncludesReading(waiting),
+   "Turning memory off hides dim cached readings and leaves present devices visible");
   check(settings.IsShown(device),"Supported devices should be visible by default");
   settings.Devices[device.Key]=false;check(!settings.IsShown(device),"Unchecked device must be hidden");
   settings.Devices[device.Key]=true;check(settings.IsShown(device),"Second toggle must restore device");
   var json=new System.Web.Script.Serialization.JavaScriptSerializer();var restored=json.Deserialize<UserSettings>(json.Serialize(settings));
-  check(restored.IsShown(device),"Device checkbox state must survive settings serialization");
+  check(restored.IsShown(device)&&!restored.RememberLastCharge,"Device visibility and memory settings survive serialization");
+  check(json.Deserialize<UserSettings>("{\"ShowWidget\":true}").RememberLastCharge,"Older settings files inherit the memory default");
+  var localNow=DateTime.Now;
+  var fromDisk=json.Deserialize<BatteryState>(json.Serialize(new BatteryState{Key="mouse",Name="Mouse only",Percent=95,Sample=localNow.AddMinutes(-1)}));
+  var afterRestart=Batteries.MergeReadings(new BatteryState[0],new[]{fromDisk},localNow,false);
+  check(afterRestart.Count==1&&afterRestart[0].Percent==95&&afterRestart[0].Dimmed,"A saved sample survives restart and does not appear live before the scan");
   check(WindowsDevices.KindFromClass(0x0504,"Controller")=="Gamepad"&&WindowsDevices.KindFromClass(0x0540,"Keys")=="Klavye"&&WindowsDevices.KindFromClass(0x0580,"Mouse")=="Mouse","Bluetooth device classes");
   check(new BatteryState{Percent=60,Approximate=true}.Level=="60%","Approximate values must display without a tilde marker");
   check(new BatteryState{Percent=60,Approximate=true,LevelText="Orta"}.Level=="Orta","Gamepad's honest coarse level remains allowed");

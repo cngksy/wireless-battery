@@ -36,7 +36,12 @@ public static class SteelSeries {
    var statuses=Map(Field(Map(Field(result,"loadoutConfiguration")),"statuses"));
    var battery=Map(Field(statuses,"batteryLevels"));var connection=Map(Field(statuses,"wirelessConnection"));
    bool connected=(string)Field(connection,"twoFourGHZStatus")=="connected"||(string)Field(connection,"wiredStatus")=="connected"||(string)Field(connection,"btStatus")=="connected";
-   if(!connected){state.Status="Klavye bağlı değil • SteelSeries GG";return state;}
+   if(connected)state.Connection=DeviceConnection.Connected;
+   else{
+    if(connection!=null&&(Field(connection,"twoFourGHZStatus")!=null||Field(connection,"wiredStatus")!=null||Field(connection,"btStatus")!=null))
+     state.Connection=DeviceConnection.Disconnected;
+    state.Status="Klavye bağlı değil • SteelSeries GG";return state;
+   }
    if(!true.Equals(Field(battery,"statusKnown")))return state;
    object raw=Field(battery,"percent");if(raw==null)return state;double percent=Convert.ToDouble(raw,CultureInfo.InvariantCulture);
    if(double.IsNaN(percent)||percent<0||percent>100)return state;
