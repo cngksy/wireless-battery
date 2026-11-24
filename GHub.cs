@@ -37,8 +37,9 @@ public static class GHub {
     var payload=Map(Field(result,"payload"));object percentage=Field(payload,"percentage");if(percentage==null)continue;
     double raw=Convert.ToDouble(percentage);if(double.IsNaN(raw)||raw<0||raw>100)continue;
     string type=Field(device,"deviceType") as string;string kind=type=="MOUSE"?"Mouse":type=="KEYBOARD"?"Klavye":type=="HEADSET"?"Kulaklık":type=="GAMEPAD"?"Gamepad":"Aygıt";
-    bool proX=Convert.ToInt32(Field(device,"pid"))==0x0ABA;
-    states.Add(new BatteryState{Key=proX?"headset":"ghub:"+(Field(device,"path") as string??id),Name=Field(device,"extendedDisplayName") as string??Field(device,"displayName") as string??"Logitech",Kind=kind,Percent=(int)Math.Round(raw),Charging=true.Equals(Field(payload,"charging"))||(string)Field(payload,"chargeStatus")=="CHARGING",Sample=DateTime.Now,Status="G HUB tarafından bildirilen yüzde"});
+    int pid=Convert.ToInt32(Field(device,"pid"));
+    string key=pid==0x0ABA?"headset":pid==LogitechG735.Product?LogitechG735.DeviceKey:"ghub:"+(Field(device,"path") as string??id);
+    states.Add(new BatteryState{Key=key,Name=Field(device,"extendedDisplayName") as string??Field(device,"displayName") as string??"Logitech",Kind=kind,Percent=(int)Math.Round(raw),Charging=true.Equals(Field(payload,"charging"))||(string)Field(payload,"chargeStatus")=="CHARGING",Sample=DateTime.Now,Status="G HUB tarafından bildirilen yüzde"});
    }
   }catch(Exception){}finally{socket.Abort();}
   return states;

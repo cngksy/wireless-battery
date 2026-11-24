@@ -61,7 +61,8 @@ public sealed class HidChannel:IDisposable {
  public HidInfo Info; public SafeFileHandle Handle;
  public HidChannel(HidInfo info) {Info=info;Handle=Native.CreateFile(info.Path,0xC0000000,3,IntPtr.Zero,3,0x40000000,IntPtr.Zero);}
  public bool Valid { get {return !Handle.IsInvalid;} }
- public bool Send(byte[] data) { return Valid && Info.Output>=data.Length && Native.Transfer(Handle,data,Info.Output,true,500)!=null; }
+ public bool Send(byte[] data) { return Send(data,500); }
+ internal bool Send(byte[] data,int timeout) { return Valid && Info.Output>=data.Length && Native.Transfer(Handle,data,Info.Output,true,timeout)!=null; }
  public byte[] Read(int timeout) {return Native.Transfer(Handle,null,Info.Input,false,timeout);}
  public void Dispose(){Handle.Dispose();}
 }

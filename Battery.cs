@@ -95,6 +95,19 @@ public static class Batteries {
   var keyboard=SteelSeries.ReadKeyboard();
   if(keyboard.Percent>=0||all.Any(x=>x.Vid==0x1038&&(x.Pid==0x1630||x.Pid==0x1632||x.Pid==0x1633)))result.Add(keyboard);
   foreach(var ghub in GHub.Poll()){result.RemoveAll(x=>x.Key==ghub.Key);result.Add(ghub);}
+  if (!result.Any(x => x.Key == LogitechG735.DeviceKey)) {
+   foreach (var info in all.Where(LogitechG735.Matches)) {
+    int percent;
+    byte chargeState;
+    if (!LogitechG735.TryRead(info, out percent, out chargeState)) continue;
+    result.Add(new BatteryState {
+     Key = LogitechG735.DeviceKey, Name = "Logitech G735", Kind = "Kulaklık",
+     Percent = percent, Charging = chargeState == 1 || chargeState == 2,
+     ReceiverPresent = true, Sample = DateTime.Now, Status = "Canlı • USB HID"
+    });
+    break;
+   }
+  }
   result.AddRange(WindowsDevices.Poll());
   return result;
  }
