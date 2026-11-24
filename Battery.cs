@@ -66,6 +66,8 @@ public static class Batteries {
  }
  public static List<BatteryState> Poll(List<HidInfo> all) {
   var result=new List<BatteryState>();
+  result.AddRange(RazerDevices.Poll(all));
+  result.AddRange(HyperXDevices.Poll(all));
   var mice=all.Where(IsVxeMouse)
    .OrderByDescending(IsCompxCable).ThenByDescending(x=>x.Page==0xFF02&&x.Usage==2).ToList();
   if(mice.Count>0) {

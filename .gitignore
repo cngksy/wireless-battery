@@ -7,9 +7,11 @@
 !/Autostart.cs
 !/Battery.cs
 !/GHub.cs
+!/HyperX.cs
 !/Localization.cs
 !/Native.cs
 !/RegressionChecks.cs
+!/Razer.cs
 !/SteelSeries.cs
 !/Taskbars.cs
 !/Updates.cs

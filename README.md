@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.10
+# Wireless Battery 1.4.11
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -64,6 +64,8 @@ Not every brand and model can be read; it depends on how the device publishes it
 - Other ATK / VXE / Compx receivers (VID 3554 and 373B, e.g. the ATK X1 SE on the Nearlink 373B:10C9 receiver): read automatically when they speak the same protocol. Only a reply with a valid checksum is accepted; an unknown receiver that does not answer is not listed.
 - Logitech PRO X Wireless 046D:0ABA: the exact percentage from G HUB or HID++ is used first. Without those, a percentage calculated from the voltage is shown.
 - SteelSeries Apex Pro TKL Wireless: through GG's local status API. The GG/Engine background services must be running.
+- Razer BlackShark V3 Pro PC (1532:0577): exact percentage and charging state directly from its USB receiver; Synapse is not required.
+- HyperX Cloud Alpha Wireless (03F0:098D): exact percentage and charging state directly from its USB receiver; NGENUITY is not required.
 
 Proprietary protocols of other vendors' USB receivers, the PlayStation-specific battery protocol and wireless microphones in general are not supported in this version. If Windows or G HUB publishes their battery level, the generic readers may still pick it up. Wired devices and devices that do not publish battery information are never given a percentage.
 
@@ -108,6 +110,8 @@ Protocol references:
 - BatteryHub / Wireless Device Battery Monitor: https://github.com/krisgfx9/Wireless-Device-Battery-Monitor
 - Logitech HID++ / Solaar: https://github.com/pwr-Solaar/Solaar
 - HeadsetControl: https://github.com/Sapd/HeadsetControl
+- Razer BlackShark V3 Pro receiver protocol: https://github.com/openrazer/openrazer/issues/2838
+- HyperX Cloud Alpha Wireless receiver protocol: https://github.com/FedeltaMedia/hyperx-cloud-alpha-battery
 - LogiBAT local G HUB messages: https://github.com/someweirdhuman/LogiBAT
 - Microsoft documentation for Windows XInputGetBatteryInformation and SetupAPI.
 

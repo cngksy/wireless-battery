@@ -89,6 +89,8 @@ class Widget:Form {
   if(status.IndexOf("XInput",StringComparison.OrdinalIgnoreCase)>=0)return "Windows XInput";
   if(status.IndexOf("Bluetooth",StringComparison.OrdinalIgnoreCase)>=0)return "Windows Bluetooth";
   if(status.IndexOf("HID++",StringComparison.OrdinalIgnoreCase)>=0||status.IndexOf("voltaj",StringComparison.OrdinalIgnoreCase)>=0)return "Logitech HID++";
+  if(status.IndexOf("Razer USB HID",StringComparison.OrdinalIgnoreCase)>=0)return "Razer USB HID";
+  if(status.IndexOf("HyperX USB HID",StringComparison.OrdinalIgnoreCase)>=0)return "HyperX USB HID";
   if(status.IndexOf("USB HID",StringComparison.OrdinalIgnoreCase)>=0||state.Key=="mouse")return "USB HID";
   return "Windows";
  }

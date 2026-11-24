@@ -69,6 +69,10 @@ static class RegressionChecks {
   string hashTest=Path.Combine(Program.Root,"hash-test.tmp");try{File.WriteAllBytes(hashTest,new byte[0]);check(Updates.VerifyFile(hashTest,"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")&&!Updates.VerifyFile(hashTest,testHash),"Corrupted installer bytes fail verification");}finally{File.Delete(hashTest);}
   check(Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x10C9,Name="Nearlink Mouse Dongle"})=="ATK X1 SE"&&Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x10C9,Name="Other ATK Mouse Dongle"})=="Other ATK Mouse","Confirmed X1 SE receiver alias preserves explicit names");
   check(Batteries.MouseName(new HidInfo{Vid=0x373B,Pid=0x9999,Name="Nearlink Mouse Dongle"})=="Nearlink Mouse"&&Batteries.MouseName(new HidInfo{Vid=0x3554,Pid=0x10C9,Name="Nearlink Mouse Dongle"})=="Nearlink Mouse","Other VID or PID Nearlink receivers must not get the X1 SE name");
+  var razer=RazerDevices.Frame(0x80,0x21);check(razer.Length==64&&razer[0]==0x02&&razer[2]==0x60&&razer[6]==0x04&&razer[9]==0x80&&razer[10]==0x21&&razer[62]==0xC7,"Razer BlackShark V3 Pro battery request frame");
+  var razerReply=RazerDevices.Frame(0x80,0x21);razerReply[11]=1;razerReply[12]=1;razerReply[13]=73;razerReply[62]=0;for(int i=0;i<62;i++)razerReply[62]^=razerReply[i];
+  check(RazerDevices.Parse(razerReply,0x21)==73&&RazerDevices.Parse(razerReply,0x2A)<0,"Razer replies require the matching command and checksum");
+  check(HyperXDevices.Parse(new byte[]{0x21,0xBB,0x0B,73},0x0B)==73&&HyperXDevices.Parse(new byte[]{0x21,0xBB,0x0C,1},0x0C)==1&&HyperXDevices.Parse(new byte[]{0x20,0xBB,0x0B,73},0x0B)<0,"HyperX Cloud Alpha Wireless replies");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }
