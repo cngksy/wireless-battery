@@ -25,7 +25,7 @@ static class RegressionChecks {
   var chargingHitStates=new List<BatteryState>{new BatteryState{Percent=95},new BatteryState{Percent=100,Charging=true},new BatteryState{Percent=95}};
   check(Widget.StripWidthDip(chargingHitStates)==214&&Widget.HitDevice(147,1,chargingHitStates)==1&&Widget.HitDevice(148,1,chargingHitStates)==2,"Charging indicator must expand its cell instead of colliding with neighbors");
   string tip=Widget.DeviceTooltip(waiting);
-  check(tip=="Mouse only\n"+L.BatteryLabel(false)+"%95\n"+L.TimeLabel+"21:00\n"+L.By("USB HID"),"Tooltip must contain localized compact device details");
+  check(tip=="Mouse only\n"+L.BatteryLabel(false)+"%95\n"+L.TimeLabel+"21:00\n"+L.By("USB HID")+"\n"+L.MouseReceiverWaiting,"The cached mouse tooltip reports receiver presence");
   check(Widget.DeviceTooltip(new BatteryState{Key="headset",Name="Headset",Percent=53,Charging=true,Sample=now,Status="G HUB tarafından bildirilen yüzde"})=="Headset\n"+L.BatteryLabel(true)+"%53\n"+L.TimeLabel+"23:00\n"+L.By("G HUB"),"Charging tooltip must replace the localized battery label");
   check(Batteries.VoltagePercent(4102)==100&&Batteries.VoltagePercent(3293)==0&&Batteries.VoltagePercent(3758)==50,"Headset voltage calibration");
   var g735 = new HidInfo { Vid=0x046D, Pid=0x0AD8, Page=0xFF03, Usage=1, Input=271, Output=271 };
@@ -86,6 +86,13 @@ static class RegressionChecks {
   var razerReply=RazerDevices.Frame(0x80,0x21);razerReply[11]=1;razerReply[12]=1;razerReply[13]=73;razerReply[62]=0;for(int i=0;i<62;i++)razerReply[62]^=razerReply[i];
   check(RazerDevices.Parse(razerReply,0x21)==73&&RazerDevices.Parse(razerReply,0x2A)<0,"Razer replies require the matching command and checksum");
   check(HyperXDevices.Parse(new byte[]{0x21,0xBB,0x0B,73},0x0B)==73&&HyperXDevices.Parse(new byte[]{0x21,0xBB,0x0C,1},0x0C)==1&&HyperXDevices.Parse(new byte[]{0x20,0xBB,0x0B,73},0x0B)<0,"HyperX Cloud Alpha Wireless replies");
+  var teevo=new HidInfo{Vid=0x3554,Pid=0xF520,Name="Teevo Terra Pro",Page=0xFF02,Usage=2,Input=17,Output=17};
+  var other=new HidInfo{Vid=0x3554,Pid=0xF505,Name="Other Mouse",Page=0xFF02,Usage=2,Input=17,Output=17};
+  check(Batteries.FindKnownMouseReceiver(new[]{other,teevo},"Teevo Terra Pro")==teevo
+   &&Batteries.FindKnownMouseReceiver(new[]{other},"Teevo Terra Pro")==null
+   &&Batteries.FindKnownMouseReceiver(new[]{teevo},null)==null,"A silent receiver is retained only for the mouse that previously provided a reading");
+  var wrongMouse=Batteries.PreserveLastReading(new BatteryState{Key="mouse",Name="Other Mouse",ReceiverPresent=true},last,now);
+  check(wrongMouse.Percent<0,"A different mouse must not inherit a saved battery level");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }

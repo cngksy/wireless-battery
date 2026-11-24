@@ -27,5 +27,6 @@ public static class L {
  public static string DeviceReportCopied {get{return Pick("Cihaz raporu panoya kopyalandı. Ctrl+V ile yapıştırabilirsiniz.","Device report copied to clipboard. Paste it with Ctrl+V.");}}
  public static string DeviceReportListening(int s){return Pick("Cihaz raporu hazırlanıyor ("+s+" sn). Bu sırada cihazları kullanmaya devam edebilirsiniz.","Preparing the device report ("+s+" s). You can keep using your devices.");}
  public static string DeviceReportError {get{return Pick("Cihaz raporu panoya kopyalanamadı.","Could not copy the device report.");}}
+ public static string MouseReceiverWaiting {get{return Pick("Son ölçüm • USB alıcısı bağlı","Last reading • USB receiver present");}}
  public static string StartupError {get{return Pick("Windows başlangıç ayarı değiştirilemedi.","Could not change the Windows startup setting.");}}
 }
