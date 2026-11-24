@@ -115,7 +115,13 @@ class BatteryApp:ApplicationContext {
   if(states.Count==0){var item=new ToolStripMenuItem(L.NoDevices){Enabled=false};menu.Items.Insert(index++,item);deviceItems.Add(item);}
  }
  void ApplyVisibility(){widgets.Update(states.Where(settings.IsShown).ToList(),settings.ShowWidget);}
- async void Refresh(){if(busy||disposed)return;busy=true;try{var next=await Task.Run(()=>Batteries.Poll(Native.Scan()));if(disposed)return;if(!next.Any(x=>x.Key=="mouse")&&states.Any(x=>x.Key=="mouse"))next.Add(new BatteryState{Key="mouse",Name=states.Find(x=>x.Key=="mouse").Name,Kind="Mouse",Status="Alıcı bulunamadı"});foreach(var item in next)Batteries.PreserveLastReading(item,states.Find(x=>x.Key==item.Key),DateTime.Now);states=next;File.WriteAllText(Program.DataPath("battery-report.json"),new JavaScriptSerializer().Serialize(states));
+ async void Refresh(){if(busy||disposed)return;busy=true;try{
+   var next=await Task.Run(()=>Batteries.Poll(Native.Scan()));
+   if(disposed)return;
+   if(!next.Any(x=>x.Key=="mouse")&&states.Any(x=>x.Key=="mouse"))next.Add(new BatteryState{Key="mouse",Name=states.Find(x=>x.Key=="mouse").Name,Kind="Mouse",Status="Alıcı bulunamadı"});
+   foreach(var item in next)Batteries.PreserveLastReading(item,states.Find(x=>x.Key==item.Key),DateTime.Now);
+   states=next;
+   File.WriteAllText(Program.DataPath("battery-report.json"),new JavaScriptSerializer().Serialize(states));
    foreach(var s in states){
     if(settings.IsShown(s)&&!s.Stale&&s.Percent>=0&&s.Percent<=15&&!s.Charging&&alerts.Add(s.Key))Balloon(s.Name,L.LowBattery(s.Level),ToolTipIcon.Warning,null);
     if(s.Charging||s.Percent>25)alerts.Remove(s.Key);
