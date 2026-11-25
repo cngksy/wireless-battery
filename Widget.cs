@@ -82,7 +82,7 @@ class Widget:Form {
   return state.Key=="mouse"&&state.Stale&&state.ReceiverPresent?text+"\n"+L.MouseReceiverWaiting:text;
  }
  static string DeviceTooltipText(BatteryState state) {
-  string level=state.Percent>=0?"%"+state.Percent:state.Level;
+  string level=string.IsNullOrEmpty(state.LevelText)&&state.Percent>=0?"%"+state.Percent:state.Level;
   var sample=state.Sample.Kind==DateTimeKind.Utc?state.Sample.ToLocalTime():state.Sample;
   string time=sample==default(DateTime)?"--:--":sample.ToString("HH:mm");
   bool remembered=state.Stale&&state.Dimmed;

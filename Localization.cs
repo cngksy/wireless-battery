@@ -16,6 +16,15 @@ public static class L {
  public static string StartWithWindows {get{return Pick("Windows açılırken başlat","Start with Windows");}}
  public static string Exit {get{return Pick("Çıkış","Exit");}}
  public static string NoDevices {get{return Pick("Pil bildiren cihaz bulunamadı","No battery-reporting devices found");}}
+ public static string SystemBattery {get{return Pick("Bilgisayar pili","PC battery");}}
+ public static string BatteryLevel(int level) {
+  switch(level) {
+   case 0:return Pick("Boş","Empty");
+   case 1:return Pick("Az","Low");
+   case 2:return Pick("Orta","Medium");
+   default:return Pick("Dolu","Full");
+  }
+ }
  public static string Scanning {get{return Pick("taranıyor","scanning");}}
  public static string ReadError {get{return Pick("okuma hatası","read error");}}
  public static string DeviceCount(int count){return count+" "+Pick("cihaz","device"+(count==1?"":"s"));}

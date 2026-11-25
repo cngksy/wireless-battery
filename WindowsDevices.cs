@@ -13,6 +13,17 @@ public static class WindowsDevices {
  [DllImport("setupapi.dll")] static extern bool SetupDiDestroyDeviceInfoList(IntPtr set);
  [StructLayout(LayoutKind.Sequential)] struct XBattery {public byte Type,Level;}
  [DllImport("xinput1_4.dll")] static extern uint XInputGetBatteryInformation(uint index,byte type,out XBattery battery);
+ [StructLayout(LayoutKind.Sequential)] struct SystemPower {
+  public byte AcLine,Flags,Percent,PowerSaver;
+  public uint RemainingSeconds,FullSeconds;
+ }
+ [DllImport("kernel32.dll")] static extern bool GetSystemPowerStatus(out SystemPower status);
+ internal static BatteryState SystemBattery(byte flags,byte percent) {
+  if(percent>100||(flags!=255&&(flags&0x80)!=0))return null;
+  return new BatteryState{Key="windows:system-battery",Name=L.SystemBattery,Kind="Aygıt",Percent=percent,
+   Charging=flags!=255&&(flags&8)!=0,Connection=DeviceConnection.Connected,
+   BatterySupported=false,Status="Windows",Sample=DateTime.Now};
+ }
  static readonly PropertyKey Battery=new PropertyKey("104ea319-6ee2-4701-bd47-8ddbf425bbe5",2);
  static readonly PropertyKey Connected=new PropertyKey("83da6326-97a6-4088-9453-a1923f573b29",15);
  static readonly PropertyKey Container=new PropertyKey("8c7ed206-3f8a-4827-b3ab-ae9e1faefc6c",2);
@@ -47,9 +58,14 @@ public static class WindowsDevices {
   result.AddRange(merged.Values);
   try{for(uint index=0;index<4;index++){XBattery battery;if(XInputGetBatteryInformation(index,0,out battery)!=0||battery.Type==0||battery.Type==1)continue;
    var state=new BatteryState{Key="xinput:"+index,Name="Xbox / XInput Gamepad "+(index+1),Kind="Gamepad",Status="Windows XInput • pil seviyesi",Connection=DeviceConnection.Connected,Sample=DateTime.Now};
-   if((battery.Type==2||battery.Type==3)&&battery.Level<=3){state.Percent=new[]{0,15,60,100}[battery.Level];state.LevelText=new[]{"Boş","Az","Orta","Dolu"}[battery.Level];state.Approximate=true;}
+   if((battery.Type==2||battery.Type==3)&&battery.Level<=3){state.Percent=new[]{0,15,60,100}[battery.Level];state.LevelText=L.BatteryLevel(battery.Level);state.Approximate=true;}
    else{state.Status="Gamepad algılandı • pil seviyesi bildirilmedi";}result.Add(state);
   }}catch(DllNotFoundException){}catch(EntryPointNotFoundException){}
+  SystemPower power;
+  if(GetSystemPowerStatus(out power)) {
+   var system=SystemBattery(power.Flags,power.Percent);
+   if(system!=null)result.Add(system);
+  }
   return result;
  }
 }

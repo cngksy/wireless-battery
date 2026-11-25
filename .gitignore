@@ -11,7 +11,9 @@
 !/HyperX.cs
 !/Localization.cs
 !/LogitechG735.cs
+!/LogitechReceivers.cs
 !/Native.cs
+!/PlayStation.cs
 !/RegressionChecks.cs
 !/Razer.cs
 !/SteelSeries.cs

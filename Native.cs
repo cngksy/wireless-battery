@@ -10,6 +10,12 @@ public class HidInfo {
  public override string ToString() { return string.Format("{0:X4}:{1:X4} {2:X4}:{3:X4} in={4} out={5} feature={6} {7}",Vid,Pid,Page,Usage,Input,Output,Feature,Name); }
 }
 public static class Native {
+ internal static string HidKey(string provider,string path) {
+  using(var hash=System.Security.Cryptography.SHA256.Create()) {
+   var bytes=Encoding.UTF8.GetBytes((path??"").ToUpperInvariant());
+   return provider+":"+BitConverter.ToString(hash.ComputeHash(bytes),0,12).Replace("-","");
+  }
+ }
  [StructLayout(LayoutKind.Sequential)] public struct Interface { public int Size; public Guid Guid; public int Flags; public IntPtr Reserved; }
  [StructLayout(LayoutKind.Sequential)] public struct Attributes { public int Size; public ushort Vid,Pid,Version; }
  [StructLayout(LayoutKind.Sequential)] public struct Overlap { public IntPtr Internal,InternalHigh; public uint Offset,OffsetHigh; public IntPtr Event; }

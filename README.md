@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.14
+# Wireless Battery 1.5.0
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -53,6 +53,8 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - Battery levels refresh automatically every 60 seconds. Taskbar and monitor changes are tracked separately.
 - After plugging in a new device, use **Refresh now** to scan right away.
 - Other models may work if Windows Bluetooth, XInput, or Logitech G HUB provides battery data. XInput can show a level such as Low or Full. Compatible ATK / VXE receivers may also work.
+- Logitech devices can also be detected through compatible Unifying, Bolt, Lightspeed, or Nano receivers if the device implements a supported HID++ 2.0 battery feature.
+- If Windows reports a system battery, enable **PC battery** from the device list to show it on the taskbar.
 - **Remember last charge** is off by default. Enable it to keep disconnected devices' last readings visible in gray, including after an app restart. A known mouse with its receiver plugged in keeps its last reading visible during temporary read failures. Low battery alerts use current readings.
 
 ## Supported devices
@@ -65,14 +67,14 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - Logitech G735 LIGHTSPEED
 - Logitech PRO X Wireless
 - Razer BlackShark V3 Pro (PC USB receiver)
+- Sony DualShock 4, DualSense and DualSense Edge (USB or full Bluetooth reports)
 - SteelSeries Apex Pro TKL Wireless (requires SteelSeries GG)
 - VXE R1 / NordicMouse
 
 ## Not supported
 
 - 8BitDo Ultimate 2C Wireless (no usable battery reading from the tested 2.4 GHz receiver, so the indicator shows `--`)
-- Sony DualShock 4 (native PlayStation battery protocol is not implemented)
-- Sony DualSense (native PlayStation battery protocol is not implemented)
+- Sony DualShock 4, DualSense and DualSense Edge in basic Bluetooth mode (the short reports carry no battery data)
 
 ## Bug Report
 
@@ -112,6 +114,8 @@ The application code is GPL-3.0-or-later. The full license is in the `LICENSE` f
 Protocol references:
 - BatteryHub / Wireless Device Battery Monitor: https://github.com/krisgfx9/Wireless-Device-Battery-Monitor
 - Logitech HID++ / Solaar: https://github.com/pwr-Solaar/Solaar
+- Sony controller input reports: https://github.com/torvalds/linux/blob/master/drivers/hid/hid-playstation.c
+- Windows system battery: https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-system_power_status
 - Logitech G735 HID protocol and USB capture by erzhenin-alex: https://github.com/erzhenin-alex/Wireless-Device-Battery-Monitor/commit/6ff09641e99b68b647f034f2ed91cb6aac75c292
 - HeadsetControl: https://github.com/Sapd/HeadsetControl
 - 8BitDo Ultimate 2C receiver: https://github.com/ascendedent/8bitdo-Linux-Software/blob/main/spec/protocol.md

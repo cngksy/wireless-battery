@@ -160,6 +160,34 @@ static class RegressionChecks {
    &&Batteries.FindKnownMouseReceiver(new[]{teevo},null)==null,"A silent receiver is retained only for the mouse that previously provided a reading");
   var wrongMouse=Batteries.PreserveLastReading(new BatteryState{Key="mouse",Name="Other Mouse",ReceiverPresent=true},last,now);
   check(wrongMouse.Percent<0,"A different mouse must not inherit a saved battery level");
+  var unifying=new HidInfo{Vid=0x046D,Pid=0xC52B,Page=0xFF00,Usage=2,Input=20,Output=20};
+  check(LogitechReceivers.SlotCount(unifying)==6,"HID++ discovers Unifying slots by receiver class");
+  unifying.Pid=0xC548;
+  check(LogitechReceivers.SlotCount(unifying)==6,"HID++ discovers Bolt slots by receiver class");
+  unifying.Pid=0xC53F;
+  check(LogitechReceivers.SlotCount(unifying)==0,"The dedicated G305 route is not probed twice");
+  var unified=LogitechReceivers.ParseBattery(new byte[]{0,2,1,0},0x1004);
+  check(unified!=null&&unified.Level==L.BatteryLevel(1)&&unified.Charging
+   &&Widget.DeviceTooltip(unified).Contains(L.BatteryLabel(true)+L.BatteryLevel(1)),
+   "Unified battery levels are displayed as levels, including in the tooltip");
+  var hidppPercent=LogitechReceivers.ParseBattery(new byte[]{67,0,0},0x1000);
+  check(hidppPercent!=null&&hidppPercent.Percent==67&&!hidppPercent.Charging
+   &&LogitechReceivers.ParseBattery(new byte[]{67,0,5},0x1000)==null
+   &&LogitechReceivers.ParseBattery(new byte[]{0,0,0},0x1004)==null,"HID++ ignores unavailable and invalid reports");
+  var dualSenseReport=new byte[64];dualSenseReport[0]=0x01;dualSenseReport[53]=0x16;
+  var dualSense=PlayStation.Decode(0x0CE6,dualSenseReport,false);
+  check(dualSense!=null&&dualSense.Percent==65&&dualSense.Charging&&dualSense.Approximate
+   &&PlayStation.Decode(0x0CE6,dualSenseReport,true)==null,"DualSense USB report and rejection of Bluetooth simple mode");
+  var dualShockReport=new byte[78];dualShockReport[0]=0x11;dualShockReport[32]=7;
+  var dualShock=PlayStation.Decode(0x09CC,dualShockReport,true);
+  check(dualShock!=null&&dualShock.Percent==75&&!dualShock.Charging
+   &&PlayStation.Decode(0x09CC,new byte[10],true)==null,"DualShock only accepts battery-bearing extended Bluetooth reports");
+  var adapterReport=new byte[64];adapterReport[0]=1;adapterReport[31]=4;
+  check(PlayStation.Decode(0x0BA0,adapterReport,false)==null,"An unpaired DualShock adapter has no battery reading");
+  var systemBattery=WindowsDevices.SystemBattery(8,82);
+  check(systemBattery!=null&&systemBattery.Charging&&systemBattery.Percent==82&&!new UserSettings().IsShown(systemBattery)
+   &&WindowsDevices.SystemBattery(128,82)==null&&WindowsDevices.SystemBattery(255,255)==null,
+   "System battery is opt-in and omitted when Windows has no usable reading");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }

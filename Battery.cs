@@ -68,8 +68,14 @@ public static class Batteries {
   var watch=Stopwatch.StartNew();while(watch.ElapsedMilliseconds<650) {var r=d.Read((int)(650-watch.ElapsedMilliseconds));if(r==null)break;if(r.Length>=17 && r[0]==8 && r[1]==command && r[16]==Checksum(r))return r;}return null;
  }
  static byte[] Logi(HidChannel d,byte device,byte feature,byte function,params byte[] args) {
+  return LogiRequest(d,500,device,feature,function,args);
+ }
+ internal static byte[] LogiRequest(HidChannel d,int timeout,byte device,byte feature,byte function,params byte[] args) {
   byte[] b=new byte[20];b[0]=0x11;b[1]=device;b[2]=feature;b[3]=function;Array.Copy(args,0,b,4,Math.Min(args.Length,16));
-  if(!d.Send(b))return null;var watch=Stopwatch.StartNew();while(watch.ElapsedMilliseconds<500){var r=d.Read((int)(500-watch.ElapsedMilliseconds));if(r==null)break;if(r.Length<7 || r[1]!=device)continue;
+  var watch=Stopwatch.StartNew();
+  if(!d.Send(b,timeout))return null;
+  int remaining;
+  while((remaining=timeout-(int)watch.ElapsedMilliseconds)>0){var r=d.Read(remaining);if(r==null)break;if(r.Length<7||(r[0]!=0x10&&r[0]!=0x11)||r[1]!=device)continue;
    if(r[2]==feature && r[3]==function)return r.Skip(4).ToArray();if((r[2]==0xFF || r[2]==0x8F)&&r[3]==feature && r[4]==function)return null;
   }return null;
  }
@@ -131,6 +137,7 @@ public static class Batteries {
   var result=new List<BatteryState>();
   result.AddRange(RazerDevices.Poll(all));
   result.AddRange(HyperXDevices.Poll(all));
+  result.AddRange(PlayStation.Poll(all));
   var ultimate2C=EightBitDo.ReadUltimate2C(all);
   if(ultimate2C!=null)result.Add(ultimate2C);
   var ultimate2=EightBitDo.ReadUltimate2(all);
@@ -164,9 +171,15 @@ public static class Batteries {
   }
   var keyboard=SteelSeries.ReadKeyboard();
   if(keyboard.Percent>=0||keyboard.Connection!=DeviceConnection.Unknown||all.Any(x=>x.Vid==0x1038&&(x.Pid==0x1630||x.Pid==0x1632||x.Pid==0x1633)))result.Add(keyboard);
-  foreach(var ghub in GHub.Poll()){
+  var ghubReadings=GHub.Poll();
+  foreach(var ghub in ghubReadings){
    if(ghub.Stale&&result.Any(x=>x.Key==ghub.Key&&x.Percent>=0&&!x.Stale))continue;
    result.RemoveAll(x=>x.Key==ghub.Key);result.Add(ghub);
+  }
+  foreach(var reading in LogitechReceivers.Poll(all)) {
+   var duplicate=ghubReadings.Find(x=>!x.Stale&&x.Percent>=0&&x.Kind==reading.Kind&&SameLogitechName(x.Name,reading.Name));
+   if(duplicate!=null)ghubReadings.Remove(duplicate);
+   else result.Add(reading);
   }
   if(!result.Any(x=>x.Key==LogitechG305Key&&x.Percent>=0&&!x.Stale)) {
    var g305=ReadG305(all);
@@ -191,5 +204,11 @@ public static class Batteries {
   }
   result.AddRange(WindowsDevices.Poll());
   return result;
+ }
+ static bool SameLogitechName(string a,string b) {
+  const string prefix="Logitech ";
+  if(a.StartsWith(prefix,StringComparison.OrdinalIgnoreCase))a=a.Substring(prefix.Length);
+  if(b.StartsWith(prefix,StringComparison.OrdinalIgnoreCase))b=b.Substring(prefix.Length);
+  return string.Equals(a,b,StringComparison.OrdinalIgnoreCase);
  }
 }
