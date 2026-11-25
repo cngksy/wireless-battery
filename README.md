@@ -52,12 +52,25 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - Device details appear after the pointer rests on the indicator for 1.2 seconds, and never while the menu is open.
 - Battery levels refresh automatically every 60 seconds. Taskbar and monitor changes are tracked separately.
 - After plugging in a new device, use **Refresh now** to scan right away.
-- Other models may work if Windows Bluetooth, XInput, or Logitech G HUB provides battery data. XInput can show a level such as Low or Full. Compatible ATK / VXE receivers may also work.
-- Logitech devices can also be detected through compatible Unifying, Bolt, Lightspeed, or Nano receivers if the device implements a supported HID++ 2.0 battery feature.
 - If Windows reports a system battery, enable **PC battery** from the device list to show it on the taskbar.
 - **Remember last charge** is off by default. Enable it to keep disconnected devices' last readings visible in gray, including after an app restart. A known mouse with its receiver plugged in keeps its last reading visible during temporary read failures. Low battery alerts use current readings.
 
-## Supported devices
+<a name="supported-devices"></a>
+
+## Device compatibility
+
+**Your device may work even if it isn't listed below.** Wireless Battery automatically looks for battery data on connected devices. Plug in or pair your device, turn it on, and choose **Refresh now** from the tray menu.
+
+### Other devices
+
+- Bluetooth devices that report battery information to Windows
+- XInput controllers that report battery information (some show a level such as Low or Full)
+- Logitech devices that report battery information through G HUB or HID++ 2.0 on a compatible Unifying, Bolt, Lightspeed, or Nano receiver
+- ATK / VXE mice that use a compatible USB receiver
+
+If your device still doesn't appear, [send a device report](#bug-report).
+
+### Models with dedicated support
 
 - 8BitDo Ultimate 2 Wireless for PC (2.4 GHz receiver)
 - ATK X1 SE
@@ -71,7 +84,7 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - SteelSeries Apex Pro TKL Wireless (requires SteelSeries GG)
 - VXE R1 / NordicMouse
 
-## Not supported
+### Known limitations
 
 - 8BitDo Ultimate 2C Wireless (no usable battery reading from the tested 2.4 GHz receiver, so the indicator shows `--`)
 - Sony DualShock 4, DualSense and DualSense Edge in basic Bluetooth mode (the short reports carry no battery data)
