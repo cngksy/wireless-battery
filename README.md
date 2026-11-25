@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.13
+# Wireless Battery 1.4.14
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -58,12 +58,14 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 Not every brand and model can be read; it depends on how the device publishes its battery data. This version reads:
 
 - Bluetooth devices that publish the standard Windows battery property, regardless of brand.
+- 8BitDo Ultimate 2 Wireless for PC (2DC8:310B): reads battery status via the 2.4 GHz receiver's vendor HID channel.
 - 8BitDo Ultimate 2C Wireless: shows the battery percentage when the controller input report provides it. If the 2.4 GHz receiver exposes only the controller connection, the indicator shows `--`.
 - XInput-compatible wireless controllers. If the driver reports only four levels, Empty/Low/Medium/Full is shown; no exact percentage is made up.
 - Devices whose battery level Logitech G HUB publishes through its local API. The G HUB background service must be running.
 - VXE R1 / NordicMouse family: battery over HID through the 3554:F58A receiver, and the 3554:F58C and verified 373B:1273 cable/charging connections.
 - Other ATK / VXE / Compx receivers (VID 3554 and 373B, e.g. the ATK X1 SE on the Nearlink 373B:10C9 receiver): read automatically when they speak the same protocol. Only a reply with a valid checksum is accepted; an unknown receiver that does not answer is not listed.
 - Logitech PRO X Wireless 046D:0ABA: the exact percentage from G HUB or HID++ is used first. Without those, a percentage calculated from the voltage is shown.
+- Logitech G305 LIGHTSPEED (046D:C53F receiver): reads the reported battery percentage through HID++ if G HUB has no reading.
 - Logitech G735 LIGHTSPEED (046D:0AD8): reads the exact percentage and charging status directly from the USB receiver when G HUB has no reading. The HID protocol is based on [erzhenin-alex's G735 implementation and USB capture](https://github.com/erzhenin-alex/Wireless-Device-Battery-Monitor/commit/6ff09641e99b68b647f034f2ed91cb6aac75c292).
 - SteelSeries Apex Pro TKL Wireless: through GG's local status API. The GG/Engine background services must be running.
 - Razer BlackShark V3 Pro PC (1532:0577): exact percentage and charging state directly from its USB receiver; Synapse is not required.
@@ -115,6 +117,7 @@ Protocol references:
 - Logitech HID++ / Solaar: https://github.com/pwr-Solaar/Solaar
 - HeadsetControl: https://github.com/Sapd/HeadsetControl
 - 8BitDo Ultimate 2C receiver: https://github.com/ascendedent/8bitdo-Linux-Software/blob/main/spec/protocol.md
+- 8BitDo Ultimate 2 Wireless battery protocol: https://github.com/MiguelSanzBr/8bitdo-ultimate2-linux/blob/main/docs/PROTOCOL.md
 - 8BitDo gamepad input report: https://github.com/notjiccu/wireless-device-battery-monitor/blob/main/src/drivers/eightbitdo.cpp
 - Razer BlackShark V3 Pro receiver protocol: https://github.com/openrazer/openrazer/issues/2838
 - HyperX Cloud Alpha Wireless receiver protocol: https://github.com/FedeltaMedia/hyperx-cloud-alpha-battery

@@ -137,6 +137,22 @@ static class RegressionChecks {
   check(HyperXDevices.ParseCloudIII(new byte[]{0x66,0x0C,1},0x8A)==1
    &&HyperXDevices.ParseCloudIII(new byte[]{0x66,0x8A,2},0x8A)==2
    &&HyperXDevices.ParseCloudIII(new byte[]{0x66,0x0D,1},0x8A)<0,"Cloud III distinguishes charging, full and unrelated reports");
+  var g305=new HidInfo{Vid=0x046D,Pid=0xC53F,Page=0xFF00,Usage=2,Input=20,Output=20};
+  check(Batteries.IsG305BatteryChannel(g305)&&Batteries.ParseG305Battery(new byte[]{57,20,0})==57
+   &&Batteries.ParseG305Battery(new byte[]{0,0,0})<0,"G305 recognizes the long HID++ channel and only accepts a reported percentage");
+  g305.Usage=4;
+  check(!Batteries.IsG305BatteryChannel(g305),"G305 does not probe other vendor collections");
+  var ultimate2=new HidInfo{Vid=0x2DC8,Pid=0x310B,Page=0xFF7A,Usage=1,Input=64,Output=64,
+   Name="8BitDo Ultimate 2 Wireless Controller for PC"};
+  check(EightBitDo.IsUltimate2BatteryChannel(ultimate2),"Ultimate 2 Wireless recognizes the reported vendor collection");
+  ultimate2.Pid=0x310A;
+  check(!EightBitDo.IsUltimate2BatteryChannel(ultimate2),"Ultimate 2 battery queries are not sent to the Ultimate 2C");
+  var ultimate2Reply=new byte[64];
+  Array.Copy(new byte[]{0x02,0x04,0x04,0x00,0x21,0x01},ultimate2Reply,6);
+  ultimate2Reply[18]=0x80|52;
+  check(EightBitDo.ParseUltimate2Battery(ultimate2Reply)==(0x80|52),"Ultimate 2 preserves the charging flag in a valid battery report");
+  ultimate2Reply[4]=0x20;
+  check(EightBitDo.ParseUltimate2Battery(ultimate2Reply)<0,"Ultimate 2 rejects a reply to another command");
   var teevo=new HidInfo{Vid=0x3554,Pid=0xF520,Name="Teevo Terra Pro",Page=0xFF02,Usage=2,Input=17,Output=17};
   var other=new HidInfo{Vid=0x3554,Pid=0xF505,Name="Other Mouse",Page=0xFF02,Usage=2,Input=17,Output=17};
   check(Batteries.FindKnownMouseReceiver(new[]{other,teevo},"Teevo Terra Pro")==teevo
