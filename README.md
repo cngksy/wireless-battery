@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.11
+# Wireless Battery 1.4.12
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -58,6 +58,7 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 Not every brand and model can be read; it depends on how the device publishes its battery data. This version reads:
 
 - Bluetooth devices that publish the standard Windows battery property, regardless of brand.
+- 8BitDo Ultimate 2C Wireless: shows the battery percentage when the controller input report provides it. If the 2.4 GHz receiver exposes only the controller connection, the indicator shows `--`.
 - XInput-compatible wireless controllers. If the driver reports only four levels, Empty/Low/Medium/Full is shown; no exact percentage is made up.
 - Devices whose battery level Logitech G HUB publishes through its local API. The G HUB background service must be running.
 - VXE R1 / NordicMouse family: battery over HID through the 3554:F58A receiver, and the 3554:F58C and verified 373B:1273 cable/charging connections.
@@ -67,6 +68,7 @@ Not every brand and model can be read; it depends on how the device publishes it
 - SteelSeries Apex Pro TKL Wireless: through GG's local status API. The GG/Engine background services must be running.
 - Razer BlackShark V3 Pro PC (1532:0577): exact percentage and charging state directly from its USB receiver; Synapse is not required.
 - HyperX Cloud Alpha Wireless (03F0:098D): exact percentage and charging state directly from its USB receiver; NGENUITY is not required.
+- HyperX Cloud III Wireless (03F0:05B7 receiver, 03F0:06B7 USB): reads battery percentage and charging state from the headset's HID reports.
 
 Proprietary protocols of other vendors' USB receivers, the PlayStation-specific battery protocol and wireless microphones in general are not supported in this version. If Windows or G HUB publishes their battery level, the generic readers may still pick it up. Wired devices and devices that do not publish battery information are never given a percentage.
 
@@ -112,8 +114,11 @@ Protocol references:
 - BatteryHub / Wireless Device Battery Monitor: https://github.com/krisgfx9/Wireless-Device-Battery-Monitor
 - Logitech HID++ / Solaar: https://github.com/pwr-Solaar/Solaar
 - HeadsetControl: https://github.com/Sapd/HeadsetControl
+- 8BitDo Ultimate 2C receiver: https://github.com/ascendedent/8bitdo-Linux-Software/blob/main/spec/protocol.md
+- 8BitDo gamepad input report: https://github.com/notjiccu/wireless-device-battery-monitor/blob/main/src/drivers/eightbitdo.cpp
 - Razer BlackShark V3 Pro receiver protocol: https://github.com/openrazer/openrazer/issues/2838
 - HyperX Cloud Alpha Wireless receiver protocol: https://github.com/FedeltaMedia/hyperx-cloud-alpha-battery
+- HyperX Cloud III Wireless battery protocol: https://lists.openwall.net/linux-kernel/2026/10/22/2247 and https://github.com/LennardKittner/HyperHeadset
 - LogiBAT local G HUB messages: https://github.com/someweirdhuman/LogiBAT
 - Microsoft documentation for Windows XInputGetBatteryInformation and SetupAPI.
 

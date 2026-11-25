@@ -103,6 +103,19 @@ static class RegressionChecks {
   var razerReply=RazerDevices.Frame(0x80,0x21);razerReply[11]=1;razerReply[12]=1;razerReply[13]=73;razerReply[62]=0;for(int i=0;i<62;i++)razerReply[62]^=razerReply[i];
   check(RazerDevices.Parse(razerReply,0x21)==73&&RazerDevices.Parse(razerReply,0x2A)<0,"Razer replies require the matching command and checksum");
   check(HyperXDevices.Parse(new byte[]{0x21,0xBB,0x0B,73},0x0B)==73&&HyperXDevices.Parse(new byte[]{0x21,0xBB,0x0C,1},0x0C)==1&&HyperXDevices.Parse(new byte[]{0x20,0xBB,0x0B,73},0x0B)<0,"HyperX Cloud Alpha Wireless replies");
+  var cloudIII=new HidInfo{Vid=0x03F0,Pid=0x05B7,Page=0xFF13,Usage=1,Input=62,Output=62};
+  check(HyperXDevices.IsCloudIIIChannel(cloudIII),"Cloud III recognizes the wireless receiver's vendor collection");
+  cloudIII.Pid=0x06B7;
+  check(HyperXDevices.IsCloudIIIChannel(cloudIII),"Cloud III recognizes the charging cable's vendor collection");
+  cloudIII.Page=0x000B;
+  check(!HyperXDevices.IsCloudIIIChannel(cloudIII),"Cloud III does not probe the telephony collection");
+  check(HyperXDevices.ParseCloudIII(new byte[]{0x66,0x0D,0x0E,0xD7,48},0x89)==48
+   &&HyperXDevices.ParseCloudIII(new byte[]{0x66,0x89,0x0E,0xD7,100},0x89)==100
+   &&HyperXDevices.ParseCloudIII(new byte[]{0x66,0x89,0,0,0},0x89)<0
+   &&HyperXDevices.ParseCloudIII(new byte[]{0x66,0x89,0x0E,0xD7,101},0x89)<0,"Cloud III validates both battery reply IDs and rejects absent or invalid readings");
+  check(HyperXDevices.ParseCloudIII(new byte[]{0x66,0x0C,1},0x8A)==1
+   &&HyperXDevices.ParseCloudIII(new byte[]{0x66,0x8A,2},0x8A)==2
+   &&HyperXDevices.ParseCloudIII(new byte[]{0x66,0x0D,1},0x8A)<0,"Cloud III distinguishes charging, full and unrelated reports");
   var teevo=new HidInfo{Vid=0x3554,Pid=0xF520,Name="Teevo Terra Pro",Page=0xFF02,Usage=2,Input=17,Output=17};
   var other=new HidInfo{Vid=0x3554,Pid=0xF505,Name="Other Mouse",Page=0xFF02,Usage=2,Input=17,Output=17};
   check(Batteries.FindKnownMouseReceiver(new[]{other,teevo},"Teevo Terra Pro")==teevo

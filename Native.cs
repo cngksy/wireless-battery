@@ -59,7 +59,7 @@ public static class Native {
 }
 public sealed class HidChannel:IDisposable {
  public HidInfo Info; public SafeFileHandle Handle;
- public HidChannel(HidInfo info) {Info=info;Handle=Native.CreateFile(info.Path,0xC0000000,3,IntPtr.Zero,3,0x40000000,IntPtr.Zero);}
+ public HidChannel(HidInfo info,bool readOnly=false) {Info=info;Handle=Native.CreateFile(info.Path,readOnly?0x80000000u:0xC0000000u,3,IntPtr.Zero,3,0x40000000,IntPtr.Zero);}
  public bool Valid { get {return !Handle.IsInvalid;} }
  public bool Send(byte[] data) { return Send(data,500); }
  internal bool Send(byte[] data,int timeout) { return Valid && Info.Output>=data.Length && Native.Transfer(Handle,data,Info.Output,true,timeout)!=null; }

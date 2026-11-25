@@ -110,6 +110,8 @@ public static class Batteries {
   var result=new List<BatteryState>();
   result.AddRange(RazerDevices.Poll(all));
   result.AddRange(HyperXDevices.Poll(all));
+  var ultimate2C=EightBitDo.ReadUltimate2C(all);
+  if(ultimate2C!=null)result.Add(ultimate2C);
   var mice=all.Where(IsVxeMouse)
    .OrderByDescending(IsCompxCable).ThenByDescending(x=>x.Page==0xFF02&&x.Usage==2).ToList();
   if(mice.Count>0) {
