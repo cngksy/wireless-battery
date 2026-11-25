@@ -10,7 +10,7 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 [![GitHub Stars](https://img.shields.io/github/stars/cngksy/wireless-battery?label=Star&logo=github&color=yellow)](https://github.com/cngksy/wireless-battery/stargazers)
 [![License](https://img.shields.io/github/license/cngksy/wireless-battery?label=License&color=lightgrey)](LICENSE)
 [![VirusTotal](https://img.shields.io/badge/VirusTotal-scan%20results-394EFF?logo=virustotal&logoColor=white)](https://www.virustotal.com/gui/file/4f586f4611add569e60ad887210f3caa0e69485604e6802589578d96b1425620)
-[![Report a device](https://img.shields.io/badge/Report-a%20device-2ea44f?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Device%20support%3A%20&body=Brand%20%2F%20model%3A%0AConnection%20(USB%20receiver%20%2F%20Bluetooth%20%2F%20cable)%3A%0ASoftware%20used%20(G%20HUB%2C%20SteelSeries%20GG%2C%20etc.)%3A%0ADevice%20report%20(tray%20menu%20%E2%86%92%20Copy%20device%20report)%3A%0A)
+[![Report a device](https://img.shields.io/badge/Report-a%20device-2ea44f?logo=github)][device-report]
 [![Report a bug](https://img.shields.io/badge/Report-a%20bug-d73a49?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Bug%3A%20)
 [![Share on Reddit](https://img.shields.io/badge/Reddit-Share-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fcngksy%2Fwireless-battery&title=Wireless%20Battery%20-%20see%20your%20wireless%20device%20batteries%20on%20the%20Windows%20taskbar)
 
@@ -97,7 +97,9 @@ Is your device not showing up, or showing the wrong battery level? Let us know a
 
 1. Right-click the Wireless Battery icon and choose **Copy device report** while the device is **not charging**. Note the battery level the device or its own software shows, if you can.
 2. Plug the device in to charge and choose **Copy device report** again.
-3. Open a [bug report](https://github.com/cngksy/wireless-battery/issues/new?title=Device%20support%3A%20&body=Brand%20%2F%20model%3A%0ABattery%20level%20shown%20by%20the%20device%20or%20its%20software%3A%0A%0AReport%20while%20NOT%20charging%3A%0A%0A%0AReport%20while%20charging%3A%0A%0A) and paste both reports with Ctrl+V, together with the brand and model.
+3. Open a [bug report][device-report] and paste both reports with Ctrl+V, together with the brand and model.
+
+[device-report]: https://github.com/cngksy/wireless-battery/issues/new?title=Device%20support%3A%20&body=Brand%20%2F%20model%3A%0AConnection%20%28USB%20receiver%20%2F%20Bluetooth%20%2F%20USB%20cable%29%3A%0ASoftware%20used%20%28if%20any%29%3A%0ABattery%20level%20shown%20by%20the%20device%20or%20its%20software%3A%0A%0AReport%20while%20NOT%20charging%20%28right-click%20the%20Wireless%20Battery%20tray%20icon%20%3E%20Copy%20device%20report%2C%20wait%20for%20the%20%22Device%20report%20copied%20to%20clipboard%22%20notification%2C%20then%20paste%20here%20with%20Ctrl%2BV%29%3A%0A%0A%0AReport%20while%20charging%20%28plug%20in%20the%20device%2C%20right-click%20the%20Wireless%20Battery%20tray%20icon%20%3E%20Copy%20device%20report%2C%20wait%20for%20the%20%22Device%20report%20copied%20to%20clipboard%22%20notification%2C%20then%20paste%20here%20with%20Ctrl%2BV%29%3A%0A%0A%0A
 
 Each report takes about 10 seconds. It contains only device IDs and the data your devices send on their own; no device paths, serial numbers or Bluetooth device names. Nothing is sent to your devices while the report is made. Opening an issue needs a free GitHub account.
 
