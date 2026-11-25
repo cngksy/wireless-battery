@@ -51,31 +51,28 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - While the right-click menu is open, a left or right click on the icon or the indicator closes it instead of reopening it.
 - Device details appear after the pointer rests on the indicator for 1.2 seconds, and never while the menu is open.
 - Battery levels refresh automatically every 60 seconds. Taskbar and monitor changes are tracked separately.
-- After plugging in a new device, use Refresh now to scan right away.
+- After plugging in a new device, use **Refresh now** to scan right away.
+- Other models may work if Windows Bluetooth, XInput, or Logitech G HUB provides battery data. XInput can show a level such as Low or Full. Compatible ATK / VXE receivers may also work.
+- **Remember last charge** is off by default. Enable it to keep disconnected devices' last readings visible in gray, including after an app restart. A known mouse with its receiver plugged in keeps its last reading visible during temporary read failures. Low battery alerts use current readings.
 
 ## Supported devices
 
-Not every brand and model can be read; it depends on how the device publishes its battery data. This version reads:
+- 8BitDo Ultimate 2 Wireless for PC (2.4 GHz receiver)
+- ATK X1 SE
+- HyperX Cloud Alpha Wireless
+- HyperX Cloud III Wireless
+- Logitech G305 LIGHTSPEED
+- Logitech G735 LIGHTSPEED
+- Logitech PRO X Wireless
+- Razer BlackShark V3 Pro (PC USB receiver)
+- SteelSeries Apex Pro TKL Wireless (requires SteelSeries GG)
+- VXE R1 / NordicMouse
 
-- Bluetooth devices that publish the standard Windows battery property, regardless of brand.
-- 8BitDo Ultimate 2 Wireless for PC (2DC8:310B): reads battery status via the 2.4 GHz receiver's vendor HID channel.
-- 8BitDo Ultimate 2C Wireless: shows the battery percentage when the controller input report provides it. If the 2.4 GHz receiver exposes only the controller connection, the indicator shows `--`.
-- XInput-compatible wireless controllers. If the driver reports only four levels, Empty/Low/Medium/Full is shown; no exact percentage is made up.
-- Devices whose battery level Logitech G HUB publishes through its local API. The G HUB background service must be running.
-- VXE R1 / NordicMouse family: battery over HID through the 3554:F58A receiver, and the 3554:F58C and verified 373B:1273 cable/charging connections.
-- Other ATK / VXE / Compx receivers (VID 3554 and 373B, e.g. the ATK X1 SE on the Nearlink 373B:10C9 receiver): read automatically when they speak the same protocol. Only a reply with a valid checksum is accepted; an unknown receiver that does not answer is not listed.
-- Logitech PRO X Wireless 046D:0ABA: the exact percentage from G HUB or HID++ is used first. Without those, a percentage calculated from the voltage is shown.
-- Logitech G305 LIGHTSPEED (046D:C53F receiver): reads the reported battery percentage through HID++ if G HUB has no reading.
-- Logitech G735 LIGHTSPEED (046D:0AD8): reads the exact percentage and charging status directly from the USB receiver when G HUB has no reading. The HID protocol is based on [erzhenin-alex's G735 implementation and USB capture](https://github.com/erzhenin-alex/Wireless-Device-Battery-Monitor/commit/6ff09641e99b68b647f034f2ed91cb6aac75c292).
-- SteelSeries Apex Pro TKL Wireless: through GG's local status API. The GG/Engine background services must be running.
-- Razer BlackShark V3 Pro PC (1532:0577): exact percentage and charging state directly from its USB receiver; Synapse is not required.
-- HyperX Cloud Alpha Wireless (03F0:098D): exact percentage and charging state directly from its USB receiver; NGENUITY is not required.
-- HyperX Cloud III Wireless (03F0:05B7 receiver, 03F0:06B7 USB): reads battery percentage and charging state from the headset's HID reports.
+## Not supported
 
-Proprietary protocols of other vendors' USB receivers, the PlayStation-specific battery protocol and wireless microphones in general are not supported in this version. If Windows or G HUB publishes their battery level, the generic readers may still pick it up. Wired devices and devices that do not publish battery information are never given a percentage.
-
-**Remember last charge** is off by default to keep disconnected devices out of the taskbar. Enable it to show their last recorded charge in gray, including after an app restart. Hover to see when the charge was last read and whether the connection is confirmed. A known mouse whose receiver is still present keeps its last reading visible during a temporary read failure. Low battery alerts use current readings.
-
+- 8BitDo Ultimate 2C Wireless (no usable battery reading from the tested 2.4 GHz receiver, so the indicator shows `--`)
+- Sony DualShock 4 (native PlayStation battery protocol is not implemented)
+- Sony DualSense (native PlayStation battery protocol is not implemented)
 
 ## Bug Report
 
@@ -115,6 +112,7 @@ The application code is GPL-3.0-or-later. The full license is in the `LICENSE` f
 Protocol references:
 - BatteryHub / Wireless Device Battery Monitor: https://github.com/krisgfx9/Wireless-Device-Battery-Monitor
 - Logitech HID++ / Solaar: https://github.com/pwr-Solaar/Solaar
+- Logitech G735 HID protocol and USB capture by erzhenin-alex: https://github.com/erzhenin-alex/Wireless-Device-Battery-Monitor/commit/6ff09641e99b68b647f034f2ed91cb6aac75c292
 - HeadsetControl: https://github.com/Sapd/HeadsetControl
 - 8BitDo Ultimate 2C receiver: https://github.com/ascendedent/8bitdo-Linux-Software/blob/main/spec/protocol.md
 - 8BitDo Ultimate 2 Wireless battery protocol: https://github.com/MiguelSanzBr/8bitdo-ultimate2-linux/blob/main/docs/PROTOCOL.md
