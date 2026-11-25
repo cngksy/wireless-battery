@@ -70,7 +70,9 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 
 If your device still doesn't appear, [send a device report](#bug-report).
 
-### Models with dedicated support
+### Approved devices
+
+These models have built-in support in Wireless Battery. Where support depends on the connection or software, that requirement is listed next to the model.
 
 - 8BitDo Ultimate 2 Wireless for PC (2.4 GHz receiver)
 - ATK X1 SE
