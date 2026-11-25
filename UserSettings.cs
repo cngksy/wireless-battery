@@ -5,6 +5,8 @@ using System.Web.Script.Serialization;
 
 public class UserSettings {
  public bool ShowWidget=true;
+ // Null follows all current and future displays. An empty selection hides every taskbar indicator.
+ public string[] TaskbarDisplays;
  public bool StartWithWindows=true;
  public bool CheckUpdates=true;
  public bool RememberLastCharge=false;

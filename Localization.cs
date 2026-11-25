@@ -5,6 +5,10 @@ public static class L {
  static string Pick(string tr,string en){return Turkish?tr:en;}
  public static string Refresh {get{return Pick("Şimdi yenile","Refresh now");}}
  public static string TaskbarIndicator {get{return Pick("Görev çubuğu göstergesi","Taskbar indicator");}}
+ public static string TaskbarDisplay {get{return Pick("Gösterilecek ekran","Show on display");}}
+ public static string AllDisplays {get{return Pick("Tüm ekranlar","All displays");}}
+ public static string DisplayOption(string label){return Pick("Ekran ","Display ")+label;}
+ public static string DisplayDisconnected(string label){return label+Pick(" (bağlı değil)"," (disconnected)");}
  public static string RememberLastCharge {get{return Pick("Son pil yüzdesini hatırla","Remember last charge");}}
  public static string LastCharge {get{return Pick("Son pil bilgisi: ","Last charge: ");}}
  public static string Disconnected {get{return Pick("Bağlı değil","Disconnected");}}

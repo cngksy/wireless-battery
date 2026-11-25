@@ -1,4 +1,4 @@
-# Wireless Battery 1.4.12
+# Wireless Battery 1.4.13
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -37,10 +37,10 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 
 ## Usage
 
-- Supported devices that report a battery level are detected automatically and placed on the taskbar of every monitor.
+- Supported devices that report a battery level are detected automatically. The indicator appears on every monitor with a taskbar by default. Use **Show on display** in the right-click menu to toggle individual displays or return to **All displays**. A selected monitor keeps its check mark when unplugged and shows the indicator again when it reconnects and its Windows taskbar is available.
 - Hovering over a device shows only that device's name, battery level and last reading.
 - Click a device in the right-click menu to show or hide it; the check mark shows its visibility. Choices are saved in `settings.json`.
-- Menu order: Taskbar indicator and Remember last charge; Start with Windows and Check for updates; device list; Refresh now; Exit.
+- Menu order: Taskbar indicator, Show on display and Remember last charge; Start with Windows and Check for updates; device list; Refresh now; Exit.
 - If your device does not show up, choose **Copy device report** in the menu. The IDs of connected USB devices are copied to the clipboard; paste the report wherever you want with Ctrl+V. No browser page is opened. The report contains no device paths, serial numbers or Bluetooth device names. It also listens for 10 seconds to the vendor channels of devices that are not supported yet and includes what they send; nothing is sent to any device. For a headset, one report while charging and one while not charging helps the most.
 - The app checks GitHub for the latest version 30 seconds after starting and every 6 hours after that. When a new version is out, it shows one notification. Clicking **Check for updates**, **New version: … — Install**, or the update notification downloads the official installer, checks its SHA-256 against the release checksums, and installs it in the background. The app closes during installation, restarts, and confirms the new version with an "Updated successfully" notification. Versions older than 1.4.7 need one final manual update to enable this flow.
 - Opening the menu silently refreshes update availability when the last successful check was over five minutes ago.

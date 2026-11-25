@@ -85,12 +85,33 @@ static class RegressionChecks {
   check(DeviceReport.Hex(new byte[]{0x01,0xA5,0,0,0})=="01 A5 (+3 x 00)"&&DeviceReport.Hex(new byte[]{0,0})=="00 (+1 x 00)","Captured reports are printed compactly");
   check(DeviceReport.IsListenCandidate(new HidInfo{Vid=0x3634,Pid=0x4155,Page=0xFF02,Usage=2,Input=65,Output=65})&&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x3634,Pid=0x4155,Page=0x000C,Usage=1,Input=3})&&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x373B,Pid=0x10C9,Page=0xFF02,Usage=2,Input=17,Output=17}),"Only unsupported vendor channels are listened to");
   var second=new System.Drawing.Rectangle(-1920,78,1920,1080);var menuSize=new System.Drawing.Size(277,254);
+  string display1=@"\\.\DISPLAY1",display2=@"\\.\DISPLAY2";
+  check(Taskbars.DisplayNumber(display2)==2,"Monitor label uses the Windows display number");
+  string display3=@"\\.\DISPLAY3";
+  check(Taskbars.IsDisplayOptionChecked(null,null)&&!Taskbars.IsDisplayOptionChecked(null,display2)
+   &&Taskbars.ShowsOnDisplay(null,display2),"All displays shows every indicator but only checks the all-displays item");
+  var selectedDisplays=Taskbars.ToggleDisplay(null,display2);
+  check(Taskbars.IsDisplayOptionChecked(selectedDisplays,display2)&&!Taskbars.IsDisplayOptionChecked(selectedDisplays,null)
+   &&!Taskbars.ShowsOnDisplay(selectedDisplays,display1),"Selecting a display from all-displays mode shows only that display");
+  var twoDisplays=Taskbars.ToggleDisplay(selectedDisplays,display3);
+  check(Taskbars.ShowsOnDisplay(twoDisplays,display2)&&Taskbars.ShowsOnDisplay(twoDisplays,display3)
+   &&!Taskbars.ShowsOnDisplay(twoDisplays,display1),"Selecting another display keeps the earlier selection");
+  settings.TaskbarDisplays=Taskbars.ToggleDisplay(twoDisplays,display3);
+  var restoredDisplays=json.Deserialize<UserSettings>(json.Serialize(settings)).TaskbarDisplays;
+  check(restoredDisplays.Length==1&&Taskbars.ShowsOnDisplay(restoredDisplays,display2)
+   &&json.Deserialize<UserSettings>("{\"ShowWidget\":true}").TaskbarDisplays==null,
+   "Custom selections survive a restart and older settings keep all displays");
+  check(!Taskbars.ShowsOnDisplay(Taskbars.ToggleDisplay(restoredDisplays,display2),display2),
+   "An empty selection hides all indicators");
   var nearEdge=MenuToggle.MenuOrigin(new System.Drawing.Point(-60,1134),menuSize,second);
   check(nearEdge.X==-277&&nearEdge.Y==1134-254,"Menu near the right edge of a secondary monitor stays on that monitor");
   var leftEdge=MenuToggle.MenuOrigin(new System.Drawing.Point(-1910,1134),menuSize,second);
   check(leftEdge.X==-1910&&leftEdge.X>=second.Left,"Menu never crosses the left edge either");
   var top=MenuToggle.MenuOrigin(new System.Drawing.Point(100,90),menuSize,second);
   check(top.Y==90,"Menu opens below the cursor when there is no room above");
+  check(MenuToggle.SubmenuDirection(new System.Drawing.Rectangle(-277,930,275,22),132,second)==System.Windows.Forms.ToolStripDropDownDirection.Left
+   &&MenuToggle.SubmenuDirection(new System.Drawing.Rectangle(-1700,930,275,22),132,second)==System.Windows.Forms.ToolStripDropDownDirection.Right,
+   "The display submenu opens away from the nearest monitor edge when space is limited");
   string testHash=new string('a',64);
   check(Updates.InstallerHash(testHash+"  WirelessBattery-Setup.exe\r\n")==testHash,"Installer hash supports release checksum format");
   bool rejected=false;try{Updates.InstallerHash(testHash+"  Other.exe");}catch(InvalidDataException){rejected=true;}check(rejected,"Wrong checksum filename is rejected");

@@ -40,6 +40,14 @@ class BatteryApp:ApplicationContext {
   var toggle=new ToolStripMenuItem(L.TaskbarIndicator){Checked=settings.ShowWidget,CheckOnClick=true};
   toggle.CheckedChanged+=(s,e)=>{settings.ShowWidget=toggle.Checked;settings.Save();ApplyVisibility();};
   menu.Items.Add(toggle);
+  displayMenu=new ToolStripMenuItem(L.TaskbarDisplay);
+  menu.Items.Add(displayMenu);
+  menu.Opened+=(s,e)=>{
+   var itemBounds=menu.RectangleToScreen(displayMenu.Bounds);
+   var workingArea=Screen.FromRectangle(menu.Bounds).WorkingArea;
+   int width=displayMenu.DropDown.GetPreferredSize(Size.Empty).Width;
+   displayMenu.DropDownDirection=MenuToggle.SubmenuDirection(itemBounds,width,workingArea);
+  };
   var remember=new ToolStripMenuItem(L.RememberLastCharge){Checked=settings.RememberLastCharge,CheckOnClick=true};
   remember.CheckedChanged+=(s,e)=>{settings.RememberLastCharge=remember.Checked;settings.Save();ApplyVisibility();};
   menu.Items.Add(remember);menu.Items.Add(new ToolStripSeparator());
@@ -56,7 +64,7 @@ class BatteryApp:ApplicationContext {
   menu.Items.Add(new ToolStripSeparator());menu.Items.Add(L.Exit,null,(s,e)=>ExitThread());
   // Device entries are rebuilt right before showing, so the menu size used for placement is final.
   main=new NotifyIcon{Icon=MakeAppIcon(),Text="Wireless Battery • "+L.Scanning,Visible=true};
-  menuToggle=new MenuToggle(menu){BeforeShow=()=>{RebuildDeviceMenu();if(settings.CheckUpdates&&(DateTime.UtcNow-lastUpdateCheck).TotalMinutes>=5)CheckUpdates(false,false);}};
+  menuToggle=new MenuToggle(menu){BeforeShow=()=>{RebuildDisplayMenu();RebuildDeviceMenu();if(settings.CheckUpdates&&(DateTime.UtcNow-lastUpdateCheck).TotalMinutes>=5)CheckUpdates(false,false);}};
   main.MouseDown+=(s,e)=>menuToggle.Press();
   main.MouseUp+=(s,e)=>menuToggle.Release(e.Button);
   widgets=new WidgetManager(menuToggle,settings.ShowWidget);
@@ -71,7 +79,7 @@ class BatteryApp:ApplicationContext {
   }
   updateTimer=new System.Windows.Forms.Timer{Interval=30000};updateTimer.Tick+=(s,e)=>{updateTimer.Interval=6*60*60*1000;if(settings.CheckUpdates)CheckUpdates(false);};updateTimer.Start();
  }
- ToolStripMenuItem updateItem;UpdateInfo available;string balloonUrl;bool checkingUpdates;System.Windows.Forms.Timer updateTimer,updatedTimer;
+ ToolStripMenuItem updateItem,displayMenu;UpdateInfo available;string balloonUrl;bool checkingUpdates;System.Windows.Forms.Timer updateTimer,updatedTimer;
  void Balloon(string title,string text,ToolTipIcon icon,string url){balloonUrl=url;main.ShowBalloonTip(url!=null?10000:5000,title,text,icon);}
  // Copies a list of connected HID devices (IDs, report sizes and product
  // names only: no paths, serials or Bluetooth names) to the clipboard.
@@ -109,6 +117,32 @@ class BatteryApp:ApplicationContext {
   }catch(Exception e){if(manual&&!disposed)Balloon("Wireless Battery",L.UpdateError,ToolTipIcon.Warning,null);try{File.WriteAllText(Program.DataPath("update-error.txt"),e.ToString());}catch{}}
   finally{checkingUpdates=false;}
  }
+ void RebuildDisplayMenu(){
+  while(displayMenu.DropDownItems.Count>0)displayMenu.DropDownItems[0].Dispose();
+  var displays=Screen.AllScreens.Select(screen=>screen.DeviceName).OrderBy(Taskbars.DisplayNumber).ToArray();
+  foreach(string display in displays)AddDisplayOption(DisplayLabel(display),display);
+  if(settings.TaskbarDisplays!=null)
+   foreach(string display in settings.TaskbarDisplays.Except(displays,StringComparer.OrdinalIgnoreCase))
+    AddDisplayOption(L.DisplayDisconnected(DisplayLabel(display)),display);
+  if(displayMenu.DropDownItems.Count>0)displayMenu.DropDownItems.Add(new ToolStripSeparator());
+  AddDisplayOption(L.AllDisplays,null);
+ }
+ static string DisplayLabel(string deviceName){
+  int number=Taskbars.DisplayNumber(deviceName);
+  return L.DisplayOption(number>0?number.ToString():deviceName);
+ }
+ void AddDisplayOption(string label,string deviceName){
+  var option=new ToolStripMenuItem(label){
+   Checked=Taskbars.IsDisplayOptionChecked(settings.TaskbarDisplays,deviceName)
+  };
+  option.Click+=(s,e)=>{
+   settings.TaskbarDisplays=deviceName==null?null:
+    Taskbars.ToggleDisplay(settings.TaskbarDisplays,deviceName);
+   settings.Save();
+   ApplyVisibility();
+  };
+  displayMenu.DropDownItems.Add(option);
+ }
  void RebuildDeviceMenu(){
   foreach(var item in deviceItems){menu.Items.Remove(item);item.Dispose();}deviceItems.Clear();int index=menu.Items.IndexOf(devicesStart)+1;
   foreach(var state in states.Where(settings.IncludesReading).OrderBy(x=>x.Name)){
@@ -120,7 +154,7 @@ class BatteryApp:ApplicationContext {
  }
  void ApplyVisibility(){
   var readings=states.Where(settings.IncludesReading).ToList();
-  widgets.Update(readings.Where(settings.IsShown).ToList(),settings.ShowWidget);
+  widgets.Update(readings.Where(settings.IsShown).ToList(),settings.ShowWidget,settings.TaskbarDisplays);
   string trayText="Wireless Battery • "+L.DeviceCount(readings.Count);if(main.Text!=trayText)main.Text=trayText;
  }
  async void Refresh(){if(busy||disposed)return;busy=true;try{
@@ -161,6 +195,11 @@ class MenuToggle {
   int x=Math.Max(screen.Left,Math.Min(cursor.X,screen.Right-menu.Width));
   int y=cursor.Y-menu.Height;if(y<screen.Top)y=Math.Max(screen.Top,Math.Min(cursor.Y,screen.Bottom-menu.Height));
   return new Point(x,y);
+ }
+ public static ToolStripDropDownDirection SubmenuDirection(Rectangle item,int width,Rectangle screen){
+  int rightSpace=screen.Right-item.Right;
+  int leftSpace=item.Left-screen.Left;
+  return width>rightSpace&&leftSpace>rightSpace?ToolStripDropDownDirection.Left:ToolStripDropDownDirection.Right;
  }
  void ShowAt(Point cursor){
   if(BeforeShow!=null)BeforeShow();

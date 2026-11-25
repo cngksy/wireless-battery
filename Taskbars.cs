@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Automation;
 using System.Windows.Forms;
@@ -13,6 +14,23 @@ public static class Taskbars {
   var result=new List<IntPtr>();IntPtr main=FindWindow("Shell_TrayWnd",null);if(main!=IntPtr.Zero)result.Add(main);
   for(IntPtr other=FindWindowEx(IntPtr.Zero,IntPtr.Zero,"Shell_SecondaryTrayWnd",null);other!=IntPtr.Zero;other=FindWindowEx(IntPtr.Zero,other,"Shell_SecondaryTrayWnd",null))result.Add(other);
   return result;
+ }
+ internal static int DisplayNumber(string deviceName) {
+  const string prefix=@"\\.\DISPLAY";
+  int number;
+  return deviceName!=null&&deviceName.StartsWith(prefix,StringComparison.OrdinalIgnoreCase)
+   &&int.TryParse(deviceName.Substring(prefix.Length),out number)&&number>0?number:0;
+ }
+ internal static bool ShowsOnDisplay(string[] selected,string deviceName) {
+  return selected==null||selected.Contains(deviceName,StringComparer.OrdinalIgnoreCase);
+ }
+ internal static bool IsDisplayOptionChecked(string[] selected,string deviceName) {
+  return deviceName==null?selected==null:selected!=null&&ShowsOnDisplay(selected,deviceName);
+ }
+ internal static string[] ToggleDisplay(string[] selected,string deviceName) {
+  var displays=new HashSet<string>(selected??new string[0],StringComparer.OrdinalIgnoreCase);
+  if(!displays.Remove(deviceName))displays.Add(deviceName);
+  return displays.OrderBy(DisplayNumber).ToArray();
  }
  class ClockCache {public int Right;public DateTime Time;}
  static readonly Dictionary<IntPtr,ClockCache> cache=new Dictionary<IntPtr,ClockCache>();
@@ -40,11 +58,14 @@ public static class Taskbars {
 class WidgetManager:IDisposable {
  readonly Dictionary<IntPtr,Widget> widgets=new Dictionary<IntPtr,Widget>();
  readonly Timer timer=new Timer{Interval=2000};readonly MenuToggle menuToggle;
- List<BatteryState> states=new List<BatteryState>();bool enabled;
+ List<BatteryState> states=new List<BatteryState>();bool enabled;string[] selectedDisplays;
  public WidgetManager(MenuToggle toggle,bool show){menuToggle=toggle;enabled=show;timer.Tick+=(s,e)=>RefreshHosts();timer.Start();}
- public void Update(List<BatteryState> values,bool show){states=values;enabled=show;RefreshHosts();foreach(var widget in widgets.Values){widget.EnabledByUser=show;widget.SetStates(values);if(!show)widget.Hide();}}
+ public void Update(List<BatteryState> values,bool show,string[] displays){states=values;enabled=show;selectedDisplays=displays;RefreshHosts();foreach(var widget in widgets.Values){widget.EnabledByUser=show;widget.SetStates(values);if(!show)widget.Hide();}}
  void RefreshHosts(){
-  var bars=Taskbars.List();foreach(var handle in new List<IntPtr>(widgets.Keys))if(!bars.Contains(handle)||widgets[handle].IsDisposed){widgets[handle].Dispose();widgets.Remove(handle);}
+  var bars=Taskbars.List();
+  if(selectedDisplays!=null)
+   bars.RemoveAll(handle=>!Taskbars.ShowsOnDisplay(selectedDisplays,Screen.FromHandle(handle).DeviceName));
+  foreach(var handle in new List<IntPtr>(widgets.Keys))if(!bars.Contains(handle)||widgets[handle].IsDisposed){widgets[handle].Dispose();widgets.Remove(handle);}
   foreach(var handle in bars)if(!widgets.ContainsKey(handle)){var widget=new Widget(menuToggle,handle){EnabledByUser=enabled};widgets.Add(handle,widget);if(enabled)widget.Show();widget.SetStates(states);}
  }
  public void Dispose(){timer.Stop();timer.Dispose();foreach(var widget in widgets.Values)widget.Dispose();widgets.Clear();}
