@@ -26,6 +26,15 @@ static class RegressionChecks {
   var cachedBluetooth=Batteries.MergeReadings(new[]{offBt},new[]{new BatteryState{Key=offBt.Key,Percent=68,Sample=now.AddHours(-1),Status="Windows Bluetooth"}},now,true)[0];
   check(cachedBluetooth.Percent==68&&cachedBluetooth.Sample==now.AddHours(-1)&&cachedBluetooth.Dimmed,
    "An offline Bluetooth snapshot does not replace the saved sample or timestamp");
+  var redmi=new BatteryState{Key="windows:redmi-profile",Name="REDMI Buds 8 Pro Hands-Free AG",Kind="Kulaklık",
+   Percent=100,Stale=true,Connection=DeviceConnection.Disconnected};
+  var bluetoothProfiles=new List<BatteryState>{redmi};
+  WindowsRuntimeBattery.MergeConnectedBluetooth(bluetoothProfiles,"windows:redmi-endpoint","REDMI Buds 8 Pro",0,-1,now);
+  check(bluetoothProfiles.Count==1&&bluetoothProfiles[0].Key==redmi.Key&&bluetoothProfiles[0].Percent==100
+   &&bluetoothProfiles[0].Sample==now&&new UserSettings().IncludesReading(bluetoothProfiles[0]),
+   "A connected Bluetooth endpoint can confirm a battery reading from its hands-free profile");
+  WindowsRuntimeBattery.MergeConnectedBluetooth(bluetoothProfiles,"windows:no-battery","Another headset",0,-1,now);
+  check(bluetoothProfiles.Count==1,"A connected endpoint without a battery reading does not add an empty indicator");
   var hitStates=new List<BatteryState>{new BatteryState{Percent=95},new BatteryState{Percent=95},new BatteryState{Percent=95}};
   check(Widget.HitDevice(0,1,hitStates)==0&&Widget.HitDevice(65,1,hitStates)==0&&Widget.HitDevice(66,1,hitStates)==1&&Widget.HitDevice(132,1,hitStates)==2,"Device boundaries must select separate cells");
   check(Widget.HitDevice(-1,1,hitStates)==-1&&Widget.HitDevice(198,1,hitStates)==-1,"Outside strip must not select a device");
@@ -180,6 +189,24 @@ static class RegressionChecks {
   check(LogitechReceivers.SlotCount(unifying)==6,"HID++ discovers Bolt slots by receiver class");
   unifying.Pid=0xC53F;
   check(LogitechReceivers.SlotCount(unifying)==0,"The dedicated G305 route is not probed twice");
+  var ghubMouse=new BatteryState{Key="ghub:g502",Name="G502 X PLUS Wireless Gaming Mouse",Kind="Mouse",Percent=100,Sample=now};
+  var ghubKeys=new BatteryState{Key="ghub:g515",Name="G515 LIGHTSPEED TKL Gaming Keyboard",Kind="Klavye",Percent=94,Sample=now};
+  var hidMouse=new BatteryState{Key="logitech:hidpp:mouse:1",Name="Logitech G502 X PLUS",Kind="Mouse",Percent=99,Sample=now};
+  var hidKeys=new BatteryState{Key="logitech:hidpp:keyboard:1",Name="Logitech G515 LS TKL",Kind="Klavye",Percent=93,Sample=now};
+  var hidOther=new BatteryState{Key="logitech:hidpp:other:1",Name="Logitech G502 X LIGHTSPEED",Kind="Mouse",Percent=70,Sample=now};
+  var logitechResults=new List<BatteryState>{ghubMouse,ghubKeys};
+  Batteries.AddLogitechReceiverReadings(logitechResults,new[]{ghubMouse,ghubKeys},new[]{hidMouse,hidKeys,hidOther});
+  check(logitechResults.Count==3&&logitechResults[0]==ghubMouse&&logitechResults[1]==ghubKeys&&logitechResults[2]==hidOther,
+   "G HUB and HID++ share one indicator per unambiguously matching model and preserve distinct models");
+  check(Batteries.MergeReadings(logitechResults,new[]{hidMouse,hidKeys},now,true).Count==3,
+   "Remembered HID++ duplicates do not reappear when G HUB supplies the live reading");
+  var logitechFallback=new List<BatteryState>();
+  Batteries.AddLogitechReceiverReadings(logitechFallback,new BatteryState[0],new[]{hidMouse,hidKeys});
+  check(logitechFallback.Count==2,"The receiver still supplies both models without G HUB");
+  var offlineGHub=new BatteryState{Key=ghubMouse.Key,Name=ghubMouse.Name,Kind=ghubMouse.Kind,Stale=true,Connection=DeviceConnection.Disconnected};
+  var logitechOffline=new List<BatteryState>{offlineGHub};
+  Batteries.AddLogitechReceiverReadings(logitechOffline,new[]{offlineGHub},new[]{hidMouse});
+  check(logitechOffline.Count==1&&logitechOffline[0]==hidMouse,"A live HID++ reading replaces a matching offline G HUB entry");
   var unified=LogitechReceivers.ParseBattery(new byte[]{0,2,1,0},0x1004);
   check(unified!=null&&unified.Level==L.BatteryLevel(1)&&unified.Charging
    &&Widget.DeviceTooltip(unified).Contains(L.BatteryLabel(true)+L.BatteryLevel(1)),

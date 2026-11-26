@@ -33,20 +33,31 @@ static class WindowsRuntimeBattery {
      object value;
      int percent=device.Properties.TryGetValue(BatteryLife,out value)?ReadPercent(value):-1;
      if(percent<0&&device.Properties.TryGetValue(BluetoothBattery,out value))percent=ReadPercent(value);
-     if(percent<0||string.IsNullOrWhiteSpace(device.Name))continue;
      string key=device.Properties.TryGetValue(ContainerId,out value)&&value is Guid&&(Guid)value!=Guid.Empty
       ?"windows:"+((Guid)value).ToString():Native.HidKey("windows:bluetooth",device.Id);
-     string name=WindowsDevices.BluetoothName(device.Name);
      uint cod=device.Properties.TryGetValue(ClassOfDevice,out value)&&value is uint?(uint)value<<8:0;
-     var existing=readings.FirstOrDefault(x=>x.Key==key)??readings.SingleOrDefaultSafe(x=>
-      string.Equals(WindowsDevices.BluetoothName(x.Name),name,StringComparison.OrdinalIgnoreCase));
-     if(existing!=null&&!existing.Stale)continue;
-     if(existing!=null){key=existing.Key;readings.Remove(existing);}
-     readings.Add(new BatteryState{Key=key,Name=name,Kind=WindowsDevices.KindFromClass(cod,name),
-      Percent=percent,Connection=DeviceConnection.Connected,Sample=DateTime.Now,Status="Windows Bluetooth pil bilgisi"});
+     MergeConnectedBluetooth(readings,key,device.Name,cod,percent,DateTime.Now);
     }
    }
   } catch(OperationCanceledException){} catch(COMException){} catch(ArgumentException){} catch(TypeLoadException){} catch(MissingMethodException){}
+ }
+ internal static void MergeConnectedBluetooth(List<BatteryState> readings,string key,string endpointName,uint cod,int percent,DateTime now) {
+  string name=WindowsDevices.BluetoothName(endpointName);
+  var existing=readings.FirstOrDefault(x=>x.Key==key);
+  if(existing==null&&!string.IsNullOrWhiteSpace(name))existing=readings.SingleOrDefaultSafe(x=>
+   string.Equals(WindowsDevices.BluetoothName(x.Name),name,StringComparison.OrdinalIgnoreCase));
+  if(existing!=null&&!existing.Stale)return;
+
+  // The connected endpoint may expose no battery property of its own. In
+  // that case use the value read from its SetupAPI profile on this scan.
+  if(percent<0&&existing!=null)percent=existing.Percent;
+  if(string.IsNullOrWhiteSpace(name)&&existing!=null)name=existing.Name;
+  if(percent<0||string.IsNullOrWhiteSpace(name))return;
+  var reading=new BatteryState{Key=existing==null?key:existing.Key,Name=name,
+   Kind=cod==0&&existing!=null?existing.Kind:WindowsDevices.KindFromClass(cod,name),
+   Percent=percent,Connection=DeviceConnection.Connected,Sample=now,Status="Windows Bluetooth pil bilgisi"};
+  if(existing==null)readings.Add(reading);
+  else readings[readings.IndexOf(existing)]=reading;
  }
  internal static int ReadPercent(object value) {
   if(value is byte)return (byte)value<=100?(byte)value:-1;

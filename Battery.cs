@@ -54,6 +54,9 @@ public static class Batteries {
    result.Add(reading);
   }
   foreach(var saved in remembered.Values) {
+   if(IsLogitechSourceKey(saved.Key)&&result.Count(x=>IsLogitechSourceKey(x.Key)&&IsOtherLogitechSource(x,saved)
+    &&x.Percent>=0&&!x.Stale&&SameLogitechDevice(x,saved))==1
+    &&remembered.Values.Count(x=>IsLogitechSourceKey(x.Key)&&!IsOtherLogitechSource(x,saved)&&SameLogitechDevice(x,saved))==1)continue;
    // Loss of the G HUB API alone does not establish a radio disconnect.
    var connection=scanned&&!saved.Key.StartsWith("ghub:",StringComparison.Ordinal)
     ?DeviceConnection.Disconnected:DeviceConnection.Unknown;
@@ -178,11 +181,7 @@ public static class Batteries {
    if(ghub.Stale&&result.Any(x=>x.Key==ghub.Key&&x.Percent>=0&&!x.Stale))continue;
    result.RemoveAll(x=>x.Key==ghub.Key);result.Add(ghub);
   }
-  foreach(var reading in LogitechReceivers.Poll(all)) {
-   var duplicate=ghubReadings.Find(x=>!x.Stale&&x.Percent>=0&&x.Kind==reading.Kind&&SameLogitechName(x.Name,reading.Name));
-   if(duplicate!=null)ghubReadings.Remove(duplicate);
-   else result.Add(reading);
-  }
+  AddLogitechReceiverReadings(result,ghubReadings,LogitechReceivers.Poll(all));
   if(!result.Any(x=>x.Key==LogitechG305Key&&x.Percent>=0&&!x.Stale)) {
    var g305=ReadG305(all);
    if(g305!=null) {
@@ -207,10 +206,46 @@ public static class Batteries {
   result.AddRange(WindowsDevices.Poll());
   return result;
  }
- static bool SameLogitechName(string a,string b) {
-  const string prefix="Logitech ";
-  if(a.StartsWith(prefix,StringComparison.OrdinalIgnoreCase))a=a.Substring(prefix.Length);
-  if(b.StartsWith(prefix,StringComparison.OrdinalIgnoreCase))b=b.Substring(prefix.Length);
-  return string.Equals(a,b,StringComparison.OrdinalIgnoreCase);
+ internal static void AddLogitechReceiverReadings(List<BatteryState> result,IEnumerable<BatteryState> ghub,IEnumerable<BatteryState> receiver) {
+  var ghubReadings=ghub.ToList();
+  var native=receiver.ToList();
+  foreach(var reading in native) {
+   var matches=ghubReadings.Where(x=>SameLogitechDevice(x,reading)).ToList();
+   if(matches.Count==1&&native.Count(x=>SameLogitechDevice(x,reading))==1) {
+    var ghubReading=matches[0];
+    if(ghubReading.Percent>=0&&!ghubReading.Stale)continue;
+    result.Remove(ghubReading);
+   }
+   result.Add(reading);
+  }
+ }
+
+ static bool IsLogitechSourceKey(string key) {
+  return key!=null&&(key.StartsWith("ghub:",StringComparison.Ordinal)||key.StartsWith("logitech:hidpp:",StringComparison.Ordinal));
+ }
+
+ static bool IsOtherLogitechSource(BatteryState a,BatteryState b) {
+  return a.Key.StartsWith("ghub:",StringComparison.Ordinal)!=b.Key.StartsWith("ghub:",StringComparison.Ordinal);
+ }
+
+ static bool SameLogitechDevice(BatteryState a,BatteryState b) {
+  if(a.Kind!=b.Kind)return false;
+  var name=LogitechModelName(a.Name);
+  return name.Length>0&&name==LogitechModelName(b.Name);
+ }
+
+ static string LogitechModelName(string name) {
+  if(string.IsNullOrWhiteSpace(name))return "";
+  var words=name.ToUpperInvariant().Split((char[])null,StringSplitOptions.RemoveEmptyEntries).ToList();
+  if(words[0]=="LOGITECH")words.RemoveAt(0);
+  if(words.Count>0&&(words[words.Count-1]=="MOUSE"||words[words.Count-1]=="KEYBOARD"||words[words.Count-1]=="HEADSET")) {
+   words.RemoveAt(words.Count-1);
+   while(words.Count>0) {
+    string word=words[words.Count-1];
+    if(word!="GAMING"&&word!="WIRELESS"&&word!="MECHANICAL")break;
+    words.RemoveAt(words.Count-1);
+   }
+  }
+  return string.Join(" ",words.Select(x=>x=="LS"?"LIGHTSPEED":x));
  }
 }
