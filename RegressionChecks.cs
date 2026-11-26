@@ -188,6 +188,29 @@ static class RegressionChecks {
   check(systemBattery!=null&&systemBattery.Charging&&systemBattery.Percent==82&&!new UserSettings().IsShown(systemBattery)
    &&WindowsDevices.SystemBattery(128,82)==null&&WindowsDevices.SystemBattery(255,255)==null,
    "System battery is opt-in and omitted when Windows has no usable reading");
+  check(WindowsRuntimeBattery.ReadPercent((byte)80)==80&&WindowsRuntimeBattery.ReadPercent((uint)80)==80
+   &&WindowsRuntimeBattery.ReadPercent((byte)101)==-1&&WindowsRuntimeBattery.ReadPercent(null)==-1,
+   "Windows Bluetooth percentages reject unknown values and accept the standard byte property");
+  check(WindowsDevices.BluetoothName("HD 350BT Hands-Free AG Audio")=="HD 350BT"
+   &&WindowsDevices.KindFromClass(0,"HD 350BT")=="Kulaklık","HD 350BT is displayed as a headset with the profile suffix removed");
+  check(WindowsRuntimeBattery.CapacityPercent(250,500)==50&&WindowsRuntimeBattery.CapacityPercent(0,500)==0
+   &&WindowsRuntimeBattery.CapacityPercent(500,0)==-1&&WindowsRuntimeBattery.CapacityPercent(null,500)==-1,
+   "Xbox Gaming Input uses real capacities without inventing a percentage for absent data");
+  var piao=new HidInfo{Vid=0x372E,Pid=0x1014,Page=0xFF00,Usage=1,Feature=64};
+  byte[] piaoRequest=IpiPiao.Request();
+  check(IpiPiao.Matches(piao)&&piaoRequest.Length==64&&piaoRequest[0]==3&&piaoRequest[1]==0x20
+   &&piaoRequest[5]==0x4F&&piaoRequest[6]==0x81,"IPI PIAO uses the documented feature report on its receiver");
+  piao.Pid=0x1015;
+  check(IpiPiao.Matches(piao),"IPI PIAO cable uses the same feature channel");
+  piao.Page=0xFF06;
+  check(!IpiPiao.Matches(piao),"IPI PIAO does not send the request to the wrong vendor collection");
+  check(IpiPiao.Decode(new byte[]{3,0x50,0,1,0,0x4F,0x81,64})==64
+   &&IpiPiao.Decode(new byte[]{3,0x50,0,1,0,0x81,0xE4,0})==0xE4
+   &&IpiPiao.Decode(new byte[]{3,0x50,2,0,0,0x4F,0x81,64})<0
+   &&IpiPiao.Decode(new byte[]{3,0x50,0,1,0,0x81,0x7F,0})<0
+   &&IpiPiao.Decode(piaoRequest)<0,"IPI PIAO accepts documented battery replies and rejects an echo or invalid reading");
+  check(IpiPiao.Request(2)[1]==0x22&&IpiPiao.Decode(new byte[]{3,0x50,0,1,2,0x81,64,0},2)==64,
+   "IPI PIAO accepts the alternate documented battery request and response");
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }

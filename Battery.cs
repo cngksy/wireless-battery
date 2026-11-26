@@ -138,6 +138,8 @@ public static class Batteries {
   result.AddRange(RazerDevices.Poll(all));
   result.AddRange(HyperXDevices.Poll(all));
   result.AddRange(PlayStation.Poll(all));
+  var piao=IpiPiao.Read(all);
+  if(piao!=null)result.Add(piao);
   var ultimate2C=EightBitDo.ReadUltimate2C(all);
   if(ultimate2C!=null)result.Add(ultimate2C);
   var ultimate2=EightBitDo.ReadUltimate2(all);

@@ -1,4 +1,4 @@
-# Wireless Battery 1.5.0
+# Wireless Battery 1.5.1
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -138,6 +138,9 @@ Protocol references:
 - 8BitDo Ultimate 2C receiver: https://github.com/ascendedent/8bitdo-Linux-Software/blob/main/spec/protocol.md
 - 8BitDo Ultimate 2 Wireless battery protocol: https://github.com/MiguelSanzBr/8bitdo-ultimate2-linux/blob/main/docs/PROTOCOL.md
 - 8BitDo gamepad input report: https://github.com/notjiccu/wireless-device-battery-monitor/blob/main/src/drivers/eightbitdo.cpp
+- IPI PIAO feature report: https://github.com/ferloom/Wireless-Device-Battery-Monitor/blob/main/src/drivers/piao.rs and https://github.com/DillanCidral/Joule
+- Windows peripheral battery property: https://learn.microsoft.com/en-us/windows/win32/properties/props-system-devices-batterylife
+- Xbox battery fallback: https://learn.microsoft.com/en-us/uwp/api/windows.gaming.input.igamecontrollerbatteryinfo.trygetbatteryreport
 - Razer BlackShark V3 Pro receiver protocol: https://github.com/openrazer/openrazer/issues/2838
 - HyperX Cloud Alpha Wireless receiver protocol: https://github.com/FedeltaMedia/hyperx-cloud-alpha-battery
 - HyperX Cloud III Wireless battery protocol: https://lists.openwall.net/linux-kernel/2026/10/22/2247 and https://github.com/LennardKittner/HyperHeadset

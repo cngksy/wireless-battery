@@ -25,6 +25,7 @@ public static class WindowsDevices {
    BatterySupported=false,Status="Windows",Sample=DateTime.Now};
  }
  static readonly PropertyKey Battery=new PropertyKey("104ea319-6ee2-4701-bd47-8ddbf425bbe5",2);
+ static readonly PropertyKey StandardBattery=new PropertyKey("49cd1f76-5626-4b17-a4e8-18b4aa1a2213",10);
  static readonly PropertyKey Connected=new PropertyKey("83da6326-97a6-4088-9453-a1923f573b29",15);
  static readonly PropertyKey Container=new PropertyKey("8c7ed206-3f8a-4827-b3ab-ae9e1faefc6c",2);
  static readonly PropertyKey Name=new PropertyKey("a45c254e-df1c-4efd-8020-67d146a850e0",14);
@@ -32,11 +33,26 @@ public static class WindowsDevices {
  static readonly PropertyKey BluetoothClass=new PropertyKey("2bd67d8b-8beb-48d5-87e0-6cda3428040a",10);
  static byte[] Property(IntPtr set,ref DeviceInfo info,PropertyKey key,out uint type){var bytes=new byte[1024];uint needed;if(!SetupDiGetDevicePropertyW(set,ref info,ref key,out type,bytes,(uint)bytes.Length,out needed,0)||needed>bytes.Length)return null;Array.Resize(ref bytes,(int)needed);return bytes;}
  static string Text(IntPtr set,ref DeviceInfo info,PropertyKey key){uint type;var b=Property(set,ref info,key,out type);return b!=null&&type==18?Encoding.Unicode.GetString(b).TrimEnd('\0'):null;}
+ static int BatteryPercent(IntPtr set,ref DeviceInfo info,PropertyKey key) {
+  uint type;
+  var bytes=Property(set,ref info,key,out type);
+  if(bytes==null)return -1;
+  if(type==3&&bytes.Length==1)return WindowsRuntimeBattery.ReadPercent(bytes[0]);
+  if(type==7&&bytes.Length==4)return WindowsRuntimeBattery.ReadPercent(BitConverter.ToUInt32(bytes,0));
+  return -1;
+ }
+ internal static string BluetoothName(string name) {
+  if(string.IsNullOrEmpty(name))return name;
+  foreach(string suffix in new[]{" Hands-Free AG Audio"," Hands-Free AG"," Hands-Free HF"," Hands-Free"," Avrcp Transport"," Stereo"})
+   if(name.Length>suffix.Length&&name.EndsWith(suffix,StringComparison.OrdinalIgnoreCase))
+    return name.Substring(0,name.Length-suffix.Length).TrimEnd();
+  return name;
+ }
  public static string KindFromClass(uint cod,string name) {
   uint major=(cod>>8)&31,minor=(cod>>2)&63;
   if(major==4)return minor==4?"Mikrofon":"Kulaklık";
   if(major==5){if((minor&15)==1||(minor&15)==2)return "Gamepad";if((minor>>4)==1)return "Klavye";if((minor>>4)==2)return "Mouse";}
-  string n=(name??"").ToLowerInvariant();if(n.Contains("keyboard"))return "Klavye";if(n.Contains("mouse"))return "Mouse";if(n.Contains("controller")||n.Contains("gamepad")||n.Contains("dualshock")||n.Contains("dualsense"))return "Gamepad";if(n.Contains("head")||n.Contains("buds"))return "Kulaklık";if(n.Contains("mic"))return "Mikrofon";return "Aygıt";
+  string n=(name??"").ToLowerInvariant();if(n.Contains("keyboard"))return "Klavye";if(n.Contains("mouse"))return "Mouse";if(n.Contains("controller")||n.Contains("gamepad")||n.Contains("dualshock")||n.Contains("dualsense"))return "Gamepad";if(n.Contains("head")||n.Contains("buds")||n.Contains("sennheiser")||n.StartsWith("hd 350bt"))return "Kulaklık";if(n.Contains("mic"))return "Mikrofon";return "Aygıt";
  }
  public static List<BatteryState> Poll() {
   var result=new List<BatteryState>();var merged=new Dictionary<string,BatteryState>();
@@ -45,22 +61,34 @@ public static class WindowsDevices {
    var info=new DeviceInfo{Size=Marshal.SizeOf(typeof(DeviceInfo))};if(!SetupDiEnumDeviceInfo(set,index,ref info))break;
    var id=new StringBuilder(512);int needed;if(!SetupDiGetDeviceInstanceId(set,ref info,id,id.Capacity,out needed))continue;
    string instance=id.ToString();if(!instance.StartsWith("BTH",StringComparison.OrdinalIgnoreCase))continue;
-   uint type;var bytes=Property(set,ref info,Battery,out type);int percent=-1;
-   if(bytes!=null&&((type==7&&bytes.Length>=4)||(type==3&&bytes.Length>=1)))percent=type==7?(int)BitConverter.ToUInt32(bytes,0):bytes[0];
-   if(percent<0||percent>100)continue;
+   int percent=BatteryPercent(set,ref info,Battery);
+   if(percent<0)percent=BatteryPercent(set,ref info,StandardBattery);
+   if(percent<0)continue;
    string name=Text(set,ref info,Name)??Text(set,ref info,Description)??"Bluetooth aygıtı";
-   bytes=Property(set,ref info,Container,out type);string key=bytes!=null&&bytes.Length==16?new Guid(bytes).ToString():instance;
+   uint type;
+   var bytes=Property(set,ref info,Container,out type);string key=bytes!=null&&bytes.Length==16?new Guid(bytes).ToString():instance;
    bytes=Property(set,ref info,Connected,out type);bool connected=bytes==null||type!=17||bytes.Length<1||bytes[0]!=0;
    bytes=Property(set,ref info,BluetoothClass,out type);uint cod=bytes!=null&&type==7&&bytes.Length>=4?BitConverter.ToUInt32(bytes,0):0;
-   var state=new BatteryState{Key="windows:"+key,Name=name,Kind=KindFromClass(cod,name),Percent=percent,Stale=!connected,Connection=connected?DeviceConnection.Connected:DeviceConnection.Disconnected,Sample=connected?DateTime.Now:default(DateTime),Status="Windows Bluetooth pil bilgisi"};
+   var state=new BatteryState{Key="windows:"+key,Name=BluetoothName(name),Kind=KindFromClass(cod,name),Percent=percent,Stale=!connected,Connection=connected?DeviceConnection.Connected:DeviceConnection.Disconnected,Sample=connected?DateTime.Now:default(DateTime),Status="Windows Bluetooth pil bilgisi"};
    BatteryState existing;if(!merged.TryGetValue(state.Key,out existing)||(!existing.Stale&&connected)||existing.Stale&&!state.Stale)merged[state.Key]=state;
   }}finally{SetupDiDestroyDeviceInfoList(set);}
   result.AddRange(merged.Values);
+  WindowsRuntimeBattery.AddBluetooth(result);
+  var xinput=new List<BatteryState>();
   try{for(uint index=0;index<4;index++){XBattery battery;if(XInputGetBatteryInformation(index,0,out battery)!=0||battery.Type==0||battery.Type==1)continue;
    var state=new BatteryState{Key="xinput:"+index,Name="Xbox / XInput Gamepad "+(index+1),Kind="Gamepad",Status="Windows XInput • pil seviyesi",Connection=DeviceConnection.Connected,Sample=DateTime.Now};
    if((battery.Type==2||battery.Type==3)&&battery.Level<=3){state.Percent=new[]{0,15,60,100}[battery.Level];state.LevelText=L.BatteryLevel(battery.Level);state.Approximate=true;}
-   else{state.Status="Gamepad algılandı • pil seviyesi bildirilmedi";}result.Add(state);
+   else{state.Status="Gamepad algılandı • pil seviyesi bildirilmedi";}xinput.Add(state);
   }}catch(DllNotFoundException){}catch(EntryPointNotFoundException){}
+  if(xinput.Exists(x=>x.Percent>=0))result.AddRange(xinput);
+  else {
+   var gamingInput=new List<BatteryState>();
+   WindowsRuntimeBattery.AddGameControllers(gamingInput);
+   foreach(var reading in gamingInput)
+    if(!result.Exists(x=>!x.Stale&&x.Kind=="Gamepad"&&string.Equals(x.Name,reading.Name,StringComparison.OrdinalIgnoreCase)))
+     result.Add(reading);
+   if(gamingInput.Count==0)result.AddRange(xinput);
+  }
   SystemPower power;
   if(GetSystemPowerStatus(out power)) {
    var system=SystemBattery(power.Flags,power.Percent);

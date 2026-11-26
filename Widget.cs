@@ -96,6 +96,7 @@ class Widget:Form {
   if(status.IndexOf("G HUB",StringComparison.OrdinalIgnoreCase)>=0)return "G HUB";
   if(status.IndexOf("SteelSeries GG",StringComparison.OrdinalIgnoreCase)>=0)return "SteelSeries GG";
   if(status.IndexOf("XInput",StringComparison.OrdinalIgnoreCase)>=0)return "Windows XInput";
+  if(status.IndexOf("Gaming Input",StringComparison.OrdinalIgnoreCase)>=0)return "Windows Gaming Input";
   if(status.IndexOf("Bluetooth",StringComparison.OrdinalIgnoreCase)>=0)return "Windows Bluetooth";
   if(status.IndexOf("HID++",StringComparison.OrdinalIgnoreCase)>=0||status.IndexOf("voltaj",StringComparison.OrdinalIgnoreCase)>=0)return "Logitech HID++";
   if(status.IndexOf("Razer USB HID",StringComparison.OrdinalIgnoreCase)>=0)return "Razer USB HID";

@@ -9,6 +9,7 @@
 !/EightBitDo.cs
 !/GHub.cs
 !/HyperX.cs
+!/IpiPiao.cs
 !/Localization.cs
 !/LogitechG735.cs
 !/LogitechReceivers.cs
@@ -22,6 +23,7 @@
 !/UserSettings.cs
 !/Widget.cs
 !/WindowsDevices.cs
+!/WindowsRuntimeBattery.cs
 !/app.manifest
 !/build.ps1
 !/installer.iss
