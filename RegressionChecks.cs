@@ -124,6 +124,20 @@ static class RegressionChecks {
   var razerReply=RazerDevices.Frame(0x80,0x21);razerReply[11]=1;razerReply[12]=1;razerReply[13]=73;razerReply[62]=0;for(int i=0;i<62;i++)razerReply[62]^=razerReply[i];
   check(RazerDevices.Parse(razerReply,0x21)==73&&RazerDevices.Parse(razerReply,0x2A)<0,"Razer replies require the matching command and checksum");
   check(HyperXDevices.Parse(new byte[]{0x21,0xBB,0x0B,73},0x0B)==73&&HyperXDevices.Parse(new byte[]{0x21,0xBB,0x0C,1},0x0C)==1&&HyperXDevices.Parse(new byte[]{0x20,0xBB,0x0B,73},0x0B)<0,"HyperX Cloud Alpha Wireless replies");
+  var alpha2=new HidInfo{Vid=0x03F0,Pid=0x08BE,Page=0xFF13,Usage=0xFF00,Input=64,Output=64};
+  check(HyperXDevices.IsCloudAlpha2Channel(alpha2),"Cloud Alpha 2 recognizes the station's battery collection");
+  alpha2.Usage=1;
+  check(!HyperXDevices.IsCloudAlpha2Channel(alpha2),"Cloud Alpha 2 skips the station's other vendor collection");
+  alpha2.Usage=0xFF00;alpha2.Pid=0x0ABE;
+  check(!HyperXDevices.IsCloudAlpha2Channel(alpha2),"Cloud Alpha 2 skips the Chat USB device");
+  bool alpha2Charging;
+  check(HyperXDevices.ParseCloudAlpha2(new byte[]{0x51,0x02,51,0,0x1A,0,0},out alpha2Charging)==51&&!alpha2Charging
+   &&HyperXDevices.ParseCloudAlpha2(new byte[]{0x51,0x02,67,0,0x1A,0,0x80},out alpha2Charging)==67&&alpha2Charging,
+   "Cloud Alpha 2 reads the exact percentage and the charging flag");
+  check(HyperXDevices.ParseCloudAlpha2(new byte[]{0x51,0x02,101,0,0,0,0},out alpha2Charging)<0
+   &&HyperXDevices.ParseCloudAlpha2(new byte[]{0x51,0x02,51},out alpha2Charging)<0
+   &&HyperXDevices.ParseCloudAlpha2(new byte[]{0x61,0x02,90,0,0,0,0},out alpha2Charging)<0,
+   "Cloud Alpha 2 rejects invalid, truncated and unrelated replies");
   var cloudIII=new HidInfo{Vid=0x03F0,Pid=0x05B7,Page=0xFF13,Usage=1,Input=62,Output=62};
   check(HyperXDevices.IsCloudIIIChannel(cloudIII),"Cloud III recognizes the wireless receiver's vendor collection");
   cloudIII.Pid=0x06B7;

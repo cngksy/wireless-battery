@@ -1,4 +1,4 @@
-# Wireless Battery 1.5.1
+# Wireless Battery 1.5.2
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -77,6 +77,7 @@ These models have built-in support in Wireless Battery. Where support depends on
 - 8BitDo Ultimate 2 Wireless for PC (2.4 GHz receiver)
 - ATK X1 SE
 - HyperX Cloud Alpha Wireless
+- HyperX Cloud Alpha 2 Wireless (2.4 GHz USB base station, hardware confirmation for Wireless Battery pending)
 - HyperX Cloud III Wireless
 - Logitech G305 LIGHTSPEED
 - Logitech G735 LIGHTSPEED
@@ -143,6 +144,7 @@ Protocol references:
 - Xbox battery fallback: https://learn.microsoft.com/en-us/uwp/api/windows.gaming.input.igamecontrollerbatteryinfo.trygetbatteryreport
 - Razer BlackShark V3 Pro receiver protocol: https://github.com/openrazer/openrazer/issues/2838
 - HyperX Cloud Alpha Wireless receiver protocol: https://github.com/FedeltaMedia/hyperx-cloud-alpha-battery
+- HyperX Cloud Alpha 2 Wireless base station protocol: USB captures and hardware testing by azizen12 in [HaloBattery issue #26](https://github.com/HeyOkay/HaloBattery/issues/26) and the [protocol notes](https://github.com/HeyOkay/HaloBattery/blob/main/docs/protocols.md#hyperx-cloud-alpha-2).
 - HyperX Cloud III Wireless battery protocol: https://lists.openwall.net/linux-kernel/2026/10/22/2247 and https://github.com/LennardKittner/HyperHeadset
 - LogiBAT local G HUB messages: https://github.com/someweirdhuman/LogiBAT
 - Microsoft documentation for Windows XInputGetBatteryInformation and SetupAPI.

@@ -7,6 +7,7 @@ using System.Linq;
 public static class HyperXDevices {
  public const ushort Vid=0x03F0,Pid=0x098D;
  const ushort CloudIIIReceiver=0x05B7,CloudIIICable=0x06B7;
+ const ushort CloudAlpha2Station=0x08BE;
  const byte CloudIIIBattery=0x89,CloudIIICharging=0x8A;
  public static int Parse(byte[] response,byte command) {
   return response!=null&&response.Length>3&&response[0]==0x21&&response[1]==0xBB&&response[2]==command?response[3]:-1;
@@ -30,7 +31,47 @@ public static class HyperXDevices {
   }
   var cloudIII=ReadCloudIII(all);
   if(cloudIII!=null)result.Add(cloudIII);
+  var cloudAlpha2=ReadCloudAlpha2(all);
+  if(cloudAlpha2!=null)result.Add(cloudAlpha2);
   return result;
+ }
+
+ internal static bool IsCloudAlpha2Channel(HidInfo info) {
+  return info.Vid==Vid&&info.Pid==CloudAlpha2Station&&info.Page==0xFF13
+   &&info.Usage==0xFF00&&info.Input==64&&info.Output==64;
+ }
+
+ static BatteryState ReadCloudAlpha2(IEnumerable<HidInfo> devices) {
+  foreach(var info in devices.Where(IsCloudAlpha2Channel)) {
+   using(var channel=new HidChannel(info)) {
+    if(!channel.Valid)continue;
+    Native.HidD_FlushQueue(channel.Handle);
+    if(!channel.Send(new byte[]{0x50,0x02},350))continue;
+
+    // NGENUITY and the station can generate unrelated traffic on this collection.
+    var watch=Stopwatch.StartNew();
+    int remaining;
+    while((remaining=1000-(int)watch.ElapsedMilliseconds)>0) {
+     var reply=channel.Read(remaining);
+     if(reply==null)break;
+     bool charging;
+     int percent=ParseCloudAlpha2(reply,out charging);
+     if(percent>=0)return new BatteryState {
+      Key="hyperx:cloud-alpha-2-wireless",Name="HyperX Cloud Alpha 2 Wireless",Kind="Kulaklık",
+      Percent=percent,Charging=charging,Connection=DeviceConnection.Connected,
+      Sample=DateTime.Now,Status="Canlı • HyperX USB HID"
+     };
+    }
+   }
+  }
+  return null;
+ }
+
+ internal static int ParseCloudAlpha2(byte[] report,out bool charging) {
+  charging=false;
+  if(report==null||report.Length<7||report[0]!=0x51||report[1]!=0x02||report[2]>100)return -1;
+  charging=(report[6]&0x80)!=0;
+  return report[2];
  }
 
  internal static bool IsCloudIIIChannel(HidInfo info) {
