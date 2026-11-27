@@ -83,20 +83,22 @@ If your device still doesn't appear, [send a device report](#bug-report).
 
 These models have built-in support in Wireless Battery.
 
-- 8BitDo Ultimate 2 Wireless for PC
-- ASUS ROG Harpe Ace Aim Lab Edition
-- ATK X1 SE
-- AULA F75 Max
-- HyperX Cloud Alpha Wireless
-- HyperX Cloud Alpha 2 Wireless
-- HyperX Cloud III Wireless
-- Logitech G305 LIGHTSPEED
-- Logitech G735 LIGHTSPEED
-- Logitech PRO X Wireless
-- Razer BlackShark V3 Pro
-- Sony DualShock 4, DualSense and DualSense Edge
-- SteelSeries Apex Pro TKL Wireless
-- VXE R1 / NordicMouse
+- **8BitDo** Ultimate 2 Wireless for PC
+- **ASUS** ROG Harpe Ace Aim Lab Edition
+- **ATK** X1 SE
+- **AULA** F75 Max
+- **HyperX** Cloud Alpha Wireless
+- **HyperX** Cloud Alpha 2 Wireless
+- **HyperX** Cloud III Wireless
+- **Logitech** G305 LIGHTSPEED
+- **Logitech** G735 LIGHTSPEED
+- **Logitech** PRO X Wireless
+- **Razer** BlackShark V3 Pro
+- **Sony** DualShock 4
+- **Sony** DualSense
+- **Sony** DualSense Edge
+- **SteelSeries** Apex Pro TKL Wireless
+- **VXE** R1 / NordicMouse
 
 ### Known limitations
 
