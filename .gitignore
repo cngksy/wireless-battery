@@ -4,6 +4,8 @@
 !/.gitignore
 !/App.cs
 !/AssemblyInfo.cs
+!/AsusRog.cs
+!/Aula.cs
 !/Autostart.cs
 !/Battery.cs
 !/EightBitDo.cs

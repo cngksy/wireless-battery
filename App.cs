@@ -214,7 +214,12 @@ static class DeviceReport {
  // Vendor-defined input channels of devices we cannot read yet. Many headset
  // dongles push their status there on their own, so listening alone can
  // reveal where the battery level sits.
- public static bool IsListenCandidate(HidInfo x){return x!=null&&x.Page>=0xFF00&&x.Input>=8&&Array.IndexOf(SupportedVendors,x.Vid)<0;}
+ public static bool IsListenCandidate(HidInfo x) {
+  if(x==null||x.Input<8)return false;
+  // The Fuxi-H3 vendor channel uses a page below the usual diagnostic range.
+  if(x.Vid==0x040B&&x.Pid==0x0897&&x.Page==0xF100&&x.Usage==0&&x.Input==9)return true;
+  return x.Page>=0xFF00&&Array.IndexOf(SupportedVendors,x.Vid)<0;
+ }
  public static string Hex(byte[] data){
   int n=data.Length;while(n>1&&data[n-1]==0)n--;
   var parts=new string[n];for(int i=0;i<n;i++)parts[i]=data[i].ToString("X2");
@@ -229,7 +234,7 @@ static class DeviceReport {
   var results=new string[targets.Count];
   Parallel.For(0,targets.Count,i=>{
    var x=targets[i];var head=string.Format("  {0:X4}:{1:X4} {2:X4}:{3:X4} in={4}",x.Vid,x.Pid,x.Page,x.Usage,x.Input);
-   try{using(var d=new HidChannel(x)){
+   try{using(var d=new HidChannel(x,readOnly:true)){
     if(!d.Valid){results[i]=head+": cannot open";return;}
     var seen=new List<string>();int total=0;var watch=System.Diagnostics.Stopwatch.StartNew();
     while(watch.ElapsedMilliseconds<ms){var r=d.Read((int)Math.Min(1000,ms-watch.ElapsedMilliseconds));if(r==null)continue;total++;string h=Hex(r);if(!seen.Contains(h)&&seen.Count<20)seen.Add(h);}

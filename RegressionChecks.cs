@@ -93,6 +93,45 @@ static class RegressionChecks {
   check(report.Contains("373B:1290 FF02:0002")&&!report.Contains("secret")&&!report.Contains("Private Phone"),"Device report lists IDs without paths or Bluetooth names");
   check(DeviceReport.Hex(new byte[]{0x01,0xA5,0,0,0})=="01 A5 (+3 x 00)"&&DeviceReport.Hex(new byte[]{0,0})=="00 (+1 x 00)","Captured reports are printed compactly");
   check(DeviceReport.IsListenCandidate(new HidInfo{Vid=0x3634,Pid=0x4155,Page=0xFF02,Usage=2,Input=65,Output=65})&&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x3634,Pid=0x4155,Page=0x000C,Usage=1,Input=3})&&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x373B,Pid=0x10C9,Page=0xFF02,Usage=2,Input=17,Output=17}),"Only unsupported vendor channels are listened to");
+  check(DeviceReport.IsListenCandidate(new HidInfo{Vid=0x040B,Pid=0x0897,Page=0xF100,Usage=0,Input=9,Output=65})
+   &&!DeviceReport.IsListenCandidate(new HidInfo{Vid=0x040B,Pid=0x0897,Page=0x000C,Usage=1,Input=3}),"Fuxi H3 diagnostics can listen to the documented vendor channel");
+  var aula=new HidInfo{Vid=0x05AC,Pid=0x024F,Page=0xFF60,Usage=0x0061,Input=33,Output=33};
+  check(AulaDevices.IsF75MaxBatteryChannel(aula),"F75 Max targets the reported 33-byte Windows HID collection");
+  aula.Page=0xFF59;
+  check(!AulaDevices.IsF75MaxBatteryChannel(aula),"F75 Max does not send battery queries on the other vendor collection");
+  var aulaRequest=AulaDevices.F75MaxBatteryRequest();
+  check(aulaRequest.Length==33&&aulaRequest[0]==0&&aulaRequest[1]==0x20&&aulaRequest[2]==1&&aulaRequest[32]==0x21,
+   "F75 Max battery query includes the Windows report ID and payload checksum");
+  check(AulaDevices.F75MaxBatteryPercent(new byte[]{0,0x20,1,0,83})==83
+   &&AulaDevices.F75MaxBatteryPercent(new byte[]{0,0x20,1,0,0})<0
+   &&AulaDevices.F75MaxBatteryPercent(new byte[]{0,0x20,1,0,101})<0
+   &&AulaDevices.F75MaxBatteryPercent(new byte[]{0,0x20,2,0,83})<0
+   &&AulaDevices.F75MaxBatteryPercent(aulaRequest)<0,"F75 Max accepts only a valid percentage response, never a request echo");
+  var harpeCable=new HidInfo{Vid=0x0B05,Pid=0x1A92,Page=0xFF01,Usage=1,Input=65,Output=65};
+  check(AsusRog.IsHarpeWiredChannel(harpeCable),"Harpe Ace matches the cable's battery collection");
+  harpeCable.Pid=0x19FC;
+  check(!AsusRog.IsHarpeWiredChannel(harpeCable),"The ASUS keyboard is never treated as a Harpe Ace");
+  var omniPair=new HidInfo{Vid=0x0B05,Pid=0x1ACE,Page=0xFF02,Usage=1,Input=64,Output=64,
+   Path=@"\\?\hid#vid_0b05&pid_1ace&mi_02&col01#7&receiver&0&0000#{hid}"};
+  var omniMouse=new HidInfo{Vid=0x0B05,Pid=0x1ACE,Page=0xFF01,Usage=1,Input=64,Output=64,
+   Path=@"\\?\hid#vid_0b05&pid_1ace&mi_02&col03#7&receiver&0&0002#{hid}"};
+  check(AsusRog.SameOmniReceiver(omniPair,omniMouse),"OMNI uses the matching receiver's mouse collection from the report");
+  omniMouse.Path=omniMouse.Path.Replace("receiver","other-receiver");
+  check(!AsusRog.SameOmniReceiver(omniPair,omniMouse),"Pairing data never crosses between separate OMNI receivers");
+  check(AsusRog.OmniHasHarpe(new byte[]{1,0xA0,0,2,0,0x85,0x1A,2,0,0x94,0x1A,3,5})
+   &&!AsusRog.OmniHasHarpe(new byte[]{1,0xA0,0,1,0,0x65,0x1B,3,5})
+   &&!AsusRog.OmniHasHarpe(new byte[]{1,0xA0,0,0,0,0x94,0x1A,3,5})
+   &&!AsusRog.OmniHasHarpe(new byte[]{1,0xA0,0,1,0,0x94,0x1A,2,5})
+   &&!AsusRog.OmniHasHarpe(new byte[]{1,0xA1,0,1,0,0x94,0x1A,3,5}),
+   "OMNI requires the Harpe Aim Lab model in the valid pair list");
+  bool harpeCharging;
+  check(AsusRog.HarpeBatteryPercent(new byte[]{0,0x12,0x07,0,0,54,2,20,0,0,1},0,out harpeCharging)==54&&harpeCharging
+   &&AsusRog.HarpeBatteryPercent(new byte[]{3,0x12,0x07,0,0,53,2,20,0,0,0},3,out harpeCharging)==53&&!harpeCharging,
+   "Harpe Ace uses the right report ID and charging flag in both connection modes");
+  check(AsusRog.HarpeBatteryPercent(new byte[]{3,0x12,0x07,0,0,0,0,0,0,0,0},3,out harpeCharging)<0
+   &&AsusRog.HarpeBatteryPercent(new byte[]{3,0x12,0x07,0,0,0xFF,0xAA,0,0,0,0},3,out harpeCharging)<0
+   &&AsusRog.HarpeBatteryPercent(new byte[]{5,0x12,0x01,0,0,2,0,0,0,0,0},3,out harpeCharging)<0,
+   "Harpe Ace ignores standby, error replies and unsolicited events from the device report");
   var second=new System.Drawing.Rectangle(-1920,78,1920,1080);var menuSize=new System.Drawing.Size(277,254);
   string display1=@"\\.\DISPLAY1",display2=@"\\.\DISPLAY2";
   check(Taskbars.DisplayNumber(display2)==2,"Monitor label uses the Windows display number");

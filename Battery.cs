@@ -140,6 +140,9 @@ public static class Batteries {
   var result=new List<BatteryState>();
   result.AddRange(RazerDevices.Poll(all));
   result.AddRange(HyperXDevices.Poll(all));
+  result.AddRange(AulaDevices.Poll(all));
+  var harpe=AsusRog.ReadHarpe(all);
+  if(harpe!=null)result.Add(harpe);
   result.AddRange(PlayStation.Poll(all));
   var piao=IpiPiao.Read(all);
   if(piao!=null)result.Add(piao);

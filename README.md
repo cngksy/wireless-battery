@@ -1,4 +1,4 @@
-# Wireless Battery 1.5.3
+# Wireless Battery 1.5.4
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -75,7 +75,9 @@ If your device still doesn't appear, [send a device report](#bug-report).
 These models have built-in support in Wireless Battery. Where support depends on the connection or software, that requirement is listed next to the model.
 
 - 8BitDo Ultimate 2 Wireless for PC (2.4 GHz receiver)
+- ASUS ROG Harpe Ace Aim Lab Edition (ROG Omni Receiver or USB cable; hardware confirmation for Wireless Battery pending)
 - ATK X1 SE
+- AULA F75 Max (05AC:024F 2.4 GHz USB receiver, battery percentage; hardware confirmation for Wireless Battery pending)
 - HyperX Cloud Alpha Wireless
 - HyperX Cloud Alpha 2 Wireless (2.4 GHz USB base station, hardware confirmation for Wireless Battery pending)
 - HyperX Cloud III Wireless
@@ -128,7 +130,7 @@ The installer is built with Inno Setup 6 from `installer.iss`.
 
 ### Publishing a release
 
-Submit the final `WirelessBattery-Setup.exe` and the `WirelessBattery.exe` from the portable ZIP to VirusTotal before publishing. If a report already exists for the exact file, reuse it. Verify both report hashes against `SHA256.txt` and link the completed reports under **VirusTotal** in the release notes. Uploading or signing a different build requires checking its new hashes and reports.
+Before publishing, scan the final `WirelessBattery-Setup.exe` and the `WirelessBattery.exe` from the portable ZIP with Microsoft Defender and submit both to VirusTotal. If a VirusTotal report already exists for the exact file, reuse it. Verify both report hashes against `SHA256.txt` and link the completed reports under **VirusTotal** in the release notes. Rebuilding or signing the files changes their hashes and requires scanning the final files again.
 
 ## License and references
 
@@ -149,6 +151,8 @@ Protocol references:
 - Razer BlackShark V3 Pro receiver protocol: https://github.com/openrazer/openrazer/issues/2838
 - HyperX Cloud Alpha Wireless receiver protocol: https://github.com/FedeltaMedia/hyperx-cloud-alpha-battery
 - HyperX Cloud Alpha 2 Wireless base station protocol: USB captures and hardware testing by azizen12 in [HaloBattery issue #26](https://github.com/HeyOkay/HaloBattery/issues/26) and the [protocol notes](https://github.com/HeyOkay/HaloBattery/blob/main/docs/protocols.md#hyperx-cloud-alpha-2).
+- AULA F75 Max battery query: [F75 Max protocol catalog](https://github.com/tarikmanoar/aula-f75-max/blob/main/docs/packet-catalog.md#dongle-battery--experimental) and [aula-f75 Linux implementation](https://github.com/c0deJedi/aula-f75/blob/main/aula.py).
+- ASUS ROG Harpe Ace Aim Lab Edition battery and receiver pairing protocol: [G-Helper](https://github.com/seerge/g-helper/tree/main/app/Peripherals) and [RIGStats battery protocol notes](https://github.com/dvalfrid/rigstats/blob/main/docs/control-architecture.md#battery).
 - HyperX Cloud III Wireless battery protocol: https://lists.openwall.net/linux-kernel/2026/10/22/2247 and https://github.com/LennardKittner/HyperHeadset
 - LogiBAT local G HUB messages: https://github.com/someweirdhuman/LogiBAT
 - Microsoft documentation for Windows XInputGetBatteryInformation and SetupAPI.
