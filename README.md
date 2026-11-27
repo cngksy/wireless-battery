@@ -92,8 +92,10 @@ These models have built-in support in Wireless Battery.
 
 ### Known limitations
 
-- 8BitDo Ultimate 2C Wireless (no usable battery reading from the tested 2.4 GHz receiver, so the indicator shows `--`)
-- Sony DualShock 4, DualSense and DualSense Edge in basic Bluetooth mode (the short reports carry no battery data)
+- 8BitDo Ultimate 2C Wireless<br>
+  The tested 2.4 GHz receiver provides no usable battery reading, so the indicator shows `--`.
+- Sony DualShock 4, DualSense and DualSense Edge<br>
+  In basic Bluetooth mode, the short reports carry no battery data.
 
 ## Bug Report
 
