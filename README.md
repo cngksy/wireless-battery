@@ -73,21 +73,21 @@ If your device still doesn't appear, [send a device report](#bug-report).
 
 ### Approved devices
 
-These models have built-in support in Wireless Battery. Where support depends on the connection or software, that requirement is listed next to the model.
+These models have built-in support in Wireless Battery.
 
-- 8BitDo Ultimate 2 Wireless for PC (2.4 GHz receiver)
-- ASUS ROG Harpe Ace Aim Lab Edition (ROG Omni Receiver or USB cable; hardware confirmation for Wireless Battery pending)
+- 8BitDo Ultimate 2 Wireless for PC
+- ASUS ROG Harpe Ace Aim Lab Edition
 - ATK X1 SE
-- AULA F75 Max (05AC:024F 2.4 GHz USB receiver, battery percentage; hardware confirmation for Wireless Battery pending)
+- AULA F75 Max
 - HyperX Cloud Alpha Wireless
-- HyperX Cloud Alpha 2 Wireless (2.4 GHz USB base station, hardware confirmation for Wireless Battery pending)
+- HyperX Cloud Alpha 2 Wireless
 - HyperX Cloud III Wireless
 - Logitech G305 LIGHTSPEED
 - Logitech G735 LIGHTSPEED
 - Logitech PRO X Wireless
-- Razer BlackShark V3 Pro (PC USB receiver)
-- Sony DualShock 4, DualSense and DualSense Edge (USB or full Bluetooth reports)
-- SteelSeries Apex Pro TKL Wireless (requires SteelSeries GG)
+- Razer BlackShark V3 Pro
+- Sony DualShock 4, DualSense and DualSense Edge
+- SteelSeries Apex Pro TKL Wireless
 - VXE R1 / NordicMouse
 
 ### Known limitations
