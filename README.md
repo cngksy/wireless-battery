@@ -4,8 +4,8 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/cangoksoy)
 [![GitHub Sponsors](https://img.shields.io/badge/GitHub-Sponsor-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/cngksy)
-[![Latest release](https://img.shields.io/github/v/release/cngksy/wireless-battery?label=Release&color=2ea44f)](https://github.com/cngksy/wireless-battery/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/cngksy/wireless-battery/total?label=Downloads&color=0a84ff)](https://github.com/cngksy/wireless-battery/releases)
+[![Latest release](https://img.shields.io/github/v/release/cngksy/wireless-battery.svg?label=Release&color=2ea44f)](https://github.com/cngksy/wireless-battery/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/cngksy/wireless-battery/total.svg?label=Downloads&color=0a84ff)](https://github.com/cngksy/wireless-battery/releases)
 [![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white)](https://github.com/cngksy/wireless-battery/releases/latest)
 [![GitHub Stars](https://img.shields.io/github/stars/cngksy/wireless-battery?label=Star&logo=github&color=yellow)](https://github.com/cngksy/wireless-battery/stargazers)
 [![License](https://img.shields.io/github/license/cngksy/wireless-battery?label=License&color=lightgrey)](LICENSE)
