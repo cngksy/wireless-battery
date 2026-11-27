@@ -19,6 +19,14 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 - **Wireless Battery - Setup:** [VirusTotal report](https://www.virustotal.com/gui/file/63b2963f5e4e9a83ea394bccf855d39e6fc36a9ab3130fab603dbf6eca2d377b)
 - **Wireless Battery - Portable:** [VirusTotal report](https://www.virustotal.com/gui/file/ce680f58087144da2d1d7e95a5a305b6efe298a7c9ad3c6d68dd3bb5d7185532)
 
+## What's new in 1.5.4
+
+- **ASUS ROG Harpe Ace Aim Lab Edition** now shows battery percentage and charging status over the ROG Omni Receiver or USB cable.
+- **AULA F75 Max** now shows battery percentage over its 2.4 GHz USB receiver. Charging status still needs verification.
+- **Havit Fuxi H3** now appears in listen-only USB diagnostics to help investigate battery support.
+
+[Read the full release notes](https://github.com/cngksy/wireless-battery/releases/tag/v1.5.4)
+
 The installer sets the app up for your user account only. It needs no administrator rights and adds a Start menu shortcut and an uninstaller. For portable use, extract the ZIP and run `WirelessBattery.exe`. The app uses the .NET Framework 4.x that ships with Windows.
 Before installing or updating, any running copy of Wireless Battery is closed automatically and safely; there is no need to choose Exit from the tray menu first.
 
@@ -135,7 +143,7 @@ The installer is built with Inno Setup 6 from `installer.iss`.
 
 Before publishing, scan the final `WirelessBattery-Setup.exe` and the `WirelessBattery.exe` from the portable ZIP with Microsoft Defender and submit both to VirusTotal. If a VirusTotal report already exists for the exact file, reuse it. Verify both report hashes against `SHA256.txt` and link the completed reports under **VirusTotal** in the release notes. Rebuilding or signing the files changes their hashes and requires scanning the final files again.
 
-Use the versioned GitHub release page for scan links in the README bundled with the installer and portable ZIP. After scanning the final files, update both direct links at the top of the repository README in a documentation-only commit. Keep the release tag on the commit used to build the scanned files.
+Use the versioned GitHub release page for scan links in the README bundled with the installer and portable ZIP. After scanning the final files, update both direct links and the What's new summary at the top of the repository README in a documentation-only commit. Keep the release tag on the commit used to build the scanned files.
 
 ## License and references
 
