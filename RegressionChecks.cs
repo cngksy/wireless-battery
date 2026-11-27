@@ -228,6 +228,10 @@ static class RegressionChecks {
   check(LogitechReceivers.SlotCount(unifying)==6,"HID++ discovers Bolt slots by receiver class");
   unifying.Pid=0xC53F;
   check(LogitechReceivers.SlotCount(unifying)==0,"The dedicated G305 route is not probed twice");
+  var superstrikeReceiver=new HidInfo{Vid=0x046D,Pid=0xC54D,Page=0xFF00,Usage=2,Input=20,Output=20};
+  var superstrikeShortInterface=new HidInfo{Vid=0x046D,Pid=0xC54D,Page=0xFF00,Usage=1,Input=7,Output=7};
+  check(LogitechReceivers.SlotCount(superstrikeReceiver)==1&&LogitechReceivers.SlotCount(superstrikeShortInterface)==0,
+   "PRO X2 SUPERSTRIKE polls slot 1 on the LIGHTSPEED receiver's long HID++ interface");
   var ghubMouse=new BatteryState{Key="ghub:g502",Name="G502 X PLUS Wireless Gaming Mouse",Kind="Mouse",Percent=100,Sample=now};
   var ghubKeys=new BatteryState{Key="ghub:g515",Name="G515 LIGHTSPEED TKL Gaming Keyboard",Kind="Klavye",Percent=94,Sample=now};
   var hidMouse=new BatteryState{Key="logitech:hidpp:mouse:1",Name="Logitech G502 X PLUS",Kind="Mouse",Percent=99,Sample=now};
@@ -246,6 +250,15 @@ static class RegressionChecks {
   var logitechOffline=new List<BatteryState>{offlineGHub};
   Batteries.AddLogitechReceiverReadings(logitechOffline,new[]{offlineGHub},new[]{hidMouse});
   check(logitechOffline.Count==1&&logitechOffline[0]==hidMouse,"A live HID++ reading replaces a matching offline G HUB entry");
+  var superstrike=LogitechReceivers.ParseBattery(new byte[]{53,0,1,0},0x1004);
+  check(superstrike!=null&&superstrike.Percent==53&&superstrike.Charging&&!superstrike.Approximate,
+   "PRO X2 SUPERSTRIKE reports an exact percentage and charging over Unified Battery");
+  var nativeSuperstrike=new BatteryState{Key="logitech:hidpp:superstrike:1",Name="Logitech PRO X2 SUPERSTRIKE",Kind="Mouse",Percent=53,Sample=now};
+  var ghubSuperstrike=new BatteryState{Key="ghub:superstrike",Name="PRO X 2 SUPERSTRIKE Wireless Gaming Mouse",Kind="Mouse",Percent=53,Sample=now};
+  var superstrikeResults=new List<BatteryState>{ghubSuperstrike};
+  Batteries.AddLogitechReceiverReadings(superstrikeResults,new[]{ghubSuperstrike},new[]{nativeSuperstrike});
+  check(superstrikeResults.Count==1&&superstrikeResults[0]==ghubSuperstrike,
+   "PRO X2 SUPERSTRIKE appears once when G HUB and the receiver both report it");
   var unified=LogitechReceivers.ParseBattery(new byte[]{0,2,1,0},0x1004);
   check(unified!=null&&unified.Level==L.BatteryLevel(1)&&unified.Charging
    &&Widget.DeviceTooltip(unified).Contains(L.BatteryLabel(true)+L.BatteryLevel(1)),
@@ -291,6 +304,22 @@ static class RegressionChecks {
    &&IpiPiao.Decode(piaoRequest)<0,"IPI PIAO accepts documented battery replies and rejects an echo or invalid reading");
   check(IpiPiao.Request(2)[1]==0x22&&IpiPiao.Decode(new byte[]{3,0x50,0,1,2,0x81,64,0},2)==64,
    "IPI PIAO accepts the alternate documented battery request and response");
+  var thread=System.Threading.Thread.CurrentThread;
+  var originalLanguage=thread.CurrentUICulture;
+  try {
+   foreach(string locale in new[]{"es-ES","es-MX"}) {
+    thread.CurrentUICulture=System.Globalization.CultureInfo.GetCultureInfo(locale);
+    var chargingTooltip=Widget.DeviceTooltip(new BatteryState{Name="Mouse",Percent=53,Charging=true,Sample=now,Status="USB HID"});
+    check(L.DeviceReport=="Copiar informe del dispositivo"&&L.CheckUpdates=="Buscar actualizaciones"
+     &&L.DeviceCount(1)=="1 dispositivo"&&L.DeviceCount(2)=="2 dispositivos"
+     &&chargingTooltip=="Mouse\nCargando: %53\nHora: 23:00\nFuente: USB HID",
+     "Spanish menu labels and charging tooltip follow the display culture for "+locale);
+   }
+   thread.CurrentUICulture=System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+   check(L.DeviceReport=="Cihaz raporunu kopyala","Turkish menu labels are preserved");
+   thread.CurrentUICulture=System.Globalization.CultureInfo.GetCultureInfo("de-DE");
+   check(L.DeviceReport=="Copy device report","Other display languages still fall back to English");
+  } finally { thread.CurrentUICulture=originalLanguage; }
   File.WriteAllText(Path.Combine(Program.Root,"test-results.txt"),count+" checks, "+failures.Count+" failures\n"+string.Join("\n",failures));
   return failures.Count==0?0:1;
  }

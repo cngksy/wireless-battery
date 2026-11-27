@@ -64,7 +64,7 @@ public static class WindowsDevices {
    int percent=BatteryPercent(set,ref info,Battery);
    if(percent<0)percent=BatteryPercent(set,ref info,StandardBattery);
    if(percent<0)continue;
-   string name=Text(set,ref info,Name)??Text(set,ref info,Description)??"Bluetooth aygıtı";
+   string name=Text(set,ref info,Name)??Text(set,ref info,Description)??L.BluetoothDevice;
    uint type;
    var bytes=Property(set,ref info,Container,out type);string key=bytes!=null&&bytes.Length==16?new Guid(bytes).ToString():instance;
    bytes=Property(set,ref info,Connected,out type);bool connected=bytes==null||type!=17||bytes.Length<1||bytes[0]!=0;
@@ -76,7 +76,7 @@ public static class WindowsDevices {
   WindowsRuntimeBattery.AddBluetooth(result);
   var xinput=new List<BatteryState>();
   try{for(uint index=0;index<4;index++){XBattery battery;if(XInputGetBatteryInformation(index,0,out battery)!=0||battery.Type==0||battery.Type==1)continue;
-   var state=new BatteryState{Key="xinput:"+index,Name="Xbox / XInput Gamepad "+(index+1),Kind="Gamepad",Status="Windows XInput • pil seviyesi",Connection=DeviceConnection.Connected,Sample=DateTime.Now};
+   var state=new BatteryState{Key="xinput:"+index,Name=L.XInputController(index+1),Kind="Gamepad",Status="Windows XInput • pil seviyesi",Connection=DeviceConnection.Connected,Sample=DateTime.Now};
    if((battery.Type==2||battery.Type==3)&&battery.Level<=3){state.Percent=new[]{0,15,60,100}[battery.Level];state.LevelText=L.BatteryLevel(battery.Level);state.Approximate=true;}
    else{state.Status="Gamepad algılandı • pil seviyesi bildirilmedi";}xinput.Add(state);
   }}catch(DllNotFoundException){}catch(EntryPointNotFoundException){}

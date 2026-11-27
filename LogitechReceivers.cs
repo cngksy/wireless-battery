@@ -7,6 +7,7 @@ using System.Text;
 
 static class LogitechReceivers {
  const byte SoftwareId=0x0E;
+ const ushort SuperstrikeReceiver=0xC54D;
  static readonly int[] BatteryFeatures={0x1004,0x1000};
 
  internal static int SlotCount(HidInfo info) {
@@ -14,7 +15,7 @@ static class LogitechReceivers {
   switch(info.Pid) {
    case 0xC52B:case 0xC532:case 0xC548:return 6; // Unifying and Bolt
    case 0xC52E:case 0xC52F:case 0xC531:case 0xC537:case 0xC539:
-   case 0xC53A:case 0xC53D:case 0xC541:case 0xC545:case 0xC547:return 1;
+   case 0xC53A:case 0xC53D:case 0xC541:case 0xC545:case 0xC547:case SuperstrikeReceiver:return 1;
    default:return 0; // Existing dedicated G305 and headset routes stay separate.
   }
  }
@@ -41,21 +42,26 @@ static class LogitechReceivers {
   }
   if(state==null)return null;
 
-  byte nameFeature=FindFeature(channel,slot,0x0005,clock);
-  string name=null;
-  string kind=null;
-  if(nameFeature>0&&nameFeature<0xFF) {
-   name=ReadName(channel,slot,nameFeature,clock);
-   var type=Call(channel,slot,nameFeature,0x20,clock);
-   if(type!=null) {
-    if(type[0]==0||type[0]==2)kind="Klavye";
-    else if(type[0]>=3&&type[0]<=5)kind="Mouse";
+  if(channel.Info.Pid==SuperstrikeReceiver) {
+   state.Name="Logitech PRO X2 SUPERSTRIKE";
+   state.Kind="Mouse";
+  }else{
+   byte nameFeature=FindFeature(channel,slot,0x0005,clock);
+   string name=null;
+   string kind=null;
+   if(nameFeature>0&&nameFeature<0xFF) {
+    name=ReadName(channel,slot,nameFeature,clock);
+    var type=Call(channel,slot,nameFeature,0x20,clock);
+    if(type!=null) {
+     if(type[0]==0||type[0]==2)kind="Klavye";
+     else if(type[0]>=3&&type[0]<=5)kind="Mouse";
+    }
    }
+   name=string.IsNullOrWhiteSpace(name)?"Logitech "+channel.Info.Pid.ToString("X4")+" #"+slot:name;
+   if(!name.StartsWith("Logitech ",StringComparison.OrdinalIgnoreCase))name="Logitech "+name;
+   state.Name=name;
+   state.Kind=kind??WindowsDevices.KindFromClass(0,name);
   }
-  name=string.IsNullOrWhiteSpace(name)?"Logitech "+channel.Info.Pid.ToString("X4")+" #"+slot:name;
-  if(!name.StartsWith("Logitech ",StringComparison.OrdinalIgnoreCase))name="Logitech "+name;
-  state.Name=name;
-  state.Kind=kind??WindowsDevices.KindFromClass(0,name);
   state.Key=Native.HidKey("logitech:hidpp",channel.Info.Path)+":"+slot;
   state.Status="Canlı • HID++";
   state.Sample=DateTime.Now;

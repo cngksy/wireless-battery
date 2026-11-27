@@ -1,4 +1,4 @@
-# Wireless Battery 1.5.4
+# Wireless Battery 1.5.5
 
 Battery levels of your wireless headset, mouse, keyboard and controller, right on the Windows 10/11 taskbar.
 
@@ -16,16 +16,14 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 
 **Download:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (recommended) or `WirelessBattery-portable.zip`. No GitHub account needed.
 
-- **Wireless Battery - Setup:** [VirusTotal report](https://www.virustotal.com/gui/file/63b2963f5e4e9a83ea394bccf855d39e6fc36a9ab3130fab603dbf6eca2d377b)
-- **Wireless Battery - Portable:** [VirusTotal report](https://www.virustotal.com/gui/file/ce680f58087144da2d1d7e95a5a305b6efe298a7c9ad3c6d68dd3bb5d7185532)
+See the installer and portable EXE scan reports in the [1.5.5 release notes](https://github.com/cngksy/wireless-battery/releases/tag/v1.5.5#virustotal).
 
-## What's new in 1.5.4
+## What's new in 1.5.5
 
-- **ASUS ROG Harpe Ace Aim Lab Edition** now shows battery percentage and charging status over the ROG Omni Receiver or USB cable.
-- **AULA F75 Max** now shows battery percentage over its 2.4 GHz USB receiver. Charging status still needs verification.
-- **Havit Fuxi H3** now appears in listen-only USB diagnostics to help investigate battery support.
+- **Logitech PRO X2 SUPERSTRIKE** now reads battery percentage and charging status over its LIGHTSPEED USB receiver without G HUB.
+- **Spanish language support** is now available in the app and installer and follows the Windows display language.
 
-[Read the full release notes](https://github.com/cngksy/wireless-battery/releases/tag/v1.5.4)
+[Read the full release notes](https://github.com/cngksy/wireless-battery/releases/tag/v1.5.5)
 
 The installer sets the app up for your user account only. It needs no administrator rights and adds a Start menu shortcut and an uninstaller. For portable use, extract the ZIP and run `WirelessBattery.exe`. The app uses the .NET Framework 4.x that ships with Windows.
 Before installing or updating, any running copy of Wireless Battery is closed automatically and safely; there is no need to choose Exit from the tray menu first.
@@ -55,7 +53,7 @@ Before installing or updating, any running copy of Wireless Battery is closed au
 - Opening the menu silently refreshes update availability when the last successful check was over five minutes ago.
 - When already up to date, the result appears in the update menu item without a Windows notification. New-release and successful-installation notifications remain enabled.
 - "Start with Windows" manages the startup entry for your user account; clicking it again removes the check mark and the entry.
-- The interface is in Turkish when the Windows display language is Turkish, and in English otherwise.
+- The interface follows the Windows display language for English, Spanish, and Turkish. Other languages use English.
 - A left click or double click does not open a window. Only the app's logo icon sits in the notification area.
 - While the right-click menu is open, a left or right click on the icon or the indicator closes it instead of reopening it.
 - Device details appear after the pointer rests on the indicator for 1.2 seconds, and never while the menu is open.
@@ -93,6 +91,7 @@ These models have built-in support in Wireless Battery.
 - **Logitech** G305 LIGHTSPEED
 - **Logitech** G735 LIGHTSPEED
 - **Logitech** PRO X Wireless
+- **Logitech** PRO X2 SUPERSTRIKE
 - **Razer** BlackShark V3 Pro
 - **Sony** DualShock 4
 - **Sony** DualSense
@@ -153,6 +152,7 @@ The application code is GPL-3.0-or-later. The full license is in the `LICENSE` f
 Protocol references:
 - BatteryHub / Wireless Device Battery Monitor: https://github.com/krisgfx9/Wireless-Device-Battery-Monitor
 - Logitech HID++ / Solaar: https://github.com/pwr-Solaar/Solaar
+- Logitech PRO X2 SUPERSTRIKE battery reports on Windows: https://github.com/LukeLikesGit/logitech-battery-widget#how-it-reads-the-battery
 - Sony controller input reports: https://github.com/torvalds/linux/blob/master/drivers/hid/hid-playstation.c
 - Windows system battery: https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-system_power_status
 - Logitech G735 HID protocol and USB capture by erzhenin-alex: https://github.com/erzhenin-alex/Wireless-Device-Battery-Monitor/commit/6ff09641e99b68b647f034f2ed91cb6aac75c292

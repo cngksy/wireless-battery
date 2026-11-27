@@ -249,6 +249,13 @@ public static class Batteries {
     words.RemoveAt(words.Count-1);
    }
   }
-  return string.Join(" ",words.Select(x=>x=="LS"?"LIGHTSPEED":x));
+  string model=string.Join(" ",words.Select(x=>x=="LS"?"LIGHTSPEED":x));
+  switch(model) {
+   case "X2 SUPERSTRIKE":
+   case "PRO X 2 SUPERSTRIKE":
+   case "PRO X2 SUPERSTRIIKE": // Firmware spelling in the DeviceNameType response.
+    return "PRO X2 SUPERSTRIKE";
+   default:return model;
+  }
  }
 }
