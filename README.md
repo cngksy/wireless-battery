@@ -16,7 +16,8 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 
 **Download:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (recommended) or `WirelessBattery-portable.zip`. No GitHub account needed.
 
-**VirusTotal reports for the installer and portable EXE** are listed in the [latest release notes](https://github.com/cngksy/wireless-battery/releases/latest). The release also includes `SHA256.txt` so you can verify which files were scanned.
+- **Wireless Battery - Setup:** [VirusTotal report](https://www.virustotal.com/gui/file/63b2963f5e4e9a83ea394bccf855d39e6fc36a9ab3130fab603dbf6eca2d377b)
+- **Wireless Battery - Portable:** [VirusTotal report](https://www.virustotal.com/gui/file/ce680f58087144da2d1d7e95a5a305b6efe298a7c9ad3c6d68dd3bb5d7185532)
 
 The installer sets the app up for your user account only. It needs no administrator rights and adds a Start menu shortcut and an uninstaller. For portable use, extract the ZIP and run `WirelessBattery.exe`. The app uses the .NET Framework 4.x that ships with Windows.
 Before installing or updating, any running copy of Wireless Battery is closed automatically and safely; there is no need to choose Exit from the tray menu first.
@@ -131,6 +132,8 @@ The installer is built with Inno Setup 6 from `installer.iss`.
 ### Publishing a release
 
 Before publishing, scan the final `WirelessBattery-Setup.exe` and the `WirelessBattery.exe` from the portable ZIP with Microsoft Defender and submit both to VirusTotal. If a VirusTotal report already exists for the exact file, reuse it. Verify both report hashes against `SHA256.txt` and link the completed reports under **VirusTotal** in the release notes. Rebuilding or signing the files changes their hashes and requires scanning the final files again.
+
+Use the versioned GitHub release page for scan links in the README bundled with the installer and portable ZIP. After scanning the final files, update both direct links at the top of the repository README in a documentation-only commit. Keep the release tag on the commit used to build the scanned files.
 
 ## License and references
 
