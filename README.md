@@ -9,14 +9,14 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 [![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows&logoColor=white)](https://github.com/cngksy/wireless-battery/releases/latest)
 [![GitHub Stars](https://img.shields.io/github/stars/cngksy/wireless-battery?label=Star&logo=github&color=yellow)](https://github.com/cngksy/wireless-battery/stargazers)
 [![License](https://img.shields.io/github/license/cngksy/wireless-battery?label=License&color=lightgrey)](LICENSE)
-[![VirusTotal](https://img.shields.io/badge/VirusTotal-scan%20results-394EFF?logo=virustotal&logoColor=white)](https://www.virustotal.com/gui/file/4f586f4611add569e60ad887210f3caa0e69485604e6802589578d96b1425620)
+[![VirusTotal](https://img.shields.io/badge/VirusTotal-latest%20scan%20reports-394EFF?logo=virustotal&logoColor=white)](https://github.com/cngksy/wireless-battery/releases/latest)
 [![Report a device](https://img.shields.io/badge/Report-a%20device-2ea44f?logo=github)][device-report]
 [![Report a bug](https://img.shields.io/badge/Report-a%20bug-d73a49?logo=github)](https://github.com/cngksy/wireless-battery/issues/new?title=Bug%3A%20)
 [![Share on Reddit](https://img.shields.io/badge/Reddit-Share-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fcngksy%2Fwireless-battery&title=Wireless%20Battery%20-%20see%20your%20wireless%20device%20batteries%20on%20the%20Windows%20taskbar)
 
 **Download:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (recommended) or `WirelessBattery-portable.zip`. No GitHub account needed.
 
-**VirusTotal (1.4.5):** [installer: 3/71](https://www.virustotal.com/gui/file/4f586f4611add569e60ad887210f3caa0e69485604e6802589578d96b1425620) · [portable ZIP: 0/66](https://www.virustotal.com/gui/file/9bad84c3049d117841410af8f6359fd88747ae40508e97e71b9dfe20332b71fa). The installer hits are generic machine-learning guesses (e.g. "ObfuscatedPoly") that unsigned installers commonly get, and need review by the antivirus vendors; no major antivirus flags it. If you prefer, use the portable ZIP.
+**VirusTotal reports for the installer and portable EXE** are listed in the [latest release notes](https://github.com/cngksy/wireless-battery/releases/latest). The release also includes `SHA256.txt` so you can verify which files were scanned.
 
 The installer sets the app up for your user account only. It needs no administrator rights and adds a Start menu shortcut and an uninstaller. For portable use, extract the ZIP and run `WirelessBattery.exe`. The app uses the .NET Framework 4.x that ships with Windows.
 Before installing or updating, any running copy of Wireless Battery is closed automatically and safely; there is no need to choose Exit from the tray menu first.
@@ -125,6 +125,10 @@ The complete corresponding source code is in this repository; every release also
 The installer is built with Inno Setup 6 from `installer.iss`.
 
 `--test` writes the behavior checks to `test-results.txt`. `--scan` writes local device and battery reports, then exits. `--render` draws a small preview of the indicator from the current report. `--report` writes the same device report as the menu item to `device-report.txt`.
+
+### Publishing a release
+
+Submit the final `WirelessBattery-Setup.exe` and the `WirelessBattery.exe` from the portable ZIP to VirusTotal before publishing. If a report already exists for the exact file, reuse it. Verify both report hashes against `SHA256.txt` and link the completed reports under **VirusTotal** in the release notes. Uploading or signing a different build requires checking its new hashes and reports.
 
 ## License and references
 
