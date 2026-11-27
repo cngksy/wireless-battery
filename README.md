@@ -16,7 +16,8 @@ Battery levels of your wireless headset, mouse, keyboard and controller, right o
 
 **Download:** https://github.com/cngksy/wireless-battery/releases/latest — `WirelessBattery-Setup.exe` (recommended) or `WirelessBattery-portable.zip`. No GitHub account needed.
 
-See the installer and portable EXE scan reports in the [1.5.5 release notes](https://github.com/cngksy/wireless-battery/releases/tag/v1.5.5#virustotal).
+- **Wireless Battery - Setup:** [VirusTotal report](https://www.virustotal.com/gui/file/c0d1c0f34c9eeb82f6a552e0caf068d2d80c4ff3eec6aaaeae6e2c92ba8c9694)
+- **Wireless Battery - Portable:** [VirusTotal report](https://www.virustotal.com/gui/file/e86a5c745467a5220703d4f3da6b85632501be4ecfa2ec34b0f098c3d46948f3)
 
 ## What's new in 1.5.5
 
