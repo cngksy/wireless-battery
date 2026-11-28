@@ -35,7 +35,7 @@ public static class GHub {
     string type=Field(device,"deviceType") as string;string kind=type=="MOUSE"?"Mouse":type=="KEYBOARD"?"Klavye":type=="HEADSET"?"Kulaklık":type=="GAMEPAD"?"Gamepad":"Aygıt";
     int pid=Convert.ToInt32(Field(device,"pid"));
     string name=Field(device,"extendedDisplayName") as string??Field(device,"displayName") as string??"Logitech";
-    string key=pid==0x0ABA?"headset":pid==LogitechG735.Product?LogitechG735.DeviceKey:"ghub:"+(Field(device,"path") as string??id);
+    string key=pid==0x0ABA||pid==0x0AC4?"headset":pid==LogitechG735.Product?LogitechG735.DeviceKey:"ghub:"+(Field(device,"path") as string??id);
     if(kind=="Mouse"&&(pid==0x4074||pid==0xC53F||name.IndexOf("G305",StringComparison.OrdinalIgnoreCase)>=0))
      key=Batteries.LogitechG305Key;
     string connection=Field(device,"state") as string;

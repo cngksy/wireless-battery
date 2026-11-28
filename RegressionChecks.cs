@@ -58,6 +58,26 @@ static class RegressionChecks {
   check(LogitechG735.ReplyData(g735Reply,2)==null,"G735 ignores replies addressed to G HUB");
   check(!LogitechG735.TryDecodeBattery(new byte[]{0xFF,0xFF,0},out g735Percent,out g735Charge)
         && g735Percent==-1,"G735 rejects unavailable battery values");
+  var g535=new HidInfo{Vid=0x046D,Pid=0x0AC4,Page=0xFF43,Usage=0x0202,Input=20,Output=20};
+  check(Batteries.IsLogitechHeadset(g535)&&Batteries.LogitechHeadsetName(0x0AC4)=="Logitech G535 LIGHTSPEED",
+   "G535 is detected on its HID++ headset collection");
+  check(Batteries.IsLogitechHeadset(new HidInfo{Vid=0x046D,Pid=0x0ABA,Page=0xFF43,Usage=0x0202,Input=20,Output=20})
+        &&Batteries.LogitechHeadsetName(0x0ABA)=="Logitech PRO X Wireless","PRO X Wireless stays supported");
+  check(!Batteries.IsLogitechHeadset(new HidInfo{Vid=0x046D,Pid=0x0AD8,Page=0xFF03,Usage=1,Input=271,Output=271}),
+   "G735 is never routed through the HID++ headset path");
+  check(Batteries.HeadsetPercent(0x0AC4,4175)==100&&Batteries.HeadsetPercent(0x0AC4,3817)==50
+        &&Batteries.HeadsetPercent(0x0AC4,3825)==51&&Batteries.HeadsetPercent(0x0AC4,3310)==0,
+   "G535 voltage curve matches BatteryHub");
+  check(Batteries.HeadsetPercent(0x0ABA,3758)==50,"PRO X Wireless keeps the original voltage curve");
+  int adcPercent,adcMv;bool adcCharging;
+  check(Batteries.TryParseAdc(0x0AC4,new byte[]{0x0E,0xF1,0x01},out adcPercent,out adcMv,out adcCharging)
+        &&adcPercent==51&&adcMv==3825&&!adcCharging,"Captured G535 ADC reply decodes to 51% at 3825 mV");
+  check(Batteries.TryParseAdc(0x0AC4,new byte[]{0x0E,0xF1,0x03},out adcPercent,out adcMv,out adcCharging)&&adcCharging,
+   "ADC charging flag is recognized");
+  check(Batteries.TryParseAdc(0x0AC4,new byte[]{0x0E,0xF1,0x07},out adcPercent,out adcMv,out adcCharging)&&adcCharging,
+   "ADC full/powered flag is recognized");
+  check(!Batteries.TryParseAdc(0x0AC4,new byte[]{0x05,0x00,0x00},out adcPercent,out adcMv,out adcCharging)&&adcPercent==-1,
+   "HID++ error reply yields no percentage");
   check(Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=0xFF02,Usage=2,Input=17,Output=17})&&!Batteries.IsVxeMouse(new HidInfo{Vid=0x373B,Pid=0x1273,Page=1,Usage=2}),"VXE R1 Pro Max wired charging interface");
   var settings=new UserSettings();var device=new BatteryState{Key="example",BatterySupported=true};
   check(!absent.Exists(settings.IncludesReading)&&settings.IncludesReading(fresh)&&settings.IncludesReading(waiting),

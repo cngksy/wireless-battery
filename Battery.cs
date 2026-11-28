@@ -22,6 +22,8 @@ public class BatteryState {
 }
 public static class Batteries {
  internal const string LogitechG305Key="logitech:g305";
+ static ushort lastHeadsetPid;
+ static int lastHeadsetPercent=-1;
  public static BatteryState PreserveLastReading(BatteryState current,BatteryState previous,DateTime now) {
   if((current.Percent>=0&&!current.Stale&&current.Connection!=DeviceConnection.Disconnected)
    ||previous==null||previous.Percent<0||previous.Percent>100||previous.Sample==default(DateTime)
@@ -107,6 +109,38 @@ public static class Batteries {
   int[] v={4102,4046,3993,3950,3915,3877,3838,3809,3789,3772,3758,3747,3736,3722,3707,3687,3661,3644,3548,3426,3293};
   if(mv>=v[0])return 100;if(mv<=v[v.Length-1])return 0;for(int i=1;i<v.Length;i++)if(mv>=v[i])return (int)Math.Round(100-(i-1)*5-5.0*(v[i-1]-mv)/(v[i-1]-v[i]));return -1;
  }
+ // G headsets that only expose ADC measurement (0x1F20) report millivolts, not a percentage.
+ // The G535 calibration comes from BatteryHub's headset_percent (HeadsetControl / G HUB model).
+ internal static int HeadsetPercent(ushort pid,int mv) {
+  if(pid==0x0AC4)return Curve(mv,new[]{4175,3817,3766,3730,3664,3310},new[]{100,50,30,20,5,0});
+  return VoltagePercent(mv);
+ }
+ static int Curve(int mv,int[] v,int[] p) {
+  if(mv>=v[0])return p[0];
+  for(int i=1;i<v.Length;i++)if(mv>=v[i])return (int)Math.Round(p[i-1]+(p[i]-p[i-1])*(double)(v[i-1]-mv)/(v[i-1]-v[i]));
+  return p[p.Length-1];
+ }
+ internal static bool IsLogitechHeadset(HidInfo x) {
+  return x!=null&&x.Vid==0x046D&&(x.Pid==0x0ABA||x.Pid==0x0AC4)
+   &&x.Page==0xFF43&&x.Usage==0x0202&&x.Output>=20;
+ }
+ internal static string LogitechHeadsetName(ushort pid) {
+  switch(pid) {
+   case 0x0ABA:return "Logitech PRO X Wireless";
+   case 0x0AC4:return "Logitech G535 LIGHTSPEED";
+   default:return "Logitech headset";
+  }
+ }
+ internal static bool TryParseAdc(ushort pid,byte[] p,out int percent,out int millivolts,out bool charging) {
+  percent=-1;millivolts=0;charging=false;
+  if(p==null||p.Length<3)return false;
+  int mv=(p[0]<<8)|p[1];
+  if(mv<2500||mv>5000)return false;
+  int value=HeadsetPercent(pid,mv);
+  if(value<0)return false;
+  millivolts=mv;percent=value;charging=p[2]==3||p[2]==7;
+  return true;
+ }
  // ATK / VXE / Compx mice (receivers and charging cables under VID 3554 and
  // 373B) share a 17-byte report-08 protocol. Any vendor collection large
  // enough is a candidate; only a correctly checksummed reply is accepted.
@@ -166,14 +200,19 @@ public static class Batteries {
    // Unrelated ATK/Compx devices still need a valid reply before appearing.
    if(s.Percent>=0||knownReceiver!=null||mice.Any(IsVerifiedVxe))result.Add(s);
   }
-  var headset=all.Where(x=>x.Vid==0x046D && x.Pid==0x0ABA && x.Page==0xFF43 && x.Usage==0x0202 && x.Output>=20).ToList();
-  if(headset.Count>0){var s=new BatteryState{Key="headset",Name="Logitech PRO X Wireless",Kind="Kulaklık",Status="Pil okunamadı; uyuyor veya kapalı olabilir"};
+  var headset=all.Where(IsLogitechHeadset).ToList();
+  if(headset.Count>0){var s=new BatteryState{Key="headset",Name=LogitechHeadsetName(headset[0].Pid),Kind="Kulaklık",Status="Pil okunamadı; uyuyor veya kapalı olabilir"};
    foreach(var info in headset)using(var d=new HidChannel(info)){if(!d.Valid){s.Status="HID erişimi yok";continue;}
     foreach(int fid in new[]{0x1000,0x1004,0x1F20}){byte f=Feature(d,0xFF,fid);if(f==0)continue;var p=Logi(d,0xFF,f,(byte)(fid==0x1004?0x1D:0x0D));if(p==null||p.Length<3)continue;
      if(fid==0x1000 && p[0]<=100){s.Percent=p[0];s.Charging=p[2]>=1&&p[2]<=4;}
      else if(fid==0x1004 && p[0]<=100){s.Percent=p[0];s.Charging=p[2]>=1&&p[2]<=3;}
-     else if(fid==0x1F20){int mv=(p[0]<<8)|p[1];if(mv<2500||mv>5000)continue;s.Millivolts=mv;s.Percent=VoltagePercent(mv);s.Approximate=true;s.Charging=p[2]==3;}
-     if(s.Percent>=0){s.Sample=DateTime.Now;s.Connection=DeviceConnection.Connected;s.Status=s.Approximate?"Canlı • voltajdan yaklaşık yüzde":"Canlı • HID++";break;}
+     else if(fid==0x1F20){int percent,mv;bool charging;if(!TryParseAdc(info.Pid,p,out percent,out mv,out charging))continue;
+      s.Millivolts=mv;s.Approximate=true;s.Charging=charging;
+      // Voltage rises while charging, so keep the last discharging reading instead of
+      // letting the curve jump to ~100%. BatteryHub does the same for G headsets.
+      if(charging&&lastHeadsetPid==info.Pid&&lastHeadsetPercent>=0)s.Percent=lastHeadsetPercent;
+      else {s.Percent=percent;if(!charging){lastHeadsetPid=info.Pid;lastHeadsetPercent=percent;}}}
+     if(s.Percent>=0){s.Name=LogitechHeadsetName(info.Pid);s.Sample=DateTime.Now;s.Connection=DeviceConnection.Connected;s.Status=s.Approximate?"Canlı • voltajdan yaklaşık yüzde":"Canlı • HID++";break;}
     }if(s.Percent>=0)break;
    }result.Add(s);
   }

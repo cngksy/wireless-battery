@@ -90,6 +90,7 @@ These models have built-in support in Wireless Battery.
 - **HyperX** Cloud Alpha 2 Wireless
 - **HyperX** Cloud III Wireless
 - **Logitech** G305 LIGHTSPEED
+- **Logitech** G535 LIGHTSPEED
 - **Logitech** G735 LIGHTSPEED
 - **Logitech** PRO X Wireless
 - **Logitech** PRO X2 SUPERSTRIKE
